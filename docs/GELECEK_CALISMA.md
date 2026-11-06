@@ -1,0 +1,11 @@
+# Gelecek çalışma
+
+Karar 18 (Güncelleme 06) ile puanlama ve karar kuralı donduruldu. Aşağıdaki fikirler **uygulanmaz**; rapor ve bildiride "gelecek çalışma" olarak geçer. Her maddede fikrin nereden çıktığı yazılıdır. Bunların çoğu sonuçlar görüldükten sonra düşünüldü. Bu yüzden ancak **yeni veride** (kendi kayıtlar, REHAB24-6 ya da başka bir veri seti), önceden kayıtla denenmelidir.
+
+| # | Fikir | Nereden çıktı | Neden şimdi değil |
+| --- | --- | --- | --- |
+| 1 | **Öne kaçma için kol açısı + kol boyu birlikte.** Öne giden kol, 2B'de hem kısa hem alçak görünüyor. Bu yüzden "öne kaçma" ile "az kaldırma" karışıyor. İki ölçütü birlikte kullanan bir ayrım kurulabilir. Örnek: kol kısa görünüyor ama tepe açısı normalse öne kaçma; kol boyu normal ama tepe düşükse az kaldırma. | ADIM_04, Karar 16 (`aralik_disi`), karışıklık matrisi | Karar kuralına sonuç görüldükten sonra eklenen yeni bir dal olur |
+| 2 | **Kaldırma puanında sabit ölçek.** Revize puan (Karar 13) doğrularda 0'da yığıldığı için IQR ölçeklemesi z = 100·E üretti. Seçenekler: sabit ölçek (ör. z = E); ya da duruş ölçütlerinde de z'yi kaldırıp E'leri (0–1) doğrudan karşılaştırmak. Bunlar ADIM_04'teki (b) ve (c) seçenekleridir. | ADIM_04, Ek: Güncelleme 05 | Karar 17: ikisi de sonuç gördükten sonra açılan dal |
+| 3 | **Ex7 için yönsüz bant ya da zaman bandı.** Ex7'de en iyi sistem v1b yönsüz çıktı. Açı bandının ön koşulu geniş bir kol açısı aralığıdır. Yönlü bant da yalnızca tek yönde görülen hatalara uygundur. | ADIM_04b, Karar 19 | Doğrulama sonucuna göre ana sistemi değiştirmek, doğrulamayı ayar verisine çevirir |
+| 4 | **Dinlenme ayarlı genel bant.** Kalibrasyonsuz kullanım için: genel bant, kişinin dinlenme duruşuna göre kaydırılır. | Deney 1b, Karar 11 | Kişiye özel kalibrasyon zorunlu (Karar 11) |
+| 5 | **Kol boyundan öne kaçma açısı.** Önden kamerada kolun görünen boyu yaklaşık L·cos(φ) olur. Buradan öne kaçma açısı φ ≈ arccos(görünen boy / normal boy) olarak derece cinsinden tahmin edilebilir. Bu, geri bildirimde yüzde yerine derece verir. | Adım 5 tasarımı | Yeni bir ölçüm modeli ve doğrulama gerekiyor (gonyometre ya da 3B ile) |

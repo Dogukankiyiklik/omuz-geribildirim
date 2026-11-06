@@ -6,7 +6,9 @@ Soru: Sistem bir tekrarın doğru olup olmadığını, yanlışsa HANGİ hatayı
 1) Tekrar puanları (her tekrar, her ölçüt; yönsüz ve iki yönlü E, ortalama imzalı fark):
    v2  : açı bandı (ana yöntem, Karar 6)
    v1b : zaman bandı, çoklu referans (yalnızca karşılaştırma temel çizgisi, Karar 6)
-   Kaldırma: tek kutulu tepe bandı, E 0–1 (Güncelleme 05, Karar 13; ilk sürüm sonuclar/deney2_ilk/).
+   Kaldırma: iki sürüm de hesaplanır; karar kuralı --kaldirma-surumu ile seçer.
+     ilk    (varsayılan; Karar 17–18): d = (tepe medyanı − tepe) / max(IQR, 5°) → sonuclar/deney2/
+     revize (Karar 13; başarısız deneme): tek kutulu tepe bandı, E 0–1 → sonuclar/deney2_revize/
    Adillik: doğru tekrar birini-dışarıda-bırak; hatalı tekrar tüm (n−1)'li modellerin ortalaması (Karar 7).
    Bir gruptaki n alt küme modeli bir kez kurulur: doğru tekrar i, i'nci alt kümeyle (kendisi dışarıda)
    değerlendirilir; bu, Deney 1 v2'deki birini-dışarıda-bırak ile aynı modeldir.
@@ -20,7 +22,8 @@ Kullanım:
     python -m deneyler.deney2                 # ~5–10 dk (puanlar), sonra karar kuralı ve tablolar
     python -m deneyler.deney2 --puan-hazir    # puanlar sonuclar/deney2/puanlar.csv'den okunur
     python -m deneyler.deney2 --galeri        # ayrıca galeri (sonuclar/deney2/galeri/)
-Çıktı: sonuclar/deney2/
+    python -m deneyler.deney2 --kaldirma-surumu revize   # Karar 13 denemesi → sonuclar/deney2_revize/
+Çıktı: sonuclar/deney2/ (ilk) ya da sonuclar/deney2_revize/ (revize)
 """
 from __future__ import annotations
 
@@ -54,6 +57,7 @@ ANA_SISTEM = ("v2", True)   # galeri ve "basit anlatım" için; sonuçlar görü
 AYAR_GORUSU = ONDEN_CAPRAZ
 GORUSLER = (ONDEN_CAPRAZ, TUMU)
 CIKTI = veri.KOK / "sonuclar" / "deney2"
+CIKTILAR = {"ilk": CIKTI, "revize": veri.KOK / "sonuclar" / "deney2_revize"}
 
 
 def sistem_adi(bant: str, yonlu: bool) -> str:
@@ -92,8 +96,9 @@ def _model_puani(model, alt_f, f, bant, olcutler=OLCUTLER, kaldirma=True):
         ek = {}
     if kaldirma:
         tepeler = [tepe_acisi(u["kol"]) for u in alt_f]
-        Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe_acisi(f["kol"]), tepeler)
+        Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe_acisi(f["kol"]), tepeler)   # revize
         E.update({(ht.KALDIRMA, y): Ek[y] for y in YONLER})
+        fark[ht.KALDIRMA_ILK] = ht.kaldirma_sapmasi(tepe_acisi(f["kol"]), tepeler)      # ilk (d)
     return E, fark, ek
 
 
@@ -136,14 +141,15 @@ def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True, olcutler=OLCUTLER,
 
 
 # ---------------------------------------------------------------- 2) birini-dışarıda-bırak karar
-def loso(puan: pd.DataFrame, yonlu: bool, tanim: ht.HataTanimi = ht.EX1, ayar_gorusu: str = AYAR_GORUSU):
+def loso(puan: pd.DataFrame, yonlu: bool, tanim: ht.HataTanimi = ht.EX1, ayar_gorusu: str = AYAR_GORUSU,
+         kaldirma_surumu: str = ht.VARSAYILAN_KALDIRMA):
     """Kişi bazlı birini-dışarıda-bırak. Ayar yalnızca eğitim kişilerinin ayar_gorusu tekrarlarıyla.
     Dönüş: (tahmin tablosu, kural kaydı)."""
     parcalar, kurallar = [], []
     for kisi in sorted(puan.kisi.unique()):
         egitim = puan[(puan.kisi != kisi) & gorus_maskesi(puan, ayar_gorusu)]
         test = puan[puan.kisi == kisi]
-        kural = ht.esik_sec(egitim, yonlu, tanim)
+        kural = ht.esik_sec(egitim, yonlu, tanim, kaldirma_surumu)
         z = kural.z(test)
         tah = kural.karar(test, z)
         # temel çizgi: aynı ölçekleme, tek toplam hata, yalnızca doğru/yanlış
@@ -162,7 +168,8 @@ def loso(puan: pd.DataFrame, yonlu: bool, tanim: ht.HataTanimi = ht.EX1, ayar_go
         p["toplam_hata"] = toplam
         p["temel_tahmin_yanlis"] = toplam >= Tb
         parcalar.append(p)
-        kurallar.append({"test kişisi": kisi, "T": kural.T, "öne kaçma ölçütü": kural.on_olcut,
+        kurallar.append({"test kişisi": kisi, "kaldırma sürümü": kural.kaldirma_surumu, "T": kural.T,
+                         "öne kaçma ölçütü": kural.on_olcut,
                          "eğitim makro-F1": kural.bilgi["egitim_makro_f1"], "temel çizgi T": Tb,
                          **{f"yön {k}": kural.yonler[k] for k in kural.yonler},
                          **{f"medyan {k}": kural.medyan[k] for k in kural.medyan},
@@ -469,25 +476,28 @@ def puanlari_oku(cikti: Path) -> dict[str, pd.DataFrame]:
     return {b: g.reset_index(drop=True) for b, g in df.groupby("bant")}
 
 
-def calistir(cikti=CIKTI, puan_hazir=False, bootstrap_n=2000, yazdir=True):
+def calistir(cikti=None, puan_hazir=False, bootstrap_n=2000, yazdir=True,
+             kaldirma_surumu: str = ht.VARSAYILAN_KALDIRMA):
     t0 = time.time()
-    cikti = Path(cikti)
+    cikti = Path(cikti) if cikti else CIKTILAR[kaldirma_surumu]
     cikti.mkdir(parents=True, exist_ok=True)
     puanlar = puanlari_oku(cikti) if puan_hazir else puanlari_hesapla(cikti, yazdir)
     tahminler, kurallar = {}, {}
     for bant, yonlu in SISTEMLER:
-        tahminler[(bant, yonlu)], kurallar[(bant, yonlu)] = loso(puanlar[bant], yonlu)
+        tahminler[(bant, yonlu)], kurallar[(bant, yonlu)] = loso(puanlar[bant], yonlu,
+                                                                 kaldirma_surumu=kaldirma_surumu)
     T = tablolar_uret(tahminler, kurallar, puanlar, bootstrap_n)
     kar = T.pop("_kar")
     T["tahminler"] = pd.concat([p.assign(sistem=sistem_adi(*s)) for s, p in tahminler.items()], ignore_index=True)
-    ilk = ilk_surumle_karsilastir(tahminler, n=bootstrap_n)
+    ilk = ilk_surumle_karsilastir(tahminler, n=bootstrap_n) if kaldirma_surumu == "revize" else None
     if ilk is not None:
         T["ilk_surum_karsilastirma"] = ilk
     sonuclari_yaz(T, cikti)
     for gorus, ek in ((ONDEN_CAPRAZ, "oc"), (TUMU, "tum")):
         for s in SISTEMLER:
             ad = sistem_adi(*s)
-            karisiklik_sekli(kar[(ad, gorus, "katı")], f"Deney 2 · {ad} · {gorus} · katı (birincil hata)",
+            karisiklik_sekli(kar[(ad, gorus, "katı")],
+                             f"Deney 2 · {ad} · {gorus} · katı (birincil hata) · kaldırma: {kaldirma_surumu}",
                              cikti / f"karisiklik_{ad}_{ek}.png")
     if yazdir:
         yazdir_ozet(T)
@@ -538,19 +548,23 @@ def yazdir_ozet(T):
 
 def main():
     ap = argparse.ArgumentParser(description="Deney 2: hata türünü bulma")
-    ap.add_argument("--cikti", default=str(CIKTI))
+    ap.add_argument("--cikti", default=None, help="varsayılan: sonuclar/deney2 (ilk) ya da deney2_revize")
+    ap.add_argument("--kaldirma-surumu", choices=ht.KALDIRMA_SURUMLERI, default=ht.VARSAYILAN_KALDIRMA,
+                    help="az kaldırma puanı: ilk (varsayılan, Karar 17) ya da revize (Karar 13 denemesi)")
     ap.add_argument("--puan-hazir", action="store_true", help="puanlar.csv'yi yeniden hesaplama")
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--galeri", action="store_true", help="galeri videolarını da üret")
     ap.add_argument("--adet", type=int, default=3)
     args = ap.parse_args()
     utf8_cikti()
-    print("Deney 2 — hata türünü bulma")
-    T, tahminler, puanlar, kurallar = calistir(args.cikti, args.puan_hazir, args.bootstrap)
+    print(f"Deney 2 — hata türünü bulma (kaldırma sürümü: {args.kaldirma_surumu})")
+    T, tahminler, puanlar, kurallar = calistir(args.cikti, args.puan_hazir, args.bootstrap,
+                                               kaldirma_surumu=args.kaldirma_surumu)
+    cikti = Path(args.cikti) if args.cikti else CIKTILAR[args.kaldirma_surumu]
     if args.galeri:
         from deneyler import deney2_galeri
         print("\nGaleri üretiliyor...")
-        deney2_galeri.galeri(tahminler[ANA_SISTEM], kurallar[ANA_SISTEM], Path(args.cikti) / "galeri", n=args.adet)
+        deney2_galeri.galeri(tahminler[ANA_SISTEM], kurallar[ANA_SISTEM], cikti / "galeri", n=args.adet)
 
 
 if __name__ == "__main__":

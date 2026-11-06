@@ -6,11 +6,14 @@ Her hata türünün bir ölçütü vardır (PLAN.md, Adım 4):
   ERR_HEAD_TO_SIDE      : bas (M39 F3)                               — açı bandı
   ERR_ARM_FORWARD       : on_kacma (M39 F1) ya da kol_boyu           — açı bandı; hangisi, eğitim kişilerinde seçilir
   ERR_BENT_ARM          : dirsek (M39 F4)                            — açı bandı
-  ERR_LOW_ABDUCTION     : kaldirma = tepe kol açısının "tepe bandı" hatası (Güncelleme 05, Karar 13)
+  ERR_LOW_ABDUCTION     : kaldirma = tepe kol açısı eksikliği. İki sürüm (kaldirma_surumu):
+                          "ilk"    (VARSAYILAN, Karar 17–18): d = (kalibrasyon tepelerinin medyanı − tepe)
+                                   / max(tepe IQR'si, 5°); yönlü puan max(d, 0), yönsüz |d|; yön eğitimden.
+                          "revize" (Karar 13; başarısız deneme, yalnızca rapor için): tek kutulu tepe bandı, E 0–1.
 
 Karar kuralı (basit ve açıklanabilir):
-  1. Her ölçüt için tekrarın puanı E (0–1): duruş ölçütlerinde açı/zaman bandı hatası (yönsüz ya da
-     yönlü), kaldırmada tek kutulu tepe bandının hatası (kaldirma_puanlari; yönlüde yalnızca eksik).
+  1. Her ölçüt için tekrarın puanı: duruş ölçütlerinde açı/zaman bandı hatası E (yönsüz ya da yönlü),
+     kaldırmada ilk sürümde tepe açısı sapması d (kaldirma_sapmasi), revizede tepe bandı E'si.
   2. Puan, EĞİTİM kişilerinin doğru tekrarlarındaki dağılımla ölçeklenir:
      z = (puan − medyan) / (çeyrekler arası açıklık + ε).
   3. max z < T ise "DOGRU"; değilse hata türü = argmax z.
@@ -39,6 +42,10 @@ KISA_AD = {DOGRU: "doğru", "ERR_ELEVATED_SHOULDER": "omuz", "ERR_HEAD_TO_SIDE":
            "ERR_ARM_FORWARD": "öne kaçma", "ERR_BENT_ARM": "dirsek", "ERR_LOW_ABDUCTION": "az kaldırma"}
 
 KALDIRMA = "kaldirma"
+KALDIRMA_ILK = "kaldirma_ilk"   # puan tablosunda ilk sürümün d'si: sütun F_kaldirma_ilk (Karar 7 ortalaması)
+KALDIRMA_SURUMLERI = ("ilk", "revize")
+VARSAYILAN_KALDIRMA = "ilk"     # Karar 17: önceden belirlenmiş birincil yöntem; Karar 18: dondurulmuş
+TEPE_IQR_ALT_SINIR = 5.0   # derece; ilk sürüm (Güncelleme 02)
 ON_KACMA_ADAYLARI = ("on_kacma", "kol_boyu")
 TEPE_ALT_SINIR = 10.0      # derece; tepe bandının yarı genişliği en az bu (Karar 13; literatürden, değiştirilmez)
 TEPE_GUVEN = 0.975         # τ = t(0,975; n−1)·s/√n
@@ -100,6 +107,22 @@ def fark_sutunu(olcut: str) -> str:
     return f"F_{olcut}"
 
 
+def kaldirma_sapmasi(tepe: float, kalibrasyon_tepeleri) -> float:
+    """
+    İlk sürüm (Güncelleme 02; Karar 17 ile ana yöntem): d = (kalibrasyon tepelerinin medyanı − tekrarın
+    tepesi) / max(kalibrasyon tepelerinin IQR'si, 5°). Pozitif = kol normalden az kalktı.
+    """
+    t = np.asarray(kalibrasyon_tepeleri, dtype=float)
+    q1, q3 = np.percentile(t, [25, 75])
+    return float((np.median(t) - tepe) / max(q3 - q1, TEPE_IQR_ALT_SINIR))
+
+
+def _surum_kontrol(kaldirma_surumu: str) -> str:
+    if kaldirma_surumu not in KALDIRMA_SURUMLERI:
+        raise ValueError(f"kaldirma_surumu {KALDIRMA_SURUMLERI} içinden olmalı: {kaldirma_surumu!r}")
+    return kaldirma_surumu
+
+
 def tepe_bandi(kalibrasyon_tepeleri) -> tuple[float, float]:
     """
     Tek kutulu tepe bandı (Güncelleme 05, Karar 13): μ = kalibrasyon tepelerinin ortalaması,
@@ -129,24 +152,28 @@ def kaldirma_puanlari(tepe: float, kalibrasyon_tepeleri) -> tuple[dict[int, floa
     return {1: E(eksik), -1: E(-eksik), 0: E(abs(eksik))}, eksik
 
 
-def olcut_puani(df: pd.DataFrame, olcut: str, yon: int) -> pd.Series:
-    """Bir ölçütün tekrar puanı (E). yon = 0 yönsüz; ±1 yalnızca o yöndeki sapma."""
+def olcut_puani(df: pd.DataFrame, olcut: str, yon: int, kaldirma_surumu: str = VARSAYILAN_KALDIRMA) -> pd.Series:
+    """Bir ölçütün tekrar puanı. yon = 0 yönsüz; ±1 yalnızca o yöndeki sapma.
+    Kaldırma, ilk sürüm: ortalama d'den (F_kaldirma_ilk) |d| ya da max(±d, 0) — ilk sürüm koduyla aynı."""
+    if olcut == KALDIRMA and _surum_kontrol(kaldirma_surumu) == "ilk":
+        d = df[fark_sutunu(KALDIRMA_ILK)]
+        return d.abs() if yon == 0 else np.maximum(np.sign(yon) * d, 0.0)
     return df[puan_sutunu(olcut, yon)]
 
 
-def beklenen_yonler(egitim: pd.DataFrame, esleme) -> dict[str, int]:
+def beklenen_yonler(egitim: pd.DataFrame, esleme, kaldirma_surumu: str = VARSAYILAN_KALDIRMA) -> dict[str, int]:
     """
     Her ölçütün beklenen hata yönü, eğitim tekrarlarından: işaret(ilgili hatalı tekrarların ortalama
     imzalı farkı − doğru tekrarlarınki). Fark 0 ya da tanımsızsa +1.
-    Kaldırmada yön sabit +1 (yalnızca eksik sayılır; Karar 13).
+    Kaldırma: ilk sürümde yön d'den öğrenilir (ilk sürüm koduyla aynı); revizede sabit +1 (Karar 13).
     """
     esleme = hata_olcutleri(esleme) if isinstance(esleme, str) else esleme
     yonler = {}
     for hata, k in esleme.items():
-        if k == KALDIRMA:
+        if k == KALDIRMA and _surum_kontrol(kaldirma_surumu) == "revize":
             yonler[k] = 1
             continue
-        f = egitim[fark_sutunu(k)]
+        f = egitim[fark_sutunu(KALDIRMA_ILK if k == KALDIRMA else k)]
         fark = f[egitim.hata == hata].mean() - f[egitim.hata == DOGRU].mean()
         yonler[k] = -1 if fark < 0 else 1
     return yonler
@@ -164,6 +191,7 @@ class KararKurali:
     olcek: dict[str, float]
     T: float = np.inf
     bilgi: dict = field(default_factory=dict)
+    kaldirma_surumu: str = VARSAYILAN_KALDIRMA
 
     @property
     def olcutler(self) -> dict[str, str]:
@@ -185,7 +213,7 @@ class KararKurali:
         """Tekrar × hata türü z tablosu (sütunlar esleme sırasıyla; Ex1'de HATALAR)."""
         cikti = {}
         for hata, k in self.olcutler.items():
-            cikti[hata] = (olcut_puani(df, k, self.yon(k)) - self.medyan[k]) / self.olcek[k]
+            cikti[hata] = (olcut_puani(df, k, self.yon(k), self.kaldirma_surumu) - self.medyan[k]) / self.olcek[k]
         return pd.DataFrame(cikti, index=df.index)[self.hatalar]
 
     def karar(self, df: pd.DataFrame, z: pd.DataFrame | None = None) -> pd.Series:
@@ -201,21 +229,22 @@ def _karar(z: pd.DataFrame, T: float) -> pd.Series:
     return pd.Series(np.where(en < T, DOGRU, tur), index=z.index)
 
 
-def kural_kur(egitim: pd.DataFrame, esleme, yonlu: bool) -> KararKurali:
+def kural_kur(egitim: pd.DataFrame, esleme, yonlu: bool, kaldirma_surumu: str = VARSAYILAN_KALDIRMA) -> KararKurali:
     """Ölçekleme (eğitimdeki doğru tekrarların medyanı ve IQR'si) ve yönler; T henüz seçilmemiş.
     esleme: hata -> ölçüt sözlüğü; Ex1 için öne kaçma ölçütünün adı da verilebilir."""
     esleme = hata_olcutleri(esleme) if isinstance(esleme, str) else dict(esleme)
-    yonler = beklenen_yonler(egitim, esleme)
+    yonler = beklenen_yonler(egitim, esleme, kaldirma_surumu)
     dogru = egitim[egitim.hata == DOGRU]
     medyan, olcek = {}, {}
     for k in esleme.values():
-        p = olcut_puani(dogru, k, yonler[k] if yonlu else 0).dropna()
+        p = olcut_puani(dogru, k, yonler[k] if yonlu else 0, kaldirma_surumu).dropna()
         q1, q2, q3 = np.percentile(p, [25, 50, 75])
         medyan[k], olcek[k] = float(q2), float(q3 - q1) + EPS
-    return KararKurali(esleme, yonlu, yonler, medyan, olcek)
+    return KararKurali(esleme, yonlu, yonler, medyan, olcek, kaldirma_surumu=kaldirma_surumu)
 
 
-def esik_sec(egitim: pd.DataFrame, yonlu: bool, tanim: HataTanimi = EX1) -> KararKurali:
+def esik_sec(egitim: pd.DataFrame, yonlu: bool, tanim: HataTanimi = EX1,
+             kaldirma_surumu: str = VARSAYILAN_KALDIRMA) -> KararKurali:
     """
     Eğitim tekrarlarında makro-F1'i (DOGRU + hatalar, katı) en yükseğe çıkaran ölçüt eşlemesi ve T.
     Ex1'de tek seçim öne kaçma ölçütüdür (on_kacma / kol_boyu); Ex7'de eşleme sabittir.
@@ -224,7 +253,7 @@ def esik_sec(egitim: pd.DataFrame, yonlu: bool, tanim: HataTanimi = EX1) -> Kara
     """
     en_iyi = None
     for esleme in tanim.eslemeler():
-        kural = kural_kur(egitim, esleme, yonlu)
+        kural = kural_kur(egitim, esleme, yonlu, kaldirma_surumu)
         z = kural.z(egitim)
         enz = np.nanmax(np.where(np.isnan(z.to_numpy(float)), -np.inf, z.to_numpy(float)), axis=1)
         for T in np.unique(np.percentile(enz[np.isfinite(enz)], ESIK_IZGARASI)):

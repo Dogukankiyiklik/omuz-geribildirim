@@ -273,6 +273,11 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 - **Karar 15:** Ana sistem v2 yönlü. **Karar 16:** `aralik_disi` karar kuralına eklenmez; betimsel + sınırlılık.
 - Doğrulama: Ex7 (Adım 4b, ayarsız) ve kendi kayıtlar (Adım 7).
 
+**Güncelleme 06 değişiklikleri:**
+- **Karar 17:** Az kaldırmada **ilk sürüme** dönülür (d = (tepe medyanı − tepe) / max(IQR, 5°)); kodda `kaldirma_surumu = "ilk" | "revize"`, varsayılan `"ilk"`. Revize `sonuclar/deney2_revize/` altında, başarısız deneme olarak raporlanır. (b) ve (c) denenmez → `docs/GELECEK_CALISMA.md`.
+- **Karar 18:** Yöntem donduruldu (Ex1: v2 + yönlü + ilk sürüm kaldırma + Karar 7 + LOSO ile T; Ex7: Adım 4b). Sonraki bütün adımlar bunu kullanır.
+- **Karar 19:** Ex7 sonuçları ana sistemi değiştirmez. **Karar 20:** iddia kapsamı (KARARLAR.md).
+
 **Kabul ölçütü:** Tüm tablolar var; T seçiminin her kişide hangi değere düştüğü yazılmış.
 
 ---
@@ -338,6 +343,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 - Kullanıcı okusun diye 20 rastgele örnek cümle (tohum sabit) `sonuclar/deney3/ornek_cumleler.md` dosyasına; yanında gerçek etiket yazılı olsun.
 
 **Güncelleme 05:** "İlk iki" metriği (Karar 14) Deney 3'te de raporlanır: birincil hata söylenen ilk iki hata içinde mi; 2. hata yalnızca o da T'yi geçerse söylenir.
+
+**Güncelleme 06:** Dondurulmuş yöntem (Karar 18) kullanılır; kaldırma ilk sürüm. Değerlendirme katı / esnek / ilk iki + "cümle doğru hatayı adlandırdı mı" (çıkarıcı ile) + doğrularda gereksiz uyarı. Ana tablo önden + çapraz; tüm görüşler de verilir. Sonuçlardan bağımsız seçimler (faz sınırları, şiddet eşikleri, ölçünün anı, hatalıda μ, az kaldırmanın şiddeti) kod yazılmadan önce `ADIM_05.md` "Önceden belirlenenler" bölümüne yazılıp commit'lenir.
 
 **Kabul ölçütü:** Metrik tablosu ve örnek cümleler var. Kullanıcı örnekleri okuyup anlaşılır bulduğunu veya düzeltme önerilerini ADIM dosyasına not etti.
 

@@ -79,6 +79,7 @@ class Deney2Gorseli(AciBandiGorseli):
         yon = {k: int(kural[f"yön {k}"]) for k in ht.hata_olcutleri(kural["öne kaçma ölçütü"]).values()
                if k != ht.KALDIRMA}
         self.kaldirma = olcut == ht.KALDIRMA
+        self.surum = str(kural.get("kaldırma sürümü", ht.VARSAYILAN_KALDIRMA))
         self.olcut_karar = olcut
         goster = "YENI" if self.kaldirma else olcut
         super().__init__(d, {}, goster, video_klasoru, olcutler=OLCUTLER, yon=yon)
@@ -89,11 +90,18 @@ class Deney2Gorseli(AciBandiGorseli):
             return super()._grafik_hazirla()
         kol = self.f_tam["kol"]
         tepeler = np.concatenate([np.asarray(x) for x in self.d["kalibrasyon_tepeleri"]])
-        mu, tau = ht.tepe_bandi(self.d["kalibrasyon_tepeleri"][0])
+        t0 = np.asarray(self.d["kalibrasyon_tepeleri"][0], float)
+        if self.surum == "ilk":
+            mu = float(np.median(t0))
+            q1, q3 = np.percentile(t0, [25, 75])
+            tau = max(q3 - q1, ht.TEPE_IQR_ALT_SINIR)
+            etiket = f"tepe medyanı ± ölçek = {mu:.0f}° ± {tau:.0f}°"
+        else:
+            mu, tau = ht.tepe_bandi(t0)
+            etiket = f"tepe bandı μ ± τ = {mu:.0f}° ± {tau:.0f}°"
         x = np.arange(len(kol))
         fig, ax = plt.subplots(figsize=(SAG_G / 100, GRAFIK_Y / 100), dpi=100)
-        ax.axhspan(mu - tau, mu + tau, color=M_MAVI, alpha=0.15, lw=0,
-                   label=f"tepe bandı μ ± τ = {mu:.0f}° ± {tau:.0f}°")
+        ax.axhspan(mu - tau, mu + tau, color=M_MAVI, alpha=0.15, lw=0, label=etiket)
         ax.axhline(mu, color=M_MAVI, lw=1, ls="--")
         ax.plot(x, kol, color=M_TURUNCU, lw=2, label="bu tekrarın kol açısı")
         ax.axhline(self.ek["tepe_acisi"], color=M_TURUNCU, lw=1, ls=":", label=f"bu tekrarın tepesi {self.ek['tepe_acisi']:.0f}°")
@@ -101,7 +109,8 @@ class Deney2Gorseli(AciBandiGorseli):
         ax.set_ylim(0, max(185, float(np.nanmax(kol)) + 5, float(tepeler.max()) + 5))
         ax.set_xlabel("kare")
         ax.set_ylabel("kol açısı (°)")
-        ax.set_title(f"kaldırma — eksik {self.satir_eksik():.0f}° · E = {self.satir_d():.3f}", loc="left", fontsize=10)
+        ad = "d" if self.surum == "ilk" else "E"
+        ax.set_title(f"kaldırma — eksik {self.satir_eksik():.0f}° · {ad} = {self.satir_d():.3f}", loc="left", fontsize=10)
         ax.spines[["top", "right"]].set_visible(False)
         ax.yaxis.grid(True, color="#e4e3df", lw=0.8)
         ax.legend(loc="best", frameon=False, fontsize=7.5)
@@ -116,7 +125,9 @@ class Deney2Gorseli(AciBandiGorseli):
         plt.close(fig)
 
     def satir_d(self) -> float:
-        """Kaldırmanın yönlü E'si (Karar 7: modellerin ortalaması)."""
+        """Kaldırma puanı (Karar 7: modellerin ortalaması): ilk sürümde imzalı d, revizede yönlü E."""
+        if self.surum == "ilk":
+            return float(np.mean([ht.kaldirma_sapmasi(self.ek["tepe_acisi"], t) for t in self.d["kalibrasyon_tepeleri"]]))
         return float(np.mean([ht.kaldirma_puanlari(self.ek["tepe_acisi"], t)[0][1]
                               for t in self.d["kalibrasyon_tepeleri"]]))
 
@@ -158,7 +169,8 @@ class Deney2Gorseli(AciBandiGorseli):
             o = ht.hata_olcutleri(k["öne kaçma ölçütü"])[h]
             z = r[f"z_{ht.KISA_AD[h]}"]
             ok = "▶ " if o == self.olcut_karar else "   "
-            puan = f"E = {self.satir_d():.3f}" if o == ht.KALDIRMA else f"E = {self.E[o]:.3f}"
+            puan = (f"{'d' if self.surum == 'ilk' else 'E'} = {self.satir_d():.3f}" if o == ht.KALDIRMA
+                    else f"E = {self.E[o]:.3f}")
             satirlar.append((f"{ok}{ht.KISA_AD[h]:11s} ({o}) {puan}   z = {z:6.2f}{'  ≥ T' if z >= k['T'] else ''}",
                              13, o == self.olcut_karar, M_METIN))
         satirlar += [("", 4, False, M_METIN),

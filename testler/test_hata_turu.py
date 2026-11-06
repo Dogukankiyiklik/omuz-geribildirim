@@ -104,6 +104,21 @@ def test_kaldirma_puanlari():
     assert E[1] == 0.0 and E[-1] == pytest.approx(0.5) and E[0] == pytest.approx(0.5)
 
 
+def test_kaldirma_sapmasi_ilk_surum():
+    """İlk sürüm (Karar 17): d = (medyan − tepe) / max(IQR, 5°)."""
+    t = [160.0, 170.0, 180.0, 190.0]                                  # medyan 175, IQR 15
+    assert ht.kaldirma_sapmasi(145.0, t) == pytest.approx(2.0)
+    assert ht.kaldirma_sapmasi(175.0, [175.0] * 4) == 0.0
+    assert ht.kaldirma_sapmasi(165.0, [175.0] * 4) == pytest.approx(2.0)   # IQR 0 → 5° alt sınır
+    df = pd.DataFrame({ht.fark_sutunu(ht.KALDIRMA_ILK): [2.0, -1.0]})
+    assert list(ht.olcut_puani(df, ht.KALDIRMA, 1)) == [2.0, 0.0]          # varsayılan: ilk
+    assert list(ht.olcut_puani(df, ht.KALDIRMA, -1)) == [0.0, 1.0]
+    assert list(ht.olcut_puani(df, ht.KALDIRMA, 0)) == [2.0, 1.0]
+    assert ht.VARSAYILAN_KALDIRMA == "ilk"
+    with pytest.raises(ValueError):
+        ht.olcut_puani(df, ht.KALDIRMA, 1, "baska")
+
+
 def test_ilk_iki():
     z = pd.DataFrame({h: [0.0, 1.0, 0.0] for h in ht.HATALAR})
     z.loc[0, "ERR_BENT_ARM"], z.loc[0, "ERR_HEAD_TO_SIDE"] = 7.0, 3.0
@@ -136,16 +151,19 @@ def _yapay_tablo(rng, kisiler=("A", "B", "C", "D", "E"), n_dogru=30, n_hata=10):
             E, r[ht.fark_sutunu(ht.KALDIRMA)] = ht.kaldirma_puanlari(170 - eksik, [170.0] * 4)
             for y in (0, 1, -1):
                 r[ht.puan_sutunu(ht.KALDIRMA, y)] = E[y] + abs(rng.normal(0, 0.01))
+            r[ht.fark_sutunu(ht.KALDIRMA_ILK)] = ht.kaldirma_sapmasi(170 - eksik, [168.0, 170.0, 171.0, 173.0])
             satir.append(r)
     return pd.DataFrame(satir)
 
 
-def test_karar_kurali_yapay_veride_ayirir():
+@pytest.mark.parametrize("surum", ["ilk", "revize"])
+def test_karar_kurali_yapay_veride_ayirir(surum):
     rng = np.random.default_rng(3)
     df = _yapay_tablo(rng)
     egitim, test = df[df.kisi != "E"], df[df.kisi == "E"]
     for yonlu in (False, True):
-        kural = ht.esik_sec(egitim, yonlu)
+        kural = ht.esik_sec(egitim, yonlu, kaldirma_surumu=surum)
+        assert kural.kaldirma_surumu == surum
         assert kural.on_olcut == "kol_boyu"
         assert kural.yonler == {"YENI": -1, "bas": 1, "kol_boyu": -1, "dirsek": -1, "kaldirma": 1}
         tah = kural.karar(test)

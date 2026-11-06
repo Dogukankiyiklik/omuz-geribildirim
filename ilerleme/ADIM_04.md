@@ -498,3 +498,64 @@ Makro-F1 Vasil dışındaki dört kişide düştü. Vasil'de 0,368'den 0,422'ye 
   - (c) Duruş ölçütlerinde de z'yi kaldırıp E'leri (0–1) doğrudan karşılaştırmak: tek bir T, ölçekleme yok.
   - Hangisi seçilirse seçilsin, sonuçlara bakılarak seçildiği raporda açıkça yazılmalı ve Ex7 ile kendi kayıtlarımızda doğrulanmalı. Ex7'de az kaldırma sınıfı olmadığı için Adım 4b bu karardan etkilenmiyor.
 - **"İlk iki" Adım 5 için umut verici.** Geri bildirim iki hata söylerse, birincil hata 100 hatalı tekrarın 69'unda söylenmiş oluyor. Doğru tekrarlarda ikinci bir uyarı yalnızca %1,6 oranında çıkıyor.
+
+---
+
+# Ek: Güncelleme 06 — ilk sürüm kaldırmaya dönüş (Karar 17–18)
+
+**Tarih:** 2026-11-07
+**Durum:** Tamamlandı. `python -m deneyler.deney2` komutunu Claude Code çalıştırdı (112,7 s). Sayılar `sonuclar/deney2/ilk_iki.csv` dosyasından ve terminal çıktısından kopyalandı.
+
+## Basit anlatım
+- Danışman, az kaldırma puanında **ilk sürüme** dönülmesine karar verdi (Karar 17). Gerekçe, ilk sürümün daha iyi sonuç vermesi değil, **sonuçlardan önce tanımlanmış** birincil yöntem olması.
+- Revize puan (Karar 13) artık **başarısız bir deneme** olarak raporlanıyor. Çıktıları `sonuclar/deney2_revize/` altında duruyor.
+- Yöntem bundan sonra **donduruldu** (Karar 18): Adım 5 ve sonraki bütün adımlar aynı kuralı kullanacak.
+- Kontrol (regresyon) yapıldı: yeni kod, ilk sürümün bütün tablolarını **birebir aynı** üretiyor.
+
+## Yapılanlar
+- `cekirdek/hata_turu.py`:
+  - `kaldirma_sapmasi` geri geldi: d = (kalibrasyon tepelerinin medyanı − tepe) / max(IQR, 5°).
+  - Yeni seçenek `kaldirma_surumu = "ilk" | "revize"`, varsayılan `"ilk"` (`VARSAYILAN_KALDIRMA`). Seçenek `olcut_puani`, `beklenen_yonler`, `kural_kur`, `esik_sec` ve `KararKurali` içinde.
+  - İlk sürümde kaldırmanın yönü, eskisi gibi eğitimden öğreniliyor. Revizede yön sabit +1.
+- `deneyler/deney2.py`:
+  - Puan tablosu iki sürümü de hesaplıyor. Revize sütunları `E_kaldirma_*` ve `F_kaldirma` (eksik = μ − tepe). İlk sürüm sütunu `F_kaldirma_ilk` (d, Karar 7 ortalaması).
+  - `--kaldirma-surumu` seçeneği var. `ilk` çıktıyı `sonuclar/deney2/`, `revize` çıktıyı `sonuclar/deney2_revize/` altına yazar. `ilk_surum_karsilastirma.csv` yalnızca revizede üretilir.
+  - `esikler.csv` dosyasına "kaldırma sürümü" sütunu eklendi.
+- `deneyler/deney2_galeri.py`: Kaldırma grafiği ve paneli sürüme göre çiziliyor. İlk sürümde tepe medyanı ± ölçek ve d, revizede μ ± τ ve E.
+- Eski `sonuclar/deney2/` klasörü (revize çıktıları, galeri dahil) `sonuclar/deney2_revize/` adıyla taşındı. Yeni `sonuclar/deney2/` ilk sürümle yeniden üretildi.
+- Testler:
+  - `test_kaldirma_sapmasi_ilk_surum` eklendi.
+  - Yapay veride karar kuralı testi artık iki sürüm için çalışıyor.
+  - Yeni `testler/test_deney2_regresyon.py`: puanlardan v2 yönlü kural yeniden kuruluyor; 1668 tahmin ve max z, `deney2_ilk/tahminler.csv` ile karşılaştırılıyor.
+
+## Regresyon
+- Şu dosyalar `sonuclar/deney2_ilk/` ile **bayt bayt aynı**: `ozet.csv`, `temel_cizgi.csv`, `siniflar.csv`, `gorus_grubu.csv`, `aralik_disi.csv`, `bootstrap.csv` ve 10 karışıklık CSV'si.
+- `kisi.csv`, `tahminler.csv` ve `esikler.csv` dosyalarında yalnızca yeni sütunlar var. Ortak sütunlar birebir aynı (`DataFrame.equals` = True). Yeni sütunlar şunlar:
+  - `kisi.csv`: "hatalılarda 'doğru' dedi", "birincil ilk iki z içinde";
+  - `tahminler.csv`: T, z1/z2, soylenen1/2;
+  - `esikler.csv`: kaldırma sürümü.
+- `F_kaldirma_ilk` sütunu, eski `puanlar.csv` dosyasındaki `F_kaldirma` (d) ile 3336 satırın tamamında aynı.
+- `pytest`: `58 passed` (bkz. ADIM_05).
+
+## İlk sürümün "ilk iki" sonuçları (`sonuclar/deney2/ilk_iki.csv`)
+Bu bir değerlendirme metriğidir, yöntem değişikliği değildir (Karar 14).
+
+| sistem | görüş | birincil = 1. z /100 | birincil ilk iki z içinde /100 | birincil söylenen ilk iki içinde /100 | hatalılarda 2. z ≥ T /100 | yakalanan hatalılarda 2. z ≥ T (%) | söylenen 2. hata = birincil /100 | doğrularda 2. z ≥ T /100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **v2 yönlü** | ö+ç | 62.76 | **77.27** | **67.45** | 46.33 | 54.86 | 10.85 | 1.62 |
+| v2 yönlü | tüm | 57.07 | 73.14 | 58.75 | 41.13 | 53.76 | 9.47 | 1.68 |
+| v2 yönlü | profil | 31.58 | 54.61 | 19.74 | 17.76 | 43.55 | 3.29 | 1.96 |
+| v2 yönsüz | ö+ç | 64.37 | 84.90 | 72.73 | 54.69 | 61.45 | 14.66 | 1.91 |
+| v1b yönlü | ö+ç | 61.58 | 76.39 | 67.60 | 49.12 | 55.93 | 10.26 | 1.17 |
+| v1b yönsüz | ö+ç | 60.56 | 80.50 | 73.31 | 70.09 | 75.16 | 16.13 | 2.79 |
+
+Basit anlatım (ana sistem, önden + çapraz):
+- 100 hatalı tekrarın **63**'ünde (62,76) gerçek hata, sistemin en yüksek z'sine sahip hata.
+- **77**'sinde (77,27) gerçek hata en yüksek iki z içinde.
+- Kural 2. hatayı yalnızca o da eşiği geçerse söylüyor. Bu durumda gerçek hata, söylenen ilk iki hata içinde 100 tekrarın **67**'sinde (67,45) bulunuyor. Tek hata söylendiğinde bu sayı 56,60'tı (Tablo 1, "tür doğru").
+- Doğru tekrarlarda ikinci bir uyarı yalnızca 100 tekrarın **1,6**'sında çıkıyor.
+- Revizeyle karşılaştırma: "birincil ilk iki z içinde" 75,81'den 77,27'ye, "birincil söylenen ilk iki içinde" 68,62'den 67,45'e değişti.
+
+## Kararlar ve sapmalar
+- **Galeri:** `sonuclar/deney2/galeri/` yeniden üretilmedi. İlk sürümün galerisi zaten `sonuclar/deney2_ilk/galeri/` altında. Revizenin galerisi `sonuclar/deney2_revize/galeri/` altında.
+- **`kaldirma.csv` (ilk sürüm):** Eksik açı burada μ − tepe (ortalama) ile hesaplanıyor. Bu betimsel bir tablodur, karar kuralına girmez.

@@ -1,0 +1,69 @@
+# Hocanın ödev tanımı — özet ve bizim karşılığımız
+
+Kaynak: "Bilgisayarla Görü – Ara Sınav Projesi" Word dosyası. Sunum 16 Kasım 2026, 5 dakika. **Sunumdan sonra** 1 sayfalık rapor teslim edilir.
+
+## Proje konusu
+Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıcıya anlamlı geri bildirim üretilmesi. Üç problemden en az birini çözen **çalışan bir uygulama** isteniyor; birden fazlası seçilebilir. **Biz üçünü birden kapsıyoruz.**
+
+## Problemler ve şartlar
+
+### P1 — Hareket doğruluğu ve doğal dil geri bildirimi
+- Referans hareket ile kullanıcı hareketi karşılaştırılır.
+- Eklem açıları, doğrultular ve hizalama ölçüleri üretilir.
+- **Hatalı bölge ve hata büyüklüğü** belirlenir; düzeltme doğal dilde söylenir.
+  - Örnek: "Sağ kolunu yaklaşık 90° kaldırman gerekiyordu; sen 80° kaldırdın…"
+- Doğru harekette olumlu geri bildirim verilir.
+- **Yeterli değil:** Sadece iskelet çizmek veya "%85 doğru" demek. AUC ve accuracy deneysel değerlendirmede kullanılabilir, ama kullanıcıya verilen ana çıktı fiziksel ölçüm ve doğal dil olmalı.
+- **Bizde:** Adım 4–5. Cümlelerde ölçü (derece, gövde %) ve düzeltme önerisi var; doğru tekrarda somut olumlu cümle.
+
+### P2 — Omuz/skapula hareketlerinin hassas ölçümü
+- Standart pose çıktısının hangi durumda sınırlı kaldığı gösterilir.
+- **Omuza özel en az bir iyileştirme** uygulanır.
+- Yorumlanabilir ölçüm verilir: derece, normalize mesafe, asimetri, yörünge.
+- Mümkünse standart yöntemle iyileştirilmiş yöntem karşılaştırılır.
+- **Yeterli değil:** MediaPipe'ın omuz koordinatlarını doğrudan okuyup piksel farkını raporlamak.
+- **Hocanın önerdiği yöntemler:** shoulder ROI, optical flow, zamansal yumuşatma/Kalman, DeepLabCut ile özel noktalar, RGB-D, keypoint + lokal görüntü/özel geometrik ölçüm birleşimi. Ayrıca "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" ölçülebilecekler arasında sayılmış.
+- **Bizde:**
+  - **Sınırın gösterilmesi:** Deney 1, bantsız ölçütler (AUC 0,60–0,70) ve bant grafiği.
+  - **İyileştirmeler:**
+    1. kol açısına koşullu, kişiye özel bant;
+    2. kulak–omuz geometrik ölçütü;
+    3. zamansal yumuşatma (Deney 1c);
+    4. isteğe bağlı siluet ölçütü (Adım 6b).
+  - **Karşılaştırma:** AUC tabloları.
+
+### P3 — Referans ve kullanıcı hareketini çakıştırma
+- **Zamansal hizalama:** DTW veya başlangıç/bitiş eşleme.
+- **Geometrik hizalama:** öteleme, ölçek, döndürme veya Procrustes.
+- İki iskelet aynı video üzerinde farklı renklerle gösterilir; hatalı bölgeler görünür olur.
+- **Yeterli değil:** Videoları yan yana oynatmak veya aynı kare numaralarını üst üste çizmek.
+- **Bizde:** Görsel kontrol aracı (Adım 2b) ve uygulamadaki tekrar oynatımı (Adım 6, madde 5b). İkisi ortak `cekirdek/bindirme.py` kodunu kullanır.
+
+## 1 sayfalık rapor şablonu
+1. **Problem ve amaç:** 2–3 cümle.
+2. **Teknolojiler ve veri** (tablo):
+   - pose yöntemi
+   - ek yöntemler
+   - araçlar
+   - girdi/referans
+3. **Yeniden gerçekleştirme adımları (ana bölüm):**
+   1. ortam
+   2. girdi hazırlığı
+   3. pose çıkarımı
+   4. ölçüm/hizalama
+   5. hata hesabı
+   6. geri bildirim
+   7. çıktı
+4. **Çalışan çıktı, en önemli sınırlılık, 3–5 kaynak.**
+
+## Kurallar
+- Kullanılan her makale, GitHub deposu, doküman ve veri seti kaynak olarak yazılır.
+- Python ve kritik paket sürümleri belirtilir.
+- **Üretken yapay zekâ ile kod, hata ayıklama veya rapor desteği alındıysa, amacı kısa bir notla belirtilir.**
+- Son kontrol sorusu: "Bir başka öğrenci bu raporla uygulamanın temel sürümünü yeniden kurabilir mi?"
+
+## Hocanın kaynak rehberinde omuz için önerilenler
+Raporun sınırlılık veya kaynak kısmında anılabilir:
+- **Lefebvre vd. (2025):** DeepLabCut ile 20 anatomik omuz/üst ekstremite noktası.
+- **Ceglia vd. (2026):** RGB-D ve akromial küme ile omuz/skapula kinematiği.
+- **RGB-D omuz ROM sistematik derlemesi (2025):** Bizim M14'ümüz.

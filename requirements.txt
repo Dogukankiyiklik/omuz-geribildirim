@@ -1,0 +1,15 @@
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+matplotlib>=3.8
+mediapipe>=0.10.14
+opencv-python>=4.9
+pillow>=10.0
+pytest>=8.0
+# DTW hızlandırma (cekirdek/hizalama.py); yoksa saf Python ile aynı sonuç, yavaş
+numba>=0.60
+# Sonuçların Excel kopyası (sonuclar.xlsx)
+openpyxl>=3.1
+# Adım 8 (LLM) için, ihtiyaç olunca:
+# google-genai
+# ollama

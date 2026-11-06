@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+veri/*
+!veri/README.md
+!veri/Segmentation.csv
+!veri/Error_types.csv
+profiller/
+oturumlar/
+*.task
+.env
+sonuclar/deney4/onbellek.jsonl
+# Üretilen videolar (yeniden üretilebilir; büyük)
+sonuclar/**/*.mp4
+.pytest_cache/

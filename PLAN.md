@@ -1,0 +1,358 @@
+# PLAN.md — Adım adım yol haritası
+
+Her adımı sırayla yap. Her adımın sonunda `ilerleme/ADIM_XX.md` yazılır (bkz. `CLAUDE.md`).
+
+**📤 Danışmana gönder** işaretli adımlardan sonra kullanıcı şu dosyaları danışman Claude sohbetine gönderir:
+- `ilerleme/ADIM_XX.md`
+- ilgili `sonuclar/.../ozet.csv`
+
+Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme verir.
+
+| Adım | İş | Hedef tarih | Katman |
+| --- | --- | --- | --- |
+| 0 | Ortam ve veri: **orijinal Zenodo dosyalarından** doğrudan okuma | 6 Kas | Zorunlu |
+| 1 | Çekirdek modül + Deney 1 regresyon testi | 6 Kas | Zorunlu |
+| 2 | Deney 1'in kullanıcı tarafından çalıştırılması + şekiller | 6–7 Kas | Zorunlu 📤 |
+| 2b | **Görsel kontrol aracı** (video + iskelet + bant eğrisi + karar) | 7 Kas | Zorunlu 📤 |
+| 3 | Deney 1b (genel bant / kişiye özel bant) + **Deney 1c (zamansal yumuşatma)** | 7–8 Kas | Zorunlu 📤 |
+| 4 | Deney 2: hata türünü bulma | 8 Kas | Zorunlu 📤 |
+| 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim | 8–9 Kas | Zorunlu 📤 |
+| 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 9–11 Kas | Zorunlu 📤 |
+| 7 | Kendi kayıtlarımızla deneme | 11–12 Kas | Zorunlu 📤 |
+| 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | 13 Kas | Zorunlu 📤 |
+| — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu |
+| — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu |
+| 6b | (Yetişirse) Omuz bölgesi siluet ölçütü: segmentasyon maskesi ile "üst omuz" | 12 Kas | İsteğe bağlı 📤 |
+| 8 | (Yetişirse) Deney 4: LLM ile kural tabanlı karşılaştırması | 12 Kas | Bildiri 📤 |
+| 10 | (Yetişirse) REHAB24-6 ile 10 yeni kişide doğrulama | — | İsteğe bağlı |
+| 11 | (Yetişirse) Ex7 omuz ekstansiyonunda genelleme | — | İsteğe bağlı |
+
+Sunum: **16 Kasım 2026.** Zorunlu adımlar gecikirse isteğe bağlı adımlar atlanır. İsteğe bağlıların öncelik sırası: 6b, 8, 11, 10.
+
+### Hocanın ödev tanımıyla eşleşme (bkz. `docs/ODEV.md`)
+
+| Hocanın problemi | Bizde karşılığı |
+| --- | --- |
+| **P1 — Doğal dil geri bildirimi:** referansa göre fiziksel fark, hatalı bölge ve **büyüklüğü**, düzeltme önerisi, doğru harekette olumlu geri bildirim | Adım 4–5: hata türü + faz + yön + **ölçü (°, gövde %)** + düzeltme cümlesi |
+| **P2 — Omuz/skapula hassas ölçümü:** standart pose çıktısının sınırını göstermek + omuza özel en az bir iyileştirme + karşılaştırma | Deney 1, 1b, 1c: ham ölçütler (sınır) → kol açısına koşullu kişiye özel bant, kulak–omuz ölçütü, yumuşatma (iyileştirmeler) → AUC karşılaştırması. İsteğe bağlı 6b: siluet ölçütü |
+| **P3 — Referans ve kullanıcı hareketini çakıştırma:** zamansal (DTW) + geometrik hizalama, aynı video üzerinde gösterim, hatalı bölgeleri görünür kılma | Adım 2b ve 6: DTW + gövde merkezine öteleme + gövde boyuna ölçekleme + gövde eksenine döndürme; referans iskelet kullanıcı videosuna yarı saydam bindirilir, banttan çıkan uzuvlar kırmızı |
+
+---
+
+## Adım 0 — Ortam ve veri: orijinal dosyalardan doğrudan okuma
+
+Kullanıcı veri setini Zenodo'dan (https://zenodo.org/records/23018128) kendisi indirir ve `veri/rehab26/` klasörüne koyar:
+- `Error_types.csv`
+- `joint_names.txt`
+- `jointSequences-mediapipe.zip` (açılmış hali de olur)
+- `Segmentation.csv`
+- `Segmentation.txt`
+- `videos.zip` (8,4 GB): görsel kontrol (Adım 2b) için gerekli; açılmış hali de olur.
+
+`rehab26_kucuk.npz` artık zorunlu değil. Yalnızca karşılaştırma için tutulur, çünkü danışmanın Deney 1 sonuçları bu dosyadan üretildi.
+
+**Yapılacaklar**
+- `.venv` oluştur, `requirements.txt` kur.
+- `araclar/veri_tanit.py`: kullanıcıya veri setini tanıtan betik. Şunları yazdırır:
+  - `Segmentation.txt` içeriği
+  - `joint_names.txt` (33 eklem, indeksleriyle)
+  - zip içindeki dosya listesi
+  - bir dosyanın biçimi, `(kare, 33, 4)`
+  - her sütunun en küçük ve en büyük değeri
+  - egzersiz ve hata türü başına tekrar sayıları
+- **Koordinat kontrolü:** Zenodo sayfası "2B'de x, y piksel koordinatı" diyor. Danışmanın incelediği veride x, y 0–1 aralığındaydı, yani görüntü boyutuna bölünmüş görünüyor. Gerçek değer aralığını yazdır, video çözünürlüğünü `videos.zip` içindeki bir videodan oku ve hangisinin doğru olduğunu ADIM dosyasına yaz. En-boy düzeltmesi buna bağlı: normalize ise `x *= W/H`, piksel ise düzeltme gerekmez.
+- `cekirdek/veri.py`: zip'ten **doğrudan** okuma. Ex1 (ve istenirse Ex7) için `_2d.npy` dosyaları açılır. Her tekrar `first_frame − 10 … last_frame + 10` aralığında kesilir ve bellekte (video, kamera, yönelim) gruplarına ayrılır. Eklem seçimi kodun içinde yapılır; 33 eklemin hepsi de tutulabilir.
+- **Eşdeğerlik testi:** Aynı tekrarlar için orijinal veriden okunan 13 eklem ile `rehab26_kucuk.npz` karşılaştırılır. En büyük mutlak fark ≤ 1e-3 olmalı (float16 yuvarlaması).
+
+**Kabul ölçütü:**
+- Veri tanıtım çıktısı ADIM_00'da var.
+- Ex1 tekrar sayıları `Segmentation.csv` ile tutuyor.
+- Eşdeğerlik testi geçti.
+- Koordinat biçimi (piksel mi, normalize mi) netleşti.
+
+---
+
+## Adım 1 — Çekirdek modül ve regresyon testi
+
+**Amaç:** `referans/deney1_omuz_olcutleri.py` içindeki mantığı yeniden kullanılabilir bir pakete taşımak, **davranışı değiştirmeden.**
+
+**Yapılacaklar** — `cekirdek/` altında:
+- `veri.py` (Adım 0'da başlandı): orijinal zip'ten okuma, segmentasyon ile eşleştirme, (video, kamera, yönelim) gruplaması, görüş açısı hesabı. İsteğe bağlı olarak `rehab26_kucuk.npz`'den okuma seçeneği; regresyon testi her iki kaynakla da çalıştırılabilsin. Orijinal veri float64, npz float16 olduğu için çok küçük farklar beklenir; ±0,01 toleransı ikisi için de geçerli.
+- `geometri.py`: en-boy düzeltmesi, açı fonksiyonu.
+- `ozellikler.py`: kol açısı ve omuz ölçütleri (M01, M01_tek, M39_F2, M33, YENI). Ölçüt eklemeyi kolaylaştıran bir kayıt sistemi (sözlük) kur; Adım 4'te yeni ölçütler eklenecek.
+- `hizalama.py`: DTW yolu ve hizalama. Referans koddaki saf Python döngüsü yavaş; hızlandırabilirsin (numba veya vektörize), ama sonuç aynı kalmalı.
+- `bant.py`: bant modeli (μ, τ, Q1 alt sınırı) ve bant hatası. Hem **yönsüz** (M39, referans) hem **yönlü** (yalnızca belirtilen yöndeki sapma) hata seçeneği olsun; yönlü olan Adım 4'te kullanılacak.
+- `degerlendirme.py`: AUC, Ψ ve kişi bazlı bootstrap.
+- `deneyler/deney1.py`: çekirdeği kullanarak referans deneyi yeniden üret ve `sonuclar/deney1/` altına yaz.
+- `testler/test_deney1_regresyon.py`: `sonuclar/deney1/ozet.csv` ile `referans/beklenen_deney1_ozet.csv`'yi karşılaştıran test.
+
+**Kabul ölçütü:** Tohum 0 ve en-boy 9/16 ile bant ve ham AUC değerleri beklenen tablodan en fazla **±0,01** sapıyor. Sapma varsa sebebini bul. Hızlandırma sonrası değişen kayan nokta sırası küçük farklar yaratabilir; 0,01'in altındaysa kabul et ve not et.
+
+---
+
+## Adım 2 — Deney 1'in kullanıcı tarafından çalıştırılması + şekiller 📤
+
+**Yapılacaklar**
+- Kullanıcıya `python -m deneyler.deney1` komutunu ver; kullanıcı çalıştırır.
+- `deneyler/sekiller.py` ile iki şekil üret:
+  1. Ölçütlere göre AUC çubuk grafiği, bantlı ve bantsız yan yana (`sonuclar/deney1/auc.png`).
+  2. Bant örneği: bir kişi, önden kamera; bant (gri alan), bir doğru tekrar ve bir silkmeli tekrar. Örnek: `ex1_Honza`, `cam1`, yönelim 0 (`sonuclar/deney1/bant_ornegi.png`).
+- ADIM_02'de kullanıcıya şekilleri nasıl okuyacağını 3–5 cümleyle anlat.
+
+**Kabul ölçütü:** Kullanıcı aynı sayıları kendi bilgisayarında gördü; iki şekil oluştu.
+
+---
+
+## Adım 2b — Görsel kontrol aracı 📤
+
+**Amaç:** Sistem kapalı bir kutu olmasın. Kullanıcı herhangi bir tekrarı videoda izleyip sistemin ne gördüğünü ve neden o kararı verdiğini kendi gözüyle kontrol edebilsin. Bu araç aynı zamanda hocanın Problem 3'ünün (referans ve kullanıcı hareketini çakıştırma) ilk sürümüdür.
+
+**Yapılacaklar** — `araclar/gorsel_kontrol.py`:
+```bash
+python -m araclar.gorsel_kontrol --video ex1_Honza --kamera cam1 --yonelim 0 --tekrar 3
+```
+Çıktı bir MP4 dosyasıdır ve istenirse pencerede oynatılır. Ekran üç parçadan oluşur:
+1. **Sol: orijinal video** (`videos.zip`) ve üzerinde:
+   - veri setinin MediaPipe iskeleti, böylece kullanıcı noktaların doğru oturup oturmadığını görür;
+   - referans iskelet: kişinin kendi doğru tekrarlarından biri, DTW ile zamanda, gövde merkezi, gövde boyu ve gövde ekseniyle geometride hizalanmış, yarı saydam ve farklı renkte;
+   - banttan çıkan uzuvlar kırmızı.
+2. **Sağ üst:** Seçilen ölçütün eğrisi, bant ve hareketli bir zaman imleci (dokümandaki bant grafiğinin canlı hali).
+3. **Sağ alt:**
+   - gerçek etiket (veri setinden);
+   - sistemin kararı ve E değerleri;
+   - Adım 5'ten sonra Türkçe cümle.
+
+`videos.zip` yoksa iskeletler boş bir tuvale çizilir.
+
+**Galeri:** Her deney betiği sonunda `sonuclar/<deney>/galeri/` klasörüne otomatik örnekler üretir. Her grup için 3'er MP4, tohum sabit:
+- doğru yakalanan silkmeler
+- kaçırılan silkmeler
+- yanlış alarm verilen doğru tekrarlar
+- (Deney 2'den sonra) karıştırılan hata türleri
+
+ADIM dosyasında bu örneklerin listesi ve "neye bakmalı" notu yer alır.
+
+**Kabul ölçütü:**
+- Kullanıcı en az 5 tekrarı izledi.
+- İskeletin videoya oturduğunu ve kararların görüntüyle tutarlı olup olmadığını ADIM dosyasına not etti.
+
+---
+
+## Adım 3 — Deney 1b: genel bant ile kişiye özel bant 📤
+
+**Soru:** Kalibrasyon kişiye özel olmak zorunda mı? Başkalarının doğru tekrarlarından kurulan bir bant yeterli olur mu?
+
+**Yöntem:** Her (kişi, kamera, yönelim) dizisi için üç koşul:
+1. **Bant yok:** Deney 1'deki "ham" yöntem.
+2. **Genel bant:** Aynı kamera ve yönelimde **diğer 4 kişinin** doğru tekrarlarından kurulan bant. Test kişisinin hiçbir tekrarı modele girmez. Referans tekrar diğer kişilerden rastgele seçilir; adil olmak için kişiye özel bantla aynı sayıda tekrar kullanılabilir (örneğin 4) — bu seçimi ADIM dosyasına yaz.
+3. **Kişiye özel bant:** Deney 1'deki yöntem.
+
+**Çıktı:** Her koşul için AUC (silkme/doğru, silkme/diğer), görüş grubuna göre AUC ve kişi bazlı bootstrap güven aralıkları. Ölçüt olarak en az YENI, M33 ve M39_F2. Sonuçlar `sonuclar/deney1b/` altına.
+
+**Deney 1c — zamansal yumuşatma** (aynı adımda): Hocanın Problem 2 için önerdiği iyileştirmelerden biri. MediaPipe noktaları kareden kareye titrer (jitter).
+- `cekirdek/yumusatma.py`: One Euro filtresi ve Savitzky–Golay. Parametreler eğitim kişilerinde seçilir.
+- Deney 1, yumuşatmalı ve yumuşatmasız tekrarlanır: YENI, M33 ve M39_F2 ölçütleri, kişiye özel bant.
+- Ayrıca bir doğru tekrarda ham ve yumuşatılmış omuz noktası yörüngesi tek bir şekilde gösterilir (`sonuclar/deney1c/titreme.png`).
+
+**Kabul ölçütü:**
+- Üç koşulun tablosu ve "genel bant – kişiye özel bant" farkı için güven aralığı var.
+- Yumuşatmalı ve yumuşatmasız karşılaştırma tablosu ve titreme şekli var.
+
+---
+
+## Adım 4 — Deney 2: hata türünü bulma 📤
+
+**Soru:** Sistem, bir tekrarın doğru mu olduğunu, yanlışsa **hangi hatayı** içerdiğini bulabiliyor mu?
+
+**Hata türü başına ölçütler** (Ex1, sağ kol; M39 Tablo 1'den uyarlama; hepsi en-boy düzeltmeli 2B):
+
+| Hata kodu | Ölçüt | Tanım |
+| --- | --- | --- |
+| `ERR_ELEVATED_SHOULDER` | `omuz` = YENI | (y sağ omuz − y sağ kulak) / gövde uzunluğu |
+| `ERR_HEAD_TO_SIDE` | `bas` (M39 F3) | (omuz ortası → kulak ortası) vektörü ile (kalça ortası → omuz ortası) vektörü arasındaki açı |
+| `ERR_ARM_FORWARD` | `on_kacma` (M39 F1) | sağ bilek – sağ omuz – sağ kalça açısı; ayrıca aday: `kol_boyu` = sağ omuz–bilek mesafesi / gövde (öne giden kol önden kamerada kısa görünür) |
+| `ERR_BENT_ARM` | `dirsek` (M39 F4) | sağ omuz – sağ dirsek – sağ bilek açısı |
+| `ERR_LOW_ABDUCTION` | `kaldirma` (M39 F5) | sağ bilek – sağ omuz – sol omuz açısı |
+
+**Karar kuralı** (basit ve açıklanabilir kalmalı):
+1. Her tekrar için her ölçütün bant hatası E_k hesaplanır. Doğru tekrarlar birini-dışarıda-bırak ile, hatalılar adil modelle değerlendirilir (Deney 1'deki gibi).
+2. Her ölçüt, **eğitim kişilerinin** doğru tekrarlarındaki dağılımına göre ölçeklenir: z_k = (E_k − medyan) / (çeyrekler arası açıklık + ε).
+3. max z_k < T ise "doğru" denir; değilse hata türü = argmax z_k.
+4. T, **kişi bazlı birini-dışarıda-bırak** ile eğitim kişilerinde makro-F1'i en yükseğe çıkaracak şekilde seçilir.
+5. Yönsüz ve yönlü bant ayrı ayrı raporlanır. Yönlü bantta yön, hatanın beklenen yönüdür; örneğin `omuz` için mesafe bandın **altına** iniyorsa. Her ölçüt için beklenen yönü doğru tekrarlar ile ilgili hatalı tekrarların ortalama farkından eğitim kişilerinde belirle; elle yazma.
+6. Hem `on_kacma` hem `kol_boyu` denenir; hangisinin kullanılacağına eğitim kişilerinde karar verilir.
+
+**Çıktılar** (`sonuclar/deney2/`):
+- 6 sınıflı (DOGRU + 5 hata) karışıklık matrisi: CSV + PNG.
+- Sınıf başına duyarlılık/kesinlik/F1, makro-F1, doğruluk.
+- Görüş grubuna göre makro-F1.
+- **Katı** değerlendirme (yalnızca birincil hata) ve **esnek** değerlendirme (ek hatalardan birini söylemek de doğru sayılır).
+- Karşılaştırma için basit bir temel çizgi: tek bir toplam hata (E'lerin ortalaması) ile yalnızca doğru/yanlış ayrımı.
+
+**Kabul ölçütü:** Tüm tablolar var; T seçiminin her kişide hangi değere düştüğü yazılmış.
+
+---
+
+## Adım 5 — Deney 3: kural tabanlı Türkçe geri bildirim 📤
+
+**Amaç:** Deney 2'nin kararını kişinin anlayacağı bir cümleye çevirmek ve cümlenin doğru hatayı söyleyip söylemediğini ölçmek.
+
+**Sapma kodu** (`cekirdek/geribildirim.py`). Her hatalı tekrar için en yüksek z'li 1, en fazla 2 hata alınır ve her biri için bir kod üretilir:
+- `hata`: hata türü
+- `taraf`: "sağ" (Ex1'de sağ kol)
+- `faz`: kaldırırken / kol en üstteyken / indirirken. Referans tekrarın kol açısı eğrisine göre belirlenir: tepe = kol açısının en büyük değerinin %85'inin üstü; öncesi kaldırma, sonrası indirme. Bant dışı fazlalığın en çok toplandığı faz seçilir.
+- `yon`: bandın üstü mü altı mı
+- `siddet`: hafif / belirgin / çok belirgin. Eşikler eğitim kişilerinin hatalı tekrarlarındaki E dağılımının üçte birlik dilimlerinden alınır.
+- `olcu` ve `beklenen` (**hocanın şartı: hatanın büyüklüğü fiziksel olarak söylenmeli**): Bant dışı sapmanın en büyük olduğu anda kişinin ölçülen değeri ile bandın ortası (μ), birimiyle. Kullanıcıya gösterilecek birimler:
+  - açı ölçütleri (dirsek, baş, öne kaçma, kaldırma): derece;
+  - omuz için **omuz çizgisinin gövde eksenine göre açısı** (derece; hocanın P2 listesindeki "omuz çizgisinin gövde eksenine göre açısı") ve kulak–omuz mesafesi "gövde boyunun %'si". Tespit yine YENI ile yapılır; derece yalnızca anlatım içindir.
+  - Santimetre kullanma; tek kameradan güvenilir ölçek yok.
+
+Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyordu; sen 80° kaldırdın. Kolunu yaklaşık 10° daha yukarı kaldırmalısın."* Bizim cümlelerimiz bu ayrıntıda olmalı.
+
+**Şablonlar.** Her hata ve yön için 1–2 şablon, sade Türkçe, **ölçü + düzeltme** içeren. Örnekler (geliştirilebilir):
+- omuz, yukarı: "{Faz} sağ omzunu kulağına doğru {siddet} kaldırıyorsun: omuz çizgin normalde yaklaşık {beklenen}° iken {olcu}°'ye çıktı. Omzunu aşağıda ve gevşek tut; kolu omuzdan değil, koldan kaldır."
+- bas: "{Faz} başını yaklaşık {fark}° yana eğiyorsun. Başını dik tut, karşıya bak."
+- dirsek: "{Faz} dirseğin yaklaşık {fark}° bükülüyor (normalde {beklenen}°, sende {olcu}°). Kolunu düz tut."
+- on_kacma: "{Faz} kolun yaklaşık {fark}° öne kaçıyor. Kolunu vücudunla aynı hizada, tam yana kaldır."
+- kaldirma: "Kolunu en fazla {olcu}° kaldırdın; normalde {beklenen}° civarına çıkıyordun. Yaklaşık {fark}° daha yukarı uzan."
+- doğru (hocanın şartı: olumlu ve **somut**): "Hareketi doğru yaptın. Kolun {olcu_kol}°'ye kadar çıktı; omzun ve dirseğin normal aralıkta kaldı." Aynı cümle sürekli tekrarlanmasın diye 3–4 varyasyon olabilir.
+
+**Değerlendirme** (`deneyler/deney3.py`):
+- Bir **anahtar kelime çıkarıcı** yaz (`cekirdek/metin_cozumleyici.py`). Bir cümleden hangi hata türlerinin söz edildiğini bulur; sözlük tabanlı, örneğin omuz + kulak/kaldır → omuz. Deney 4'te LLM cümleleri de aynı çıkarıcıyla ölçülecek, bu yüzden şablonlara özel değil, genel yazılmalı. Kendi şablonlarında %100 doğru çalıştığını test et; ayrıca 15–20 elle yazılmış farklı cümleyle de test et.
+- Metrikler:
+  - hatalı tekrarlarda "cümle doğru hatayı adlandırdı" oranı (katı ve esnek)
+  - doğru tekrarlarda gereksiz uyarı oranı
+  - görüş grubuna göre aynı metrikler
+- Kullanıcı okusun diye 20 rastgele örnek cümle (tohum sabit) `sonuclar/deney3/ornek_cumleler.md` dosyasına; yanında gerçek etiket yazılı olsun.
+
+**Kabul ölçütü:** Metrik tablosu ve örnek cümleler var. Kullanıcı örnekleri okuyup anlaşılır bulduğunu veya düzeltme önerilerini ADIM dosyasına not etti.
+
+---
+
+## Adım 6 — Uygulama 📤
+
+**Amaç:** Ders sunumundaki demo. Derste gösterilen yoga uygulamasına benzer: görüntü ve iskelet bir tarafta, geri bildirim paneli diğer tarafta.
+
+**Teknik tercih:** OpenCV penceresi + MediaPipe Tasks `PoseLandmarker` (model: `pose_landmarker_full.task`, ilk çalıştırmada indirilir). Streamlit'te canlı kamera zahmetli olduğu için tercih edilmedi. Daha iyi bir fikrin varsa öner, kullanıcı onaylasın.
+
+**Akış** (`uygulama/main.py`):
+1. **Egzersiz seçimi:** Şimdilik tek egzersiz: "Kolu yana kaldırma (sağ kol)". Menü yapısı ileride yenisi eklenebilecek şekilde kurulsun.
+2. **Kalibrasyon modu:** Kişi fizyoterapist eşliğinde 5 doğru tekrar yapar. Tekrarlar otomatik ayrılır; kullanıcı her tekrarı onaylar veya reddeder. Ölçüt dizileri `profiller/<isim>.npz` dosyasına kaydedilir.
+3. **Değerlendirme modu:** Canlı kamera **veya** video dosyası (`--video yol.mp4`). Her tekrar bitince:
+   - çekirdekteki bant modeli ve Deney 2 kararı uygulanır,
+   - panelde tekrar numarası, karar (doğru/hata) ve Deney 3'ün Türkçe cümlesi gösterilir.
+   - Son 5 tekrarın geçmişi panelde kalır.
+4. **Tekrar ayırma:** Canlıda kol açısına dayalı durum makinesi: dinlenme → kaldırma → tepe → indirme (M01). Örnek eşikler: kol açısı 30°'yi geçince başlangıç, 20°'nin altına dönünce bitiş; en kısa süre 0,8 s. Eşikleri ve gerekçesini ADIM dosyasına yaz.
+5. **En-boy:** Uygulamada gerçek kare boyutu bilinir; x, W/H ile çarpılır. 9/16 sabiti yalnızca REHAB26 içindir (Adım 0'da netleşen biçime göre).
+5b. **Referans iskelet bindirme (hocanın Problem 3'ü):** Her tekrar bittiğinde o tekrarın kısa tekrar oynatımı gösterilir. Üzerinde:
+   - kullanıcının iskeleti;
+   - kalibrasyondaki referans tekrarın iskeleti, yarı saydam ve farklı renkte;
+   - banttan çıkan uzuvlar kırmızı, diğerleri yeşil;
+   - hatanın en büyük olduğu anda kısa bir etiket, örneğin "omuz +7°".
+
+   Hizalama:
+   - **Zamansal:** DTW, kol açısına göre (Adım 1'deki çekirdek).
+   - **Geometrik:**
+     1. referans iskelet kullanıcının gövde merkezine (iki omuz ve iki kalça ortalaması) ötelenir;
+     2. gövde uzunluğu oranında ölçeklenir;
+     3. gövde ekseni açısı kadar döndürülür.
+     Alternatif: gövde noktaları üzerinde Procrustes (`scipy.linalg.orthogonal_procrustes`).
+
+   Bu kod Adım 2b'deki görsel kontrol aracıyla **ortak** olmalı (`cekirdek/bindirme.py`).
+5c. **Omuz yörüngesi:** Panelde son tekrarın omuz ölçütü eğrisi ve bandı küçük bir grafikle gösterilir (hocanın P2 çıktısı: "hareket yörüngesi").
+6. **Türkçe karakter:** `cv2.putText` Türkçe karakter çizemez. Panel metni PIL (`ImageDraw` + TTF font) ile çizilmeli.
+7. **Kayıt:** Her oturumun tekrar sonuçları `oturumlar/<tarih>.csv` dosyasına yazılır.
+8. **Yığın modu:** `python -m uygulama.toplu --profil X --video Y` aynı değerlendirmeyi pencere açmadan yapar ve CSV üretir. Adım 7 bunu kullanır.
+
+**Kabul ölçütü:**
+- Kullanıcı kendi kamerasıyla kalibrasyon yapıp en az 5 tekrar değerlendirdi.
+- Video dosyası modu çalışıyor.
+- Uygulama kararları çekirdek kodu içe aktarıyor; kopya kod yok.
+
+---
+
+## Adım 7 — Kendi kayıtlarımızla deneme 📤
+
+**Çekim protokolü** (kullanıcı çeker):
+- Telefon tripodda, göğüs hizasında, 2–2,5 m uzakta; kişiye önden veya en fazla 30° çapraz. Dikey çekim olabilir. Arka plan sade, ışık önden.
+- `kalibrasyon.mp4`: 5 doğru tekrar.
+- `test.mp4`: 5 doğru, 3 omuz silkmeli, 2 baş eğik, 2 dirsek bükük, 2 yetersiz kaldırma tekrarı; sıra karışık.
+- Çekim sırasında hangi tekrarın ne olduğu `etiketler.csv` dosyasına yazılır: `tekrar_no, etiket`.
+- İstenirse ikinci bir kişiyle tekrar edilir (arkadaş veya aile).
+
+**Yapılacaklar:** Yığın moduyla değerlendir; etiketlerle karşılaştır. Karışıklık matrisi ve tekrar başına "verilen cümle – gerçek etiket" tablosunu `sonuclar/kendi_kayit/` altına yaz.
+
+**Kabul ölçütü:** Tablo var; sistemin yanıldığı tekrarlar için kısa bir gözlem yazıldı (örneğin "baş eğme omuz olarak algılandı").
+
+---
+
+## Adım 6b — (Yetişirse) Omuz bölgesi siluet ölçütü 📤
+
+**Fikir:** MediaPipe omzu tek bir nokta olarak veriyor. Oysa omuz silkilince boyun ile omuz arasındaki **siluet çizgisi** (trapez kası hattı) görünür şekilde yükselir. Hocanın P2 önerileriyle örtüşüyor: "shoulder ROI", "genel pose keypointlerini lokal görüntü özellikleriyle birleştirme". MediaPipe Pose Landmarker isteğe bağlı bir segmentasyon maskesi verebiliyor.
+
+**Yöntem (taslak):**
+1. Kulak ile omuz arasında, egzersiz yapan tarafta bir ilgi bölgesi (ROI) tanımlanır.
+2. ROI içinde segmentasyon maskesinin üst sınırı (siluetin en üst pikseli) birkaç dikey sütunda bulunur.
+3. "Siluet omuz yüksekliği" = bu sınırın kulağa göre dikey konumu / gövde uzunluğu.
+4. Bu yeni ölçüt, YENI ile aynı bant çerçevesinde değerlendirilir.
+
+**Veri:** `videos.zip` içinden yalnızca Ex1, önden ve çapraz görüş açıları, tekrar kareleri ±10. MediaPipe segmentasyonu bir kez çalıştırılıp `veri/ara/` altına önbelleğe alınır. Süreyi önceden tahmin et ve kullanıcıya söyle.
+
+**Kabul ölçütü:** YENI ile siluet ölçütünün AUC karşılaştırması ve görsel kontrol aracında siluet sınırının çizildiği 3 örnek video. Sonuç olumsuz çıksa da raporlanır.
+
+---
+
+## Adım 8 — Deney 4: LLM ile kural tabanlı karşılaştırması 📤 (bildiri katmanı)
+
+**Soru:** Aynı bilgi bir LLM'e verilirse, kurallardan daha iyi ya da daha kötü bir cümle mi çıkar?
+
+**Koşullar:**
+- **A — Kural tabanlı:** Deney 3.
+- **B — LLM + sapma kodları:** Sapma kodları JSON olarak verilir; LLM yalnızca cümleye çevirir.
+- **C — LLM + ham özet:** M21 tarzı. Her ölçüt için kişinin değeri ve bant sınırları (en büyük, en küçük, ortalama) verilir, sapma kodu verilmez; LLM hatayı da kendisi bulur.
+
+**Sağlayıcı:**
+- **Gemini ücretsiz katmanı.** Google AI Studio'dan alınan API anahtarı, `GEMINI_API_KEY` ortam değişkeninde tutulur. Güncel ücretsiz modelleri ve limitleri resmi sayfadan kontrol et: https://ai.google.dev/gemini-api/docs/rate-limits — limitler sık değişiyor.
+- **Ollama yedeği.** Yerel küçük bir model; Türkçe kalitesini ADIM dosyasında belirt.
+- `cekirdek/llm.py` sağlayıcıdan bağımsız bir arayüz olsun. `temperature = 0`.
+- **Her yanıt `sonuclar/deney4/onbellek.jsonl` dosyasına kaydedilir;** tekrar çalıştırmada yeniden istek atılmaz.
+- Hız sınırı için bekleme ve yeniden deneme eklenir.
+
+**Örneklem:** Ücretsiz limitler yüzünden tabakalı bir alt küme kullanılır. Örnek: önden ve çapraz görüşten 50 doğru + her hata türünden 20 tekrar = 150 tekrar, tohum sabit. Koşul başına 150 istek atılır.
+
+**Metrikler:** Aynı anahtar kelime çıkarıcıyla:
+- hata adlandırma doğruluğu
+- gereksiz uyarı oranı
+- **uydurma oranı**: girdide olmayan bir sayı ya da derece içeren cümleler; B koşulunda girdide olmayan bir vücut bölgesinden söz eden cümleler
+- ortalama cümle uzunluğu
+
+İstem metinleri `deneyler/istemler/` altında dosya olarak saklanır; ADIM dosyasına da kopyalanır.
+
+**Kabul ölçütü:** Üç koşulun tablosu ve her koşuldan 5 örnek cümle.
+
+---
+
+## Adım 9 — Sonuçları dondurma 📤
+
+- Tüm deneyleri temiz bir çalıştırmayla yeniden üret: `python -m deneyler.hepsi`.
+- `sonuclar/OZET.md` dosyasını yaz: her deneyin tek tablosu, en önemli 3 şekil ve 5 maddelik "ne öğrendik".
+- Sürümleri yaz: Python ve tüm kritik paketler (`pip freeze` çıktısından). Hocanın raporu "yeniden kurulabilirlik" istiyor.
+- `docs/YENIDEN_KURULUM.md`: başka bir öğrencinin sistemi sıfırdan kurabilmesi için 5–8 adım. Hocanın rapor şablonundaki 7 başlığa göre yazılır: ortam, girdi hazırlığı, pose çıkarımı, hizalama, hata hesabı, geri bildirim, çıktı. 1 sayfalık rapor buradan yazılacak.
+- `docs/LLM_KULLANIMI.md`: projede üretken yapay zekânın nerede ve hangi amaçla kullanıldığı (Claude Code: kod; Claude: literatür, planlama, analiz). Hocanın kuralı gereği raporda kısa bir notla belirtilecek.
+- Git etiketi: `v-sunum`.
+
+**Kabul ölçütü:** `OZET.md` var ve sayılar ADIM dosyalarındaki sayılarla tutarlı.
+
+---
+
+## Adım 10 — (Yetişirse) REHAB24-6 doğrulaması
+
+REHAB24-6 (M34): 10 kişi, Ex1 kol abdüksiyonu, yalnızca doğru/yanlış etiketi var. Adımlar:
+1. Kullanıcı Zenodo'dan MediaPipe çıktılarını veya videoları indirir.
+2. Yanlış Ex1 tekrarlarını izleyip omuz silkmesi olanları **elle etiketler**. Bunun için bir etiketleme betiği yazılır: tekrarı oynatır, kullanıcı tuşla etiket girer.
+3. Deney 1 ve Deney 2 burada, ayar yapılmadan çalıştırılır: "Hiç görmediği 10 kişide de çalışıyor mu?"
+
+## Adım 11 — (Yetişirse) Ex7 genellemesi
+
+Ex7'de (omuz ekstansiyonu) de `ERR_ELEVATED_SHOULDER` var ve veri zaten `rehab26_kucuk.npz` dosyasında. Deney 1'i Ex7 için tekrarla. Hizalama özelliği kolun geriye açısı olmalı; bunu tanımla ve ADIM dosyasına yaz.

@@ -38,7 +38,10 @@ from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 
 from cekirdek import veri
+from cekirdek import aci_bandi as ab
+from cekirdek.aci_bandi import aci_bandi_hatasi, aci_eslemesi, tepe_acisi
 from cekirdek.bant import bant_hatasi
+from cekirdek.ozellikler import ozellikler
 from cekirdek.bindirme import KEMIKLER, Bindirici, banttan_cikan_kemikler
 from cekirdek.etiketler import OLCUT_ADLARI, ek_hata_adlari, hata_adi
 from cekirdek.konsol import utf8_cikti
@@ -184,15 +187,11 @@ class TekrarGorseli:
         iskelet_ciz(katman, P_ref, (0, 0, 0), kalinlik=8, nokta=False)       # koyu kenar
         iskelet_ciz(katman, P_ref, REF_RENK, kalinlik=5, nokta=False)
         sol = cv2.addWeighted(katman, 0.65, sol, 0.35, 0)
-        kirmizi = banttan_cikan_kemikler(self.ayr["kare_hatasi"], i, [self.olcut])
-        iskelet_ciz(sol, self.bindirici.kullanici_noktalari(j), YESIL, kalinlik=2, kirmizi=kirmizi)
+        iskelet_ciz(sol, self.bindirici.kullanici_noktalari(j), YESIL, kalinlik=2, kirmizi=self._kirmizi(j))
         tuval[:, :SOL_G] = sol
         # sağ üst: grafik + imleç
         g = self.grafik.copy()
-        x = self._g_x(i)
-        cv2.line(g, (x, self._g_y0), (x, self._g_y1), (60, 60, 60), 1, cv2.LINE_AA)
-        v = self.d["f"][self.olcut][j]
-        cv2.circle(g, (x, self._g_y(v)), 6, (0, 0, 0), -1, cv2.LINE_AA)
+        self._imlec_ciz(g, j)
         tuval[:GRAFIK_Y, SOL_G:SOL_G + g.shape[1]] = g[:GRAFIK_Y, :SAG_G]
         # metinler (PIL: Türkçe karakter)
         pil = Image.fromarray(cv2.cvtColor(tuval, cv2.COLOR_BGR2RGB))
@@ -204,14 +203,28 @@ class TekrarGorseli:
         for metin, boyut, kalin, renk in self._satirlar:
             ciz.text((SOL_G + 14, y), metin, font=_font(boyut, kalin), fill=renk)
             y += boyut + 6
-        mu, tau = self.d["model"][self.olcut]
-        disarida = self.ayr["kare_hatasi"][self.olcut][i] > 0
-        ciz.text((SOL_G + 14, y + 4),
-                 f"Şu an: kare {j + 1}/{len(self.t.dizi)} · kol açısı {self.d['f']['kol'][j]:.0f}° · "
-                 f"{self.olcut} = {v:.3f} (bant {mu[i] - tau[i]:.3f} – {mu[i] + tau[i]:.3f}) "
-                 f"{'→ BANT DIŞI' if disarida else ''}",
-                 font=_font(13, disarida), fill="#c62828" if disarida else M_METIN)
+        metin, disarida = self._durum(j)
+        ciz.text((SOL_G + 14, y + 4), metin, font=_font(13, disarida), fill="#c62828" if disarida else M_METIN)
         return cv2.cvtColor(np.asarray(pil), cv2.COLOR_RGB2BGR)
+
+    # ---- kare başına değişen parçalar (açı bandı görünümü bunları değiştirir)
+    def _kirmizi(self, j: int):
+        return banttan_cikan_kemikler(self.ayr["kare_hatasi"], self.bindirici.referans_karesi(j), [self.olcut])
+
+    def _imlec_ciz(self, g, j: int):
+        i = self.bindirici.referans_karesi(j)
+        x = self._g_x(i)
+        cv2.line(g, (x, self._g_y0), (x, self._g_y1), (60, 60, 60), 1, cv2.LINE_AA)
+        cv2.circle(g, (x, self._g_y(self.d["f"][self.olcut][j])), 6, (0, 0, 0), -1, cv2.LINE_AA)
+
+    def _durum(self, j: int) -> tuple[str, bool]:
+        i = self.bindirici.referans_karesi(j)
+        mu, tau = self.d["model"][self.olcut]
+        v = self.d["f"][self.olcut][j]
+        disarida = bool(self.ayr["kare_hatasi"][self.olcut][i] > 0)
+        return (f"Şu an: kare {j + 1}/{len(self.t.dizi)} · kol açısı {self.d['f']['kol'][j]:.0f}° · "
+                f"{self.olcut} = {v:.3f} (bant {mu[i] - tau[i]:.3f} – {mu[i] + tau[i]:.3f}) "
+                f"{'→ BANT DIŞI' if disarida else ''}", disarida)
 
     def video_kareleri(self):
         n = len(self.t.dizi)
@@ -235,6 +248,117 @@ class TekrarGorseli:
         return cikti
 
 
+class AciBandiGorseli(TekrarGorseli):
+    """
+    Açı bandı görünümü (Adım 2c, v2). Sağ üst: x = kol açısı, y = ölçüt; kaldırma (mavi) ve indirme
+    (turuncu) bantları, tekrarın kareleri ve hareketli imleç. Bant ve E, Deney 1 v2'deki (v2) ile aynı hesap.
+
+    Referans iskelet (yalnızca görsel): modeldeki doğru tekrarlardan, tepe açısı bu tekrara en yakın olan;
+    kareler zamana göre değil, AYNI FAZDA EN YAKIN KOL AÇISINA göre eşlenir ("kol bu açıdayken normal duruşun").
+    Pay kareleri videoda görünür ama değerlendirilmez.
+    """
+
+    def __init__(self, d: dict, esik: dict, olcut: str = "YENI", video_klasoru: Path | None = None):
+        self.d, self.esik, self.olcut = d, esik, olcut
+        self.t = t = d["t"]
+        self.E, self.ek = aci_bandi_hatasi(d["model"], d["f"], OLCUTLER, ayrinti=True)
+        assert all((np.isnan(self.E[k]) and np.isnan(d["E"][k])) or abs(self.E[k] - d["E"][k]) < 1e-12 for k in OLCUTLER)
+        self.bas = t.etiketli.start
+        self.n_etiket = len(d["f"]["kol"])
+        self.f_tam = ozellikler(t.dizi, OLCUTLER)
+        tepe = tepe_acisi(d["f"]["kol"])
+        r = int(np.argmin([abs(tepe_acisi(f["kol"]) - tepe) for f in d["digerleri_f"]]))
+        self.ref = d["digerleri"][r]
+        ref_kol = ozellikler(self.ref.dizi, [])["kol"]
+        self.bindirici = Bindirici(self.ref.dizi, t.dizi, ref_kol=ref_kol, kul_kol=self.f_tam["kol"],
+                                   esleme=aci_eslemesi(ref_kol, self.f_tam["kol"]))
+        self.video = (veri.video_cikar(t.video, t.kamera, video_klasoru) if video_klasoru is not None else None)
+        self._grafik_hazirla()
+        self._panel_hazirla()
+
+    def _jj(self, j: int) -> int | None:
+        jj = j - self.bas
+        return jj if 0 <= jj < self.n_etiket else None
+
+    def _grafik_hazirla(self):
+        k, m, ek = self.olcut, self.d["model"], self.ek
+        kol, y = self.d["f"]["kol"], self.d["f"][k]
+        xm = ab.kutu_merkezleri()
+        fig, ax = plt.subplots(figsize=(SAG_G / 100, GRAFIK_Y / 100), dpi=100)
+        for p, renk in ((ab.KALDIRMA, M_MAVI), (ab.INDIRME, M_TURUNCU)):
+            g = m.gecerli[p]
+            mu, tau = m.mu[k][p], m.tau[k][p]
+            ax.fill_between(xm[g], (mu - tau)[g], (mu + tau)[g], color=renk, alpha=0.16, lw=0)
+            ax.plot(xm[g], mu[g], color=renk, lw=1, ls="--", label=f"{ab.FAZ_ADLARI[p]} bandı")
+            s = ek["faz"] == p
+            dis = s & (np.nan_to_num(ek["kare_hatasi"][k]) > 0)
+            ax.scatter(kol[s & ~dis], y[s & ~dis], s=9, color=renk, alpha=0.6, lw=0)
+            ax.scatter(kol[dis], y[dis], s=18, color=renk, edgecolor="black", linewidth=0.7, zorder=3)
+        ax.scatter([], [], s=18, color="white", edgecolor="black", label="bant dışı kare")
+        ax.set_xlim(0, 185)
+        ax.set_xlabel("kol açısı (°)")
+        ax.set_ylabel(f"{k}: {OLCUT_ADLARI.get(k, k)}")
+        ax.set_title(f"{k} — açı bandı ve bu tekrar   (E = {self.E[k]:.3f}, kapsam {ek['kapsam']:.0%})",
+                     loc="left", fontsize=10)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.yaxis.grid(True, color="#e4e3df", lw=0.8)
+        ax.legend(loc="best", frameon=False, fontsize=7.5)
+        fig.tight_layout()
+        fig.canvas.draw()
+        self.grafik = cv2.cvtColor(np.asarray(fig.canvas.buffer_rgba()), cv2.COLOR_RGBA2BGR)
+        bbox = ax.get_window_extent()
+        Hfig = self.grafik.shape[0]
+        self._g_y0, self._g_y1 = int(Hfig - bbox.y1), int(Hfig - bbox.y0)
+        self._g_x = lambda v: int(round(ax.transData.transform((v, 0))[0]))
+        self._g_y = lambda v: int(round(Hfig - ax.transData.transform((0, v))[1]))
+        plt.close(fig)
+
+    def _panel_hazirla(self):
+        super()._panel_hazirla()
+        # başlığı ve açıklamaları v2'ye göre değiştir
+        self._satirlar = [(m.replace("Sistem (Deney 1, kişiye özel bant)", "Sistem (Deney 1 v2, açı bandı)"), b, k, r)
+                          for m, b, k, r in self._satirlar]
+        self._satirlar.insert(-3, (f"Kapsam {self.ek['kapsam']:.0%} · tepe {self.ek['tepe_acisi']:.0f}° · kalibrasyon tepesi en çok "
+                                   f"{self.d['model'].en_yuksek_aci:.0f}°{' · KOL ARALIK DIŞI' if self.ek['aralik_disi'] else ''}",
+                                   13, False, M_METIN2))
+
+    def _kirmizi(self, j: int):
+        jj = self._jj(j)
+        return set() if jj is None else banttan_cikan_kemikler(self.ek["kare_hatasi"], jj, [self.olcut])
+
+    def _imlec_ciz(self, g, j: int):
+        kol, v = self.f_tam["kol"][j], self.f_tam[self.olcut][j]
+        x = self._g_x(min(kol, 185))
+        cv2.line(g, (x, self._g_y0), (x, self._g_y1), (60, 60, 60), 1, cv2.LINE_AA)
+        if self._jj(j) is not None:
+            cv2.circle(g, (x, self._g_y(v)), 7, (0, 0, 0), -1, cv2.LINE_AA)
+
+    def _durum(self, j: int) -> tuple[str, bool]:
+        kol, v = self.f_tam["kol"][j], self.f_tam[self.olcut][j]
+        bas = f"Şu an: kare {j + 1}/{len(self.t.dizi)} · kol {kol:.0f}° · {self.olcut} = {v:.3f}"
+        jj = self._jj(j)
+        if jj is None:
+            return bas + " · pay karesi (değerlendirilmez)", False
+        if not self.ek["gecerli"][jj]:
+            return bas + " · kalibrasyon aralığı dışı (değerlendirilmez)", False
+        mu, tau = self.ek["mu"][self.olcut][jj], self.ek["tau"][self.olcut][jj]
+        dis = bool(self.ek["kare_hatasi"][self.olcut][jj] > 0)
+        return (bas + f" ({ab.FAZ_ADLARI[int(self.ek['faz'][jj])]}; bant {mu - tau:.3f} – {mu + tau:.3f})"
+                + (" → BANT DIŞI" if dis else "")), dis
+
+
+def degerlendir_aci(tohum: int = 0):
+    """Deney 1 v2'nin v2 koşulu (açı bandı); kayıtlar ve tablo."""
+    from deneyler import deney1_v2
+    kayitlar = list(deney1_v2.degerlendirmeler(veri.tekrarlari_yukle(1), "v2", tohum))
+    df = pd.DataFrame([{
+        "video": d["t"].video, "kamera": d["t"].kamera, "yonelim": d["t"].yonelim,
+        "tekrar_no": d["t"].tekrar_no, "satir": d["t"].satir, "kisi": d["t"].kisi,
+        "hata": d["t"].hata, "ek_hata": d["t"].ek_hata, "gorus": d["t"].gorus,
+        **{f"bant_{k}": d["E"][k] for k in OLCUTLER}} for d in kayitlar])
+    return kayitlar, df
+
+
 def oynat(yol: Path, fps: float = 30.0) -> None:
     """MP4'ü pencerede oynatır. Boşluk: duraklat, q / Esc: çık."""
     cap = cv2.VideoCapture(str(yol))
@@ -254,16 +378,18 @@ def oynat(yol: Path, fps: float = 30.0) -> None:
 
 
 # ---------------------------------------------------------------- tek tekrar ve galeri
-def tek_tekrar(video, kamera, yonelim, tekrar, olcut="YENI", cikti=None, tohum=0, fps=30.0, goster=False):
-    kayitlar, df = degerlendir(tohum)
+def tek_tekrar(video, kamera, yonelim, tekrar, olcut="YENI", cikti=None, tohum=0, fps=30.0, goster=False, bant="zaman"):
+    kayitlar, df = degerlendir_aci(tohum) if bant == "aci" else degerlendir(tohum)
+    Gorsel = AciBandiGorseli if bant == "aci" else TekrarGorseli
+    ek = "_aci" if bant == "aci" else ""
     d = next((d for d in kayitlar if d["t"].video == video and d["t"].kamera == kamera
               and d["t"].yonelim == yonelim and d["t"].tekrar_no == tekrar), None)
     if d is None:
         raise SystemExit(f"Tekrar bulunamadı: {video} {kamera} yönelim {yonelim} tekrar {tekrar} "
                          "(ya yok ya da grubunda 3'ten az doğru tekrar var)")
-    cikti = Path(cikti) if cikti else veri.KOK / "sonuclar" / "gorsel_kontrol" / f"{video}_{kamera}_o{yonelim}_t{tekrar}_{olcut}.mp4"
+    cikti = Path(cikti) if cikti else veri.KOK / "sonuclar" / "gorsel_kontrol" / f"{video}_{kamera}_o{yonelim}_t{tekrar}_{olcut}{ek}.mp4"
     with tempfile.TemporaryDirectory() as td:
-        g = TekrarGorseli(d, esikler(df, d["t"].kisi), olcut, Path(td))
+        g = Gorsel(d, esikler(df, d["t"].kisi), olcut, Path(td))
         g.yaz(cikti, fps)
     print(f"Gerçek etiket: {d['t'].hata} · {olcut} E = {g.E[olcut]:.3f} · eşik {g.esik[olcut]:.3f} · "
           f"karar: {'şüpheli' if g.supheli else 'normal'}")
@@ -353,13 +479,15 @@ def main():
     ap.add_argument("--gorus", choices=list(GORUS_SECENEKLERI), help="galeri: yalnızca bu görüş grubundan örnekler")
     ap.add_argument("--adet", type=int, default=3, help="galeri: her gruptan kaç video")
     ap.add_argument("--tohum", type=int, default=0)
+    ap.add_argument("--bant", choices=["zaman", "aci"], default="zaman",
+                    help="zaman: Deney 1 (v1) zaman bandı; aci: Deney 1 v2 açı bandı (tek tekrar için)")
     args = ap.parse_args()
     utf8_cikti()
     if args.galeri:
         galeri(n=args.adet, olcut=args.olcut, tohum=args.tohum, gorus=args.gorus)
     elif args.video and args.tekrar:
         tek_tekrar(args.video, args.kamera, args.yonelim, args.tekrar, args.olcut, args.cikti,
-                   args.tohum, args.fps, args.goster)
+                   args.tohum, args.fps, args.goster, args.bant)
     else:
         ap.error("--video ve --tekrar ya da --galeri gerekli")
 

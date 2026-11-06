@@ -14,8 +14,10 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 1 | Çekirdek modül + Deney 1 regresyon testi | 6 Kas | Zorunlu |
 | 2 | Deney 1'in kullanıcı tarafından çalıştırılması + şekiller | 6–7 Kas | Zorunlu 📤 |
 | 2b | **Görsel kontrol aracı** (video + iskelet + bant eğrisi + karar) | 7 Kas | Zorunlu 📤 |
-| 3 | Deney 1b (genel bant / kişiye özel bant) + **Deney 1c (zamansal yumuşatma)** | 7–8 Kas | Zorunlu 📤 |
-| 4 | Deney 2: hata türünü bulma | 8 Kas | Zorunlu 📤 |
+| 2c | **Deney 1 v2:** yöntem düzeltmeleri ablasyonu (pay hariç, çoklu referans, **açı bandı**) | 7 Kas | Zorunlu 📤 |
+| 3 | Deney 1b (genel bant / kişiye özel bant) + **Deney 1c (zamansal yumuşatma)**; v1b ve v2 ile | 7–8 Kas | Zorunlu 📤 |
+| 4 | Deney 2: hata türünü bulma (açı bandı + yönlü) | 8 Kas | Zorunlu 📤 |
+| 4b | **Ex7'de ayarsız doğrulama** (eski Adım 11, öncelik yükseldi) | 8–9 Kas | Zorunlu 📤 |
 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim | 8–9 Kas | Zorunlu 📤 |
 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 9–11 Kas | Zorunlu 📤 |
 | 7 | Kendi kayıtlarımızla deneme | 11–12 Kas | Zorunlu 📤 |
@@ -25,9 +27,9 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 6b | (Yetişirse) Omuz bölgesi siluet ölçütü: segmentasyon maskesi ile "üst omuz" | 12 Kas | İsteğe bağlı 📤 |
 | 8 | (Yetişirse) Deney 4: LLM ile kural tabanlı karşılaştırması | 12 Kas | Bildiri 📤 |
 | 10 | (Yetişirse) REHAB24-6 ile 10 yeni kişide doğrulama | — | İsteğe bağlı |
-| 11 | (Yetişirse) Ex7 omuz ekstansiyonunda genelleme | — | İsteğe bağlı |
+| 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — |
 
-Sunum: **16 Kasım 2026.** Zorunlu adımlar gecikirse isteğe bağlı adımlar atlanır. İsteğe bağlıların öncelik sırası: 6b, 8, 11, 10.
+Sunum: **16 Kasım 2026.** Zorunlu adımlar gecikirse isteğe bağlı adımlar atlanır. İsteğe bağlıların öncelik sırası: 6b, 8, 10. (Adım 11, Güncelleme 02 ile zorunlu Adım 4b oldu.)
 
 ### Hocanın ödev tanımıyla eşleşme (bkz. `docs/ODEV.md`)
 
@@ -138,6 +140,48 @@ ADIM dosyasında bu örneklerin listesi ve "neye bakmalı" notu yer alır.
 
 ---
 
+## Adım 2c — Deney 1 v2: yöntem düzeltmeleri (ablasyon) 📤
+
+Kaynak: `ilerleme/GUNCELLEME_02.md` (danışman, 6 Kasım akşamı). Adım 2b'deki kullanıcı gözlemlerinden (Petra, "sondaki sapma") çıkan yöntem sorunlarının düzeltilmesi.
+
+**Amaç:** Her düzeltmenin etkisini ayrı ayrı göstermek. Deney 1 v1 (M39'a sadık hali) temel çizgi olarak **korunur ve silinmez**.
+
+**Düzeltmeler (kararlar, bkz. `KARARLAR.md`):**
+1. **Çoklu referans (zaman bandı):** Modeldeki her doğru tekrar sırayla referans yapılır, bant kurulur, E hesaplanır; E'lerin ortalaması alınır.
+2. **Açı bandı** (`cekirdek/aci_bandi.py`): kol açısına koşullu bant. "Kol θ°'deyken bu kişinin omzu normalde nerede?"
+   - Yalnızca etiketli tekrar kareleri. Faz: 5 karelik hareketli medyanla yumuşatılmış kol açısının tepesine kadar "kaldırma", sonrası "indirme".
+   - 0–180°, 5° kutular, faz başına ayrı. Her kalibrasyon tekrarı her kutuya bir değer (o kutudaki karelerin ortalaması) verir.
+   - μ = tekrar değerlerinin ortalaması; τ = t(0,975; n−1)·s/√n; alt sınır: geçerli kutulardaki τ'ların Q1'i.
+   - Geçerli kutu: en az 3 tekrar katkı verir. Geçerli kutular arası boşluklar μ ve τ için doğrusal ara değerle doldurulur; kalibrasyon aralığının dışı geçersiz.
+   - Değerlendirme: her kare kendi fazı ve kutusuna göre M39 kare hatası (yönsüz ve yönlü). E = geçerli karelerin ortalaması. Ayrıca `kapsam` (geçerli kare oranı) ve `aralik_disi` bayrağı (karelerin > %20'si kalibrasyonun en yüksek açısının 5°'den fazla üstünde).
+   - Kalibrasyon aralığı dışındaki kareler değerlendirilmez (önceden verilmiş karar; test verisine bakarak değiştirilmez).
+   - Yalnızca duruş ölçütleri için; yetersiz kaldırma Adım 4'te tepe açısıyla ayrı ele alınır.
+3. **Pay hariç:** DTW, bant ve E yalnızca `first_frame … last_frame` aralığında. Dinlenme tabanı yine ilk 8 kare (pay dahil).
+
+**Koşullar** (birikimli; hepsinde 5 omuz ölçütü, yönsüz bant):
+| Kod | Bant | Pay | Referans |
+| --- | --- | --- | --- |
+| v1 | zaman (M39) | dahil | tek rastgele (Deney 1 aynen) |
+| v1a | zaman | **hariç** | tek rastgele |
+| v1b | zaman | hariç | **çoklu (sırayla hepsi, ortalama)** |
+| v2 | **açı bandı** | hariç | yok |
+
+Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekrar aynı sayıda (n−1) doğru tekrarla. v2'de "atla" seçimi rastgele, tohum kullanılır.
+
+**Çıktılar** (`sonuclar/deney1_v2/`):
+- Koşul × ölçüt AUC tablosu: silkme/doğru, silkme/diğer, görüş grupları.
+- Kişi bazlı AUC; "ortalama (en düşük–en yüksek)".
+- YENI için "v2 − v1" farkının kişi bazlı bootstrap güven aralığı.
+- v2'de tekrarların ortalama `kapsam`ı ve `aralik_disi` oranı, hata türüne göre.
+- **Tohum duyarlılığı:** v1, v1b ve v2'de tohum 0 ile 1 arasında tekrar E'sinin değişimi (medyan ve > 0,05 oranı).
+- **Görsel:** görsel kontrol aracına açı bandı görünümü (x: kol açısı, y: ölçüt, kalkış/iniş ayrı renk, bant + tekrarın noktaları). Petra cam1 o0 t5, Honza cam1 o0 t5, Terka cam1 o20 t10 için v1 ve v2 yan yana. Sunum adayı: "kol 90°'deyken omzun normal yeri".
+
+**Dürüstlük notu (ADIM dosyasına):** Düzeltmeler aynı veriye bakılarak bulundu; v1→v2 kazancı iyimser olabilir. Doğrulama: Ex7'de ayarsız (Adım 4b) ve kendi kayıtlarımızda (Adım 7). v2 parametreleri (5° kutu, en az 3 tekrar, %20 bayrağı) **değiştirilmez**; kötü sonuç da olduğu gibi raporlanır.
+
+**Kabul ölçütü:** Ablasyon tablosu, kişi tablosu, tohum duyarlılığı, üç örnek görsel. Kullanıcı Petra örneğini v1 ve v2'de izledi ve yorumunu ADIM dosyasına not etti.
+
+---
+
 ## Adım 3 — Deney 1b: genel bant ile kişiye özel bant 📤
 
 **Soru:** Kalibrasyon kişiye özel olmak zorunda mı? Başkalarının doğru tekrarlarından kurulan bir bant yeterli olur mu?
@@ -149,9 +193,11 @@ ADIM dosyasında bu örneklerin listesi ve "neye bakmalı" notu yer alır.
 
 **Çıktı:** Her koşul için AUC (silkme/doğru, silkme/diğer), görüş grubuna göre AUC ve kişi bazlı bootstrap güven aralıkları. Ölçüt olarak en az YENI, M33 ve M39_F2. Sonuçlar `sonuclar/deney1b/` altına.
 
+**Güncelleme 02:** Hem **v1b** (zaman bandı, çoklu referans, pay hariç) hem **v2** (açı bandı) ile çalıştırılır. Açı bandında genel bant doğal olarak tanımlıdır: diğer 4 kişinin doğru tekrarları, aynı kamera ve yönelim. Kişi bazlı AUC tablosu da verilir (Karar 5).
+
 **Deney 1c — zamansal yumuşatma** (aynı adımda): Hocanın Problem 2 için önerdiği iyileştirmelerden biri. MediaPipe noktaları kareden kareye titrer (jitter).
 - `cekirdek/yumusatma.py`: One Euro filtresi ve Savitzky–Golay. Parametreler eğitim kişilerinde seçilir.
-- Deney 1, yumuşatmalı ve yumuşatmasız tekrarlanır: YENI, M33 ve M39_F2 ölçütleri, kişiye özel bant.
+- Deney 1, yumuşatmalı ve yumuşatmasız tekrarlanır: YENI, M33 ve M39_F2 ölçütleri, kişiye özel bant (v1b ve v2).
 - Ayrıca bir doğru tekrarda ham ve yumuşatılmış omuz noktası yörüngesi tek bir şekilde gösterilir (`sonuclar/deney1c/titreme.png`).
 
 **Kabul ölçütü:**
@@ -189,7 +235,24 @@ ADIM dosyasında bu örneklerin listesi ve "neye bakmalı" notu yer alır.
 - **Katı** değerlendirme (yalnızca birincil hata) ve **esnek** değerlendirme (ek hatalardan birini söylemek de doğru sayılır).
 - Karşılaştırma için basit bir temel çizgi: tek bir toplam hata (E'lerin ortalaması) ile yalnızca doğru/yanlış ayrımı.
 
+**Güncelleme 02 değişiklikleri:**
+- **Duruş ölçütleri** (omuz = YENI, baş, dirsek, öne kaçma / kol boyu): **açı bandı** + **yönlü** seçenek.
+- **Yetersiz kaldırma:** bant yerine tepe açısı. Sapma = (kalibrasyon tekrarlarının tepe açılarının medyanı − tekrarın tepe açısı); kalibrasyon tepelerinin çeyrekler arası açıklığına (alt sınır 5°) bölünerek z'ye çevrilir.
+- `aralik_disi` bayrağı ("kol normalden yüksek") karar kuralına bir girdi olabilir; eğitim kişilerinde gerekli olup olmadığına bakılır.
+- Adım 2c'de açı bandı zaman bandından belirgin şekilde kötü çıkarsa Adım 4'e geçmeden danışmana sorulur.
+
 **Kabul ölçütü:** Tüm tablolar var; T seçiminin her kişide hangi değere düştüğü yazılmış.
+
+---
+
+## Adım 4b — Ex7'de ayarsız doğrulama 📤 (Güncelleme 02; eski Adım 11)
+
+- Adım 4 bittikten sonra son yöntem (açı bandı + Deney 2 kuralı) Ex7 omuz ekstansiyonunda **hiçbir parametre değiştirilmeden** çalıştırılır.
+- Kol açısı tanımı aynı: üst kolun aşağı dikeyle yaptığı açı.
+- Ex7'nin hata türleri farklı; omuz silkmesi (`ERR_ELEVATED_SHOULDER`) ortak. En azından Deney 1 (silkme/doğru AUC) raporlanır.
+- Ekstansiyon önden zor görülür; görüş gruplarına göre ayrı raporlanır. Bu, "yöntem başka bir harekette de çalışıyor mu" kanıtıdır ve Adım 2c'deki iyimserlik riskine karşı doğrulamadır.
+
+**Kabul ölçütü:** Ex7 silkme/doğru AUC tablosu (görüş grubu ve kişi bazlı); hiçbir parametrenin değiştirilmediği ADIM dosyasında belirtilmiş.
 
 ---
 
@@ -353,6 +416,6 @@ REHAB24-6 (M34): 10 kişi, Ex1 kol abdüksiyonu, yalnızca doğru/yanlış etike
 2. Yanlış Ex1 tekrarlarını izleyip omuz silkmesi olanları **elle etiketler**. Bunun için bir etiketleme betiği yazılır: tekrarı oynatır, kullanıcı tuşla etiket girer.
 3. Deney 1 ve Deney 2 burada, ayar yapılmadan çalıştırılır: "Hiç görmediği 10 kişide de çalışıyor mu?"
 
-## Adım 11 — (Yetişirse) Ex7 genellemesi
+## Adım 11 — Ex7 genellemesi → Adım 4b'ye taşındı
 
-Ex7'de (omuz ekstansiyonu) de `ERR_ELEVATED_SHOULDER` var ve veri zaten `rehab26_kucuk.npz` dosyasında. Deney 1'i Ex7 için tekrarla. Hizalama özelliği kolun geriye açısı olmalı; bunu tanımla ve ADIM dosyasına yaz.
+Güncelleme 02 ile önceliği yükseldi ve zorunlu **Adım 4b** oldu (yukarıya bakın). Kol açısı tanımı Adım 1'dekiyle aynı (üst kolun aşağı dikeyle açısı); ayrı bir "geriye açı" tanımlanmaz.

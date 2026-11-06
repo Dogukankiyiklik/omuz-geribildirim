@@ -22,6 +22,11 @@ def bant_modeli(dogrular: list[dict], rng: np.random.Generator, olcutler) -> dic
     Dönüş: {"ref_kol": ..., ölçüt: (μ, τ), ...}
     """
     r = rng.integers(len(dogrular))
+    return bant_modeli_ref(dogrular, r, olcutler)
+
+
+def bant_modeli_ref(dogrular: list[dict], r: int, olcutler) -> dict:
+    """bant_modeli ile aynı, ama referans tekrar (r. doğru tekrar) dışarıdan verilir."""
     ref = dogrular[r]
     hizali = [ref] + [hizala(ref["kol"], t, olcutler) for i, t in enumerate(dogrular) if i != r]
     model = {"ref_kol": ref["kol"], "ref_indeks": int(r)}
@@ -69,3 +74,14 @@ def bant_hatasi(model: dict, tekrar: dict, olcutler, yon: dict[str, int] | None 
     if ayrinti:
         return E, {"hizali": h, "kare_hatasi": kareler}
     return E
+
+
+def coklu_referans_hatasi(dogrular: list[dict], tekrar: dict, olcutler,
+                          yon: dict[str, int] | None = None) -> dict[str, float]:
+    """
+    Çoklu referans (Güncelleme 02, Karar 1): modeldeki her doğru tekrar sırayla referans yapılır,
+    bant kurulur ve E hesaplanır; E'lerin ortalaması döner. Rastgele referans seçimi ortadan kalkar.
+    """
+    Es = [bant_hatasi(bant_modeli_ref(dogrular, r, olcutler), tekrar, olcutler, yon)
+          for r in range(len(dogrular))]
+    return {k: float(np.mean([e[k] for e in Es])) for k in olcutler}

@@ -118,10 +118,17 @@ class Tekrar:
     dogru: bool
     hata: str  # birincil hata kodu; doğru tekrarda "DOGRU"
     ek_hata: str  # virgülle ayrılmış ek hatalar; yoksa ""
+    etiket_bas: int = 0      # dizi içinde etiketli tekrarın ilk karesi (first_frame)
+    etiket_son: int | None = None  # dizi içinde etiketli tekrarın son karesinden SONRAKİ indeks (last_frame + 1)
 
     @property
     def gorus(self) -> int:
         return gorus_acisi(self.kamera, self.yonelim)
+
+    @property
+    def etiketli(self) -> slice:
+        """Pay kareleri hariç, Segmentation.csv'deki first_frame … last_frame aralığı (Karar 3)."""
+        return slice(self.etiket_bas, len(self.dizi) if self.etiket_son is None else self.etiket_son)
 
 
 def _kes(a: np.ndarray, ilk: int, son: int, pay: int) -> tuple[int, int]:
@@ -138,6 +145,8 @@ def _tekrar_olustur(i: int, r: pd.Series, kamera: str, b: int, dizi: np.ndarray)
         ilk_kare=b, dizi=dizi, dogru=bool(r.correctness_score == 1),
         hata=r.error_description if r.error_description else "DOGRU",
         ek_hata=r.additional_errors,
+        etiket_bas=max(0, int(r.first_frame) - b),
+        etiket_son=min(len(dizi), int(r.last_frame) - b + 1),
     )
 
 

@@ -2,31 +2,31 @@
 
 Her video: solda video + iskelet (kırmızı: grafikteki ölçütün banttan çıktığı uzuv), sağ üstte KARARI VEREN ölçütün açı bandı (kaçırmada gerçek hatanın ölçütü), sağ altta z tablosu ve karar.
 
-En sık karışan hata çiftleri (önden + çapraz): omuz → az kaldırma = 37, öne kaçma → az kaldırma = 23, dirsek → öne kaçma = 23, baş → omuz = 20, dirsek → omuz = 16
+En sık karışan hata çiftleri (önden + çapraz): omuz → az kaldırma = 61, baş → az kaldırma = 54, dirsek → az kaldırma = 38, öne kaçma → az kaldırma = 32, omuz → öne kaçma = 13
 
-## omuz silkme (omuz kulağa doğru kalkıyor) → sistem "kol yeterince kalkmıyor" dedi (37 tekrar)
-
-| Dosya | Gerçek | Ek hata | Karar | Görüş | Grafikteki ölçüt | max z | T |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `karisma_omuz_az_kaldirma_1_ex1_Petra_cam2_o40_t5.mp4` | omuz | – | az kaldırma | 5° | kaldirma | 18.98 | 4.28 |
-| `karisma_omuz_az_kaldirma_2_ex1_Petra_cam2_o70_t5.mp4` | omuz | – | az kaldırma | -25° | kaldirma | 16.62 | 4.28 |
-| `karisma_omuz_az_kaldirma_3_ex1_Petra_cam3_o60_t5.mp4` | omuz | – | az kaldırma | 30° | kaldirma | 17.95 | 4.28 |
-
-## kol öne kaçıyor → sistem "kol yeterince kalkmıyor" dedi (23 tekrar)
+## omuz silkme (omuz kulağa doğru kalkıyor) → sistem "kol yeterince kalkmıyor" dedi (61 tekrar)
 
 | Dosya | Gerçek | Ek hata | Karar | Görüş | Grafikteki ölçüt | max z | T |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `karisma_one_kacma_az_kaldirma_1_ex1_Honza_cam1_o20_t4.mp4` | öne kaçma | – | az kaldırma | -20° | kaldirma | 5.61 | 4.03 |
-| `karisma_one_kacma_az_kaldirma_2_ex1_Honza_cam1_o30_t4.mp4` | öne kaçma | – | az kaldırma | -30° | kaldirma | 7.31 | 4.03 |
-| `karisma_one_kacma_az_kaldirma_3_ex1_Terka_cam2_o80_t4.mp4` | öne kaçma | – | az kaldırma | -35° | kaldirma | 3.86 | 3.77 |
+| `karisma_omuz_az_kaldirma_1_ex1_Petra_cam2_o45_t5.mp4` | omuz | – | az kaldırma | 0° | kaldirma | 100.00 | 3.69 |
+| `karisma_omuz_az_kaldirma_2_ex1_Petra_cam3_o40_t5.mp4` | omuz | – | az kaldırma | 50° | kaldirma | 100.00 | 3.69 |
+| `karisma_omuz_az_kaldirma_3_ex1_Terka_cam2_o40_t5.mp4` | omuz | – | az kaldırma | 5° | kaldirma | 100.00 | 3.75 |
 
-## Kaçırılan hatalar: hatalı tekrar, sistem "doğru" dedi (106 tekrar)
+## baş yana eğik → sistem "kol yeterince kalkmıyor" dedi (54 tekrar)
 
 | Dosya | Gerçek | Ek hata | Karar | Görüş | Grafikteki ölçüt | max z | T |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `kacirilan_1_ex1_Vasil_cam1_o40_t4.mp4` | öne kaçma | – | doğru | -40° | kol_boyu | 0.06 | 5.00 |
-| `kacirilan_2_ex1_Vasil_cam1_o60_t5.mp4` | omuz | – | doğru | -60° | YENI | 3.78 | 5.00 |
-| `kacirilan_3_ex1_Vasil_cam3_o40_t6.mp4` | baş | – | doğru | 50° | bas | 2.91 | 5.00 |
+| `karisma_bas_az_kaldirma_1_ex1_Mima_cam1_o0_t7.mp4` | baş | omuz silkme (omuz kulağa doğru kalkıyor) | az kaldırma | 0° | kaldirma | 52.22 | 3.68 |
+| `karisma_bas_az_kaldirma_2_ex1_Mima_cam1_o30_t6.mp4` | baş | omuz silkme (omuz kulağa doğru kalkıyor), dirsek bükük | az kaldırma | -30° | kaldirma | 100.00 | 3.68 |
+| `karisma_bas_az_kaldirma_3_ex1_Mima_cam1_o40_t6.mp4` | baş | omuz silkme (omuz kulağa doğru kalkıyor), dirsek bükük | az kaldırma | -40° | kaldirma | 100.00 | 3.68 |
+
+## Kaçırılan hatalar: hatalı tekrar, sistem "doğru" dedi (69 tekrar)
+
+| Dosya | Gerçek | Ek hata | Karar | Görüş | Grafikteki ölçüt | max z | T |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `kacirilan_1_ex1_Terka_cam3_o80_t4.mp4` | öne kaçma | – | doğru | 10° | kol_boyu | 3.65 | 3.75 |
+| `kacirilan_2_ex1_Vasil_cam1_o40_t6.mp4` | baş | – | doğru | -40° | bas | 2.68 | 3.46 |
+| `kacirilan_3_ex1_Vasil_cam2_o70_t4.mp4` | öne kaçma | – | doğru | -25° | kol_boyu | 0.60 | 3.46 |
 
 ## Neye bakmalı?
 - **Karışmalarda:** Videoda gerçekten etiketteki hata mı görülüyor, yoksa sistemin söylediği hata da var mı? (Örneğin baş eğerken omuz da kalkıyor olabilir; etiket yalnızca birincil hatayı veriyor.)

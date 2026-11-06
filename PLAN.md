@@ -10,26 +10,32 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 
 | Adım | İş | Hedef tarih | Katman |
 | --- | --- | --- | --- |
-| 0 | Ortam ve veri: **orijinal Zenodo dosyalarından** doğrudan okuma | 6 Kas | Zorunlu |
-| 1 | Çekirdek modül + Deney 1 regresyon testi | 6 Kas | Zorunlu |
-| 2 | Deney 1'in kullanıcı tarafından çalıştırılması + şekiller | 6–7 Kas | Zorunlu 📤 |
-| 2b | **Görsel kontrol aracı** (video + iskelet + bant eğrisi + karar) | 7 Kas | Zorunlu 📤 |
-| 2c | **Deney 1 v2:** yöntem düzeltmeleri ablasyonu (pay hariç, çoklu referans, **açı bandı**) | 7 Kas | Zorunlu 📤 |
-| 3 | Deney 1b (genel bant / kişiye özel bant) + **Deney 1c (zamansal yumuşatma)**; v1b ve v2 ile | 7–8 Kas | Zorunlu 📤 |
-| 4 | Deney 2: hata türünü bulma (açı bandı + yönlü) | 8 Kas | Zorunlu 📤 |
-| 4b | **Ex7'de ayarsız doğrulama** (eski Adım 11, öncelik yükseldi) | 8–9 Kas | Zorunlu 📤 |
-| 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim | 8–9 Kas | Zorunlu 📤 |
-| 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 9–11 Kas | Zorunlu 📤 |
-| 7 | Kendi kayıtlarımızla deneme | 11–12 Kas | Zorunlu 📤 |
-| 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | 13 Kas | Zorunlu 📤 |
-| — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu |
-| — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu |
-| 6b | (Yetişirse) Omuz bölgesi siluet ölçütü: segmentasyon maskesi ile "üst omuz" | 12 Kas | İsteğe bağlı 📤 |
-| 8 | (Yetişirse) Deney 4: LLM ile kural tabanlı karşılaştırması | 12 Kas | Bildiri 📤 |
-| 10 | (Yetişirse) REHAB24-6 ile 10 yeni kişide doğrulama | — | İsteğe bağlı |
-| 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — |
+| 0 | Ortam ve veri: **orijinal Zenodo dosyalarından** doğrudan okuma | 6 Kas | Zorunlu ✅ |
+| 1 | Çekirdek modül + Deney 1 regresyon testi | 6 Kas | Zorunlu ✅ |
+| 2 | Deney 1'in kullanıcı tarafından çalıştırılması + şekiller | 6–7 Kas | Zorunlu ✅ |
+| 2b | **Görsel kontrol aracı** (video + iskelet + bant eğrisi + karar) | 7 Kas | Zorunlu ✅ |
+| 2c | **Deney 1 v2:** yöntem düzeltmeleri ablasyonu (pay hariç, çoklu referans, **açı bandı**) | 7 Kas | Zorunlu ✅ |
+| 3 | Deney 1b (genel bant / kişiye özel bant) + **Deney 1c (zamansal yumuşatma)**; v1b ve v2 ile | 7–8 Kas | Zorunlu ✅ |
+| 4 | Deney 2: hata türünü bulma (açı bandı + yönlü) | 6 Kas | Zorunlu ✅ |
 
-Sunum: **16 Kasım 2026.** Zorunlu adımlar gecikirse isteğe bağlı adımlar atlanır. İsteğe bağlıların öncelik sırası: 6b, 8, 10. (Adım 11, Güncelleme 02 ile zorunlu Adım 4b oldu.)
+**Yeni sıra (Güncelleme 05).** Tabloda yukarıdan aşağı yapılır:
+
+| Sıra | Adım | İş | Hedef tarih | Katman |
+| --- | --- | --- | --- | --- |
+| 1 | 4 (ek) | **Deney 2 revize** (Karar 13–14): yeni az kaldırma puanı + "ilk iki" metriği; `ADIM_04.md` sonuna "Ek: Güncelleme 05" | 7 Kas | Zorunlu 📤 |
+| 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 |
+| 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 |
+| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 |
+| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker) | 10–11 Kas | Zorunlu 📤 |
+| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 |
+| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 |
+| 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı |
+| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 |
+| — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu |
+| — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu |
+| — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — |
+
+Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 
 ### Hocanın ödev tanımıyla eşleşme (bkz. `docs/ODEV.md`)
 
@@ -260,6 +266,13 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 - Basit anlatım: "100 hatalı tekrarın kaçında hatanın türünü doğru söyledi?"
 - Karar 10–12: yumuşatma kullanılmaz; kişiye özel kalibrasyon zorunlu; Karar 7 pürüzsüzleştirme notu.
 
+**Güncelleme 05 değişiklikleri (Deney 2 revize):**
+- **Karar 13 — az kaldırma puanı 0–1 biçiminde.** Kalibrasyon tepeleri için tek kutulu bant: μ = tepelerin ortalaması, τ = max(t(0,975; n−1)·s/√n, **10°**), eksik = μ − tekrarın tepesi; E = 0 (eksik ≤ τ), değilse min(1, (eksik − τ)/τ). Yönlüde yalnızca eksik, yönsüzde |fark|. Sonra diğer ölçütlerle aynı z ölçeklemesi ve karar kuralı. 10° literatürden (M20, M41, M42) ve **değiştirilmez**.
+- İlk sürüm sonuçları `sonuclar/deney2_ilk/` altında korunur ("ilk sürüm"); revize `sonuclar/deney2/`. T ve diğer seçimler yine kişi bazlı birini-dışarıda-bırak.
+- **Karar 14 — "ilk iki" metriği:** hatalılarda gerçek birincil hata en yüksek iki z içinde mi (/100) ve ikinci z'nin de T'yi geçme oranı.
+- **Karar 15:** Ana sistem v2 yönlü. **Karar 16:** `aralik_disi` karar kuralına eklenmez; betimsel + sınırlılık.
+- Doğrulama: Ex7 (Adım 4b, ayarsız) ve kendi kayıtlar (Adım 7).
+
 **Kabul ölçütü:** Tüm tablolar var; T seçiminin her kişide hangi değere düştüğü yazılmış.
 
 ---
@@ -270,6 +283,22 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 - Kol açısı tanımı aynı: üst kolun aşağı dikeyle yaptığı açı.
 - Ex7'nin hata türleri farklı; omuz silkmesi (`ERR_ELEVATED_SHOULDER`) ortak. En azından Deney 1 (silkme/doğru AUC) raporlanır.
 - Ekstansiyon önden zor görülür; görüş gruplarına göre ayrı raporlanır. Bu, "yöntem başka bir harekette de çalışıyor mu" kanıtıdır ve Adım 2c'deki iyimserlik riskine karşı doğrulamadır.
+
+**Güncelleme 05 — Ex7 ölçüt–hata eşlemesi (önceden belirlenmiştir):**
+
+| Ex7 hata kodu | ölçüt |
+| --- | --- |
+| `ERR_ELEVATED_SHOULDER` | YENI (aynı) |
+| `ERR_BENT_ARM` | `dirsek` (aynı) |
+| `ERR_TORSO_FORWARD` | gövde öne eğimi: (kalça ortası → omuz ortası) vektörünün dikeyle açısı |
+| `ERR_TORSO_ROTATION` | omuz genişliği / kalça genişliği oranı (dönme 2B'de omuz çizgisini kısaltır) |
+| `ERR_ARM_TO_SIDE` | `kol_boyu` (Ex1'deki öne kaçmanın simetriği) |
+
+- Ex7'de "az kaldırma" sınıfı yoktur; Ex7'nin kendi 5 hatası kullanılır. Kol açısı tanımı aynı.
+- Yeni ölçütler (gövde eğimi, gövde dönmesi) açı bandıyla değerlendirilir.
+- Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle.
+- Eşik T ve ölçekleme Ex7'nin içinde yine kişi bazlı birini-dışarıda-bırak. **Ex1'de bulunan hiçbir sabit değiştirilmez:** 5° kutu, en az 3 tekrar, %20 bayrağı, 10° alt sınır.
+- Sonuçlar görüş gruplarına göre. **Uygulama senaryosu (önceden):** yan veya çapraz (|görüş| ≥ 30°), çünkü ekstansiyon sagital düzlemdedir.
 
 **Kabul ölçütü:** Ex7 silkme/doğru AUC tablosu (görüş grubu ve kişi bazlı); hiçbir parametrenin değiştirilmediği ADIM dosyasında belirtilmiş.
 
@@ -307,6 +336,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
   - doğru tekrarlarda gereksiz uyarı oranı
   - görüş grubuna göre aynı metrikler
 - Kullanıcı okusun diye 20 rastgele örnek cümle (tohum sabit) `sonuclar/deney3/ornek_cumleler.md` dosyasına; yanında gerçek etiket yazılı olsun.
+
+**Güncelleme 05:** "İlk iki" metriği (Karar 14) Deney 3'te de raporlanır: birincil hata söylenen ilk iki hata içinde mi; 2. hata yalnızca o da T'yi geçerse söylenir.
 
 **Kabul ölçütü:** Metrik tablosu ve örnek cümleler var. Kullanıcı örnekleri okuyup anlaşılır bulduğunu veya düzeltme önerilerini ADIM dosyasına not etti.
 

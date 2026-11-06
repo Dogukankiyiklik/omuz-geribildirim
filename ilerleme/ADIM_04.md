@@ -1,7 +1,7 @@
 # ADIM 04 — Deney 2: hata türünü bulma
 
 **Tarih:** 2026-11-06
-**Durum:** Tamamlandı. Kullanıcı `python -m deneyler.deney2` (23:31–23:33) ve `python -m deneyler.deney2_galeri` (23:33) komutlarını çalıştırdı. Sayılar `sonuclar/deney2/` altındaki CSV dosyalarından birebir kopyalandı. Galeri gözlemleri henüz eklenmedi (bkz. "Açık sorular").
+**Durum:** Tamamlandı. Kullanıcı `python -m deneyler.deney2` (23:31–23:33) ve `python -m deneyler.deney2_galeri` (23:33) komutlarını çalıştırdı. Sayılar `sonuclar/deney2/` altındaki CSV dosyalarından birebir kopyalandı. Kullanıcının galeri gözlemi ve incelemesi eklendi.
 
 ## Basit anlatım
 **En önemli tek sonuç:** Ana sistem (açı bandı, yönlü), önden ve çapraz görüşte **100 hatalı tekrarın yaklaşık 57'sinde hatanın türünü doğru söylüyor** (56,6; ek hatalar da doğru sayılırsa 59,8). Yaklaşık 16'sına "doğru" diyor, yani hatayı kaçırıyor. Kalan yaklaşık 28'inde bir hata olduğunu fark ediyor ama türünü yanlış söylüyor.
@@ -230,6 +230,53 @@ Hiçbir tekrarın E'si boş (NaN) değil.
 - **Profil görüşte tür bulma çalışmıyor** (makro-F1 0,30). Karar 6'daki sınırlılıkla tutarlı.
 - **Vasil:** Hatalı tekrarların %47'sine (64/137) "doğru" deniyor. Galerideki kaçırılan örneklerin üçü de Vasil'den. Vasil'in seçilen eşiği diğerlerinden yüksek (T = 5,00; diğerlerinde 3,68–4,28). Bu, diğer 4 kişide seçilen bir değer. Karar 5 gereği etiketler yorumlanmıyor.
 
+## Kullanıcının galeri gözlemi ve inceleme (6 Kasım gece)
+**Kullanıcı:** "Kol yeterince yukarı kalkmıyor şeklinde uyarı veriyor. Ancak kol gayet de yukarı kalkıyor, hatta neredeyse 180 derece kalkmış."
+
+**İnceleme:** Tepe karesi videodan alınıp iskeletle kontrol edildi. Ölçülen tepe kol açıları:
+
+| video | bu tekrar | kişinin doğru tekrarları |
+| --- | --- | --- |
+| Petra cam2 o40 t5 (silkme) | 108° | 167–171° |
+| Petra cam2 o70 t5 (silkme) | 112° | 161–168° |
+| Petra cam3 o60 t5 (silkme) | 111° | 165–174° |
+| Honza cam1 o20 t4 (öne kaçma) | 128° | 139–147° |
+| Honza cam1 o30 t4 (öne kaçma) | 129° | 144–156° |
+| Terka cam2 o80 t4 (öne kaçma) | 156° | 156–177° |
+
+İki ayrı durum var:
+1. **Petra (omuz → az kaldırma):** Ölçüm doğru. Tepe karesinde kol gerçekten omuz hizasında (~108°). Kişi silkme tekrarlarında kolu da az kaldırmış; etiket yalnızca birincil hatayı (silkme) veriyor.
+2. **Terka ve Honza (öne kaçma → az kaldırma):** Kol gerçekte neredeyse tam yukarı kalkıyor, ama **öne doğru** gidiyor. Tek kameranın 2B görüntüsünde öne giden kol daha kısa ve daha eğik görünür, bu yüzden ölçülen kol açısı düşüyor (Terka: 156° / doğru tekrarlar 175°). Kullanıcının gözlemi bu durumu doğru tarif ediyor: sistem "kol az kalktı" diyor, oysa kol öne kaçtı.
+
+**Neden bu kadar hassas?** Hesap iki adımda yapılıyor:
+- d = (kişinin normal tepesi − bu tepe) / max(doğru tepelerin IQR'si, 5°)
+- z = d / (eğitimdeki doğru tekrarların d dağılımının IQR'si ≈ 0,55–0,65 + 0,01)
+
+T ≈ 3,7–5,0 olunca, kişinin normalinden yaklaşık **11–16° az** kalkmak "az kaldırma" için yetiyor. Kişilerin doğru tekrarları çok tutarlı (IQR çoğu zaman 5°'nin altında) olduğu için, istatistiksel olarak "anormal" sayılan sapma fizyolojik olarak küçük kalıyor. Ayrıca duruş ölçütlerinin E'si 0–1 ile sınırlı, ama d sınırsız. Bu yüzden kaldırma z'si kolayca 10–19'a çıkıp argmax'ı kazanıyor.
+
+**Sayılar** (v2 yönlü, önden + çapraz; `puanlar.csv` + `tahminler.csv`):
+- Yanlış "az kaldırma" kararı 104, doğru "az kaldırma" kararı 127.
+- Kolun normalden ne kadar az kalktığı (kişinin doğru tekrarlarının medyan tepesi − bu tepe):
+
+  | | medyan | çeyrekler | en az |
+  | --- | --- | --- | --- |
+  | yanlış kararlar | 26,7° | 19,0–38,1° | 12,0° |
+  | gerçek az kaldırma | 41,7° | 30,5–62,5° | — |
+
+- Yanlış kararların 27'sinde açık 20°'nin altında.
+- Gerçek sınıfa göre medyan açık: silkme 41,7°, baş 24,5°, dirsek 25,0°, doğru 22,6°, öne kaçma 18,0°.
+
+**Kaçırılan hatalar** (hatalı tekrara "doğru" denmesi): 682 hatalı tekrarın 106'sı (%15,5).
+- Hata türüne göre: öne kaçma 48, baş 25, silkme 20, dirsek 9, az kaldırma 4.
+- Kişiye göre: Vasil 64, Terka 25, Mima 9, Honza 6, Petra 2.
+- Galerideki 3 kaçırılan örneğin üçü de Vasil'den. Rastgele seçimde 106'nın 64'ü Vasil olduğu için bu beklenen bir durum. Bu örneklerde max z (0,06; 3,78; 2,91), Vasil'in eşiği T = 5,00'ın altında kaldığı için karar "doğru" oldu.
+
+**Öneri (danışmana; uygulanmadı, çünkü bu sonuçlar görüldükten sonra düşünüldü):**
+- Kaldırma kararını yalnızca 2B kol açısına bırakmamak. Örneğin kol açısı düşükken `kol_boyu` da belirgin kısaysa "öne kaçma" öncelikli olsun.
+- Kaldırma z'sini duruş ölçütleriyle karşılaştırılabilir bir ölçeğe getirmek (üst sınır ya da 0–1 biçimi).
+- Bir derece alt sınırı koymak; örneğin normalden 20°'den az eksik kalmayı uyarı saymamak.
+Yapılacaksa önceden tanımlanmalı ve yine birini-dışarıda-bırak ile ayarlanmalı.
+
 ## Kabul ölçütü kontrolü
 - [x] 6 sınıflı karışıklık matrisi: CSV + PNG (`karisiklik_*.csv`, `karisiklik_*.png`)
 - [x] Sınıf başına duyarlılık, kesinlik ve F1; makro-F1; doğruluk (`siniflar.csv`, `ozet.csv`)
@@ -242,7 +289,7 @@ Hiçbir tekrarın E'si boş (NaN) değil.
 - [x] Galeri `sonuclar/deney2/galeri/`: 2 karışma çifti + kaçırılanlar, her gruptan 3 video (Güncelleme 04 not 2)
 - [x] Açı bandı ayrıntı çıktısı Adım 5'e hazır (Güncelleme 04 not 1)
 - [x] Testler: `50 passed`
-- [ ] Kullanıcının galeri gözlemleri (isteğe bağlı; eklenecek)
+- [x] Kullanıcının galeri gözlemi ve incelemesi (yukarıda)
 
 ## Kararlar ve sapmalar
 Hepsi kod yazılırken verildi. Kodu sınamak için deney bir kez geçici klasörde çalıştırıldı; ondan sonra hiçbir parametre değiştirilmedi. Yalnızca galeri dosya adları ASCII yapıldı.
@@ -271,3 +318,183 @@ Hepsi kod yazılırken verildi. Kodu sınamak için deney bir kez geçici klasö
 - **`aralik_disi` bayrağı öne kaçmaya ek kanıt olabilir** (%15,3'e karşı doğruda %0,15). Eklenip eklenmeyeceği danışmanın kararı.
 - **Adım 5 için:** Ana sistem yönlü mü yönsüz mü olsun? Makro-F1 farkı yok. Yönlü bant daha az gereksiz uyarı veriyor (doğru tekrarlarda "doğru" deme 0,925'e karşı 0,899), ama daha çok hata kaçırıyor. Geri bildirim uygulaması için yanlış alarmın az olması tercih edilebilir.
 - **Vasil:** Hatalı tekrarların %47'si kaçırılıyor. Kişi farkı Deney 1'deki gibi büyük.
+
+---
+
+# Ek: Güncelleme 05 — Deney 2 revize (Karar 13–14)
+
+**Tarih:** 2026-11-07
+**Durum:** Tamamlandı. Kullanıcı `python -m deneyler.deney2` ve `python -m deneyler.deney2_galeri` komutlarını çalıştırdı (7 Kas 00:05–00:09). Sayılar `sonuclar/deney2/` altındaki CSV dosyalarından birebir kopyalandı. İlk sürüm `sonuclar/deney2_ilk/` altında korunuyor; yukarıdaki tablolar ilk sürüme ait.
+
+## Basit anlatım
+**En önemli tek sonuç:** Yeni "az kaldırma" puanı sorunu **çözmedi, büyüttü.** Ana sistemde (v2 yönlü, önden + çapraz) makro-F1 0,631'den **0,568**'e düştü (fark −0,064, GA −0,117 – −0,007; sıfırı içermiyor). Yanlış "az kaldırma" kararı 104'ten **205**'e çıktı.
+
+**Neden?**
+- Yeni puan (E), doğru tekrarların %97'sinde tam **0**.
+- Bu yüzden z ölçeklemesindeki "doğruların yayılımı" (IQR), beş eğitim kümesinin beşinde de 0 çıktı. Paydada yalnızca ε = 0,01 kaldı.
+- Sonuç: z = 100 × E. Eşik T ≈ 3,1–3,7 olduğu için E ≈ 0,035 yetiyor.
+- Yani kol, kişinin normalinden **τ'nun yaklaşık %3,5 fazlası** kadar az kalktığında (τ = 10° iken ≈ 10,4°) sistem "az kaldırma" diyor. İlk sürümde bu sınır yaklaşık 11–16° idi.
+
+10° alt sınırın kendisi doğru çalışıyor. Sorun, z ölçeğinin 0'da yığılan bir dağılıma uygulanması. Bu bir **kod hatası değil**; Karar 13'teki "aynı z ölçeklemesi" adımının bu ölçütte doğurduğu sonuç.
+
+**İyi haberler:**
+- **İlk iki (Karar 14):** 100 hatalı tekrarın **76**'sında gerçek birincil hata, sistemin en yüksek iki z'si içinde (75,81). Kuralın söyleyeceği ilk iki hatanın içinde olma oranı ise **69** (68,62); 2. hata ancak o da T'yi geçerse söyleniyor.
+- **Kaçırma azaldı:** Hatalı tekrara "doğru" deme 15,5'ten 10,1'e indi (GA −14,8 – −0,4).
+- **Yönlü bant artık yönsüzden anlamlı olarak iyi:** +0,0555 (GA +0,023 – +0,078). Sebebi, yönsüz kaldırma puanının "fazla kalkmayı" da hata sayması.
+
+## Yapılanlar
+- `cekirdek/hata_turu.py`:
+  - `tepe_bandi(tepeler)`: μ = ortalama, τ = max(t(0,975; n−1)·s/√n, 10°); s örneklem standart sapması.
+  - `kaldirma_puanlari(tepe, tepeler)`: eksik = μ − tepe. Sapma ≤ τ ise E = 0; değilse E = min(1, (sapma − τ)/τ).
+    - yönlü (+1): yalnızca eksik;
+    - −1: yalnızca fazla;
+    - yönsüz: |eksik|.
+  - Kaldırma artık diğer ölçütlerle aynı biçimde işleniyor: `E_kaldirma_{0,p,n}` sütunları, aynı z, aynı karar kuralı.
+  - Kaldırmanın yönü sabit +1 (Karar 13: "yalnızca eksik"). Eskiden eğitimden öğreniliyordu; 20 seçimin 20'sinde zaten +1 çıkmıştı.
+  - `ilk_iki(z, T)`: en yüksek iki z'nin hataları ve kuralın söyleyeceği hatalar. Adım 5 aynı fonksiyonu kullanacak.
+  - Eski `kaldirma_sapmasi` (d) kaldırıldı. İlk sürüm kodu git'te, `573edcf` commit'inde duruyor.
+- `deneyler/deney2.py` yeni çıktılar üretiyor:
+  - `ilk_iki.csv`;
+  - `kaldirma.csv`: az kaldırma kararlarında eksik açı;
+  - `ilk_surum_karsilastirma.csv`: revize − ilk, aynı tekrarlarda, kişi bazlı bootstrap (2000).
+- `deneyler/deney2_galeri.py`: Kaldırma grafiği μ ± τ bandını ve eksik açıyı gösteriyor.
+- Testler: `test_tepe_bandi`, `test_kaldirma_puanlari`, `test_ilk_iki` eklendi → `52 passed`.
+- Kod önce geçici klasörde bir kez çalıştırıldı (sınama). Kullanıcının çalıştırmasında bütün tablolar birebir aynı çıktı. Sınamadan sonra hiçbir parametre değiştirilmedi.
+
+## Sonuçlar (revize)
+
+### 1. Revize − ilk sürüm (`ilk_surum_karsilastirma.csv`; aynı 1363 / 1668 tekrar)
+Makro-F1, katı:
+
+| görüş | sistem | ilk | revize | fark | %95 GA |
+| --- | --- | --- | --- | --- | --- |
+| ö+ç | **v2 yönlü** | 0.6311 | **0.5676** | −0.0635 | −0.1168 – −0.0068 |
+| ö+ç | v2 yönsüz | 0.6270 | 0.5121 | −0.1149 | −0.1475 – −0.0738 |
+| ö+ç | v1b yönlü | 0.6266 | 0.5619 | −0.0647 | −0.1100 – −0.0263 |
+| ö+ç | v1b yönsüz | 0.6059 | 0.4966 | −0.1093 | −0.1356 – −0.0855 |
+| tüm | v2 yönlü | 0.5806 | 0.5243 | −0.0563 | −0.1014 – −0.0087 |
+
+Ana sistem (v2 yönlü), diğer büyüklükler:
+
+| görüş | büyüklük | ilk | revize | fark | %95 GA |
+| --- | --- | --- | --- | --- | --- |
+| ö+ç | hatalılarda tür doğru /100 | 56.60 | 51.17 | −5.43 | −12.32 – +3.36 |
+| ö+ç | hatalılarda "doğru" dedi /100 | 15.54 | 10.12 | −5.43 | −14.83 – −0.44 |
+| ö+ç | doğrularda "doğru" dedi /100 | 92.51 | 90.02 | −2.50 | −4.42 – −0.74 |
+| ö+ç | "az kaldırma" kararı kesinliği | 0.550 | 0.390 | −0.160 | −0.224 – −0.099 |
+| tüm | hatalılarda tür doğru /100 | 49.28 | 45.32 | −3.96 | −9.83 – +3.47 |
+
+### 2. Özet (`ozet.csv`)
+| sistem | görüş | makro-F1 katı | esnek | doğruluk 6 sınıf | hatalılarda tür doğru /100 (katı) | (esnek) | hatalılarda "doğru" dedi /100 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **v2 yönlü** | ö+ç | **0.568** | 0.577 | 0.706 | **51.17** | 52.05 | 10.12 |
+| v2 yönlü | tüm | 0.524 | 0.532 | 0.674 | 45.32 | 46.04 | 17.63 |
+| v2 yönlü | profil | 0.305 | 0.305 | 0.531 | 19.08 | 19.08 | 51.32 |
+| v2 yönsüz | ö+ç | 0.512 | 0.519 | 0.668 | 46.04 | 46.63 | 7.48 |
+| v1b yönlü | ö+ç | 0.562 | 0.572 | 0.703 | 50.73 | 51.76 | 10.26 |
+| v1b yönsüz | ö+ç | 0.497 | 0.506 | 0.668 | 44.87 | 45.60 | 5.87 |
+
+Temel çizgi (tek toplam hata, yalnızca doğru/yanlış), v2 yönlü, ö+ç: ikili doğruluk 0.892. Aynı veride 6 sınıflı kuralın ikili doğruluğu 0.899.
+
+### 3. İlk iki (Karar 14; `ilk_iki.csv`)
+| sistem | görüş | birincil = 1. z /100 | birincil ilk iki z içinde /100 | birincil söylenen ilk iki içinde /100 | hatalılarda 2. z ≥ T /100 | yakalanan hatalılarda 2. z ≥ T (%) | söylenen 2. hata = birincil /100 | doğrularda 2. z ≥ T /100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **v2 yönlü** | ö+ç | 55.13 | **75.81** | **68.62** | 55.57 | 61.83 | 17.45 | 1.62 |
+| v2 yönlü | tüm | 50.96 | 71.94 | 60.43 | 49.88 | 60.55 | 15.11 | 1.68 |
+| v2 yönlü | profil | 32.24 | 54.61 | 23.68 | 24.34 | 50.00 | 4.61 | 1.96 |
+| v2 yönsüz | ö+ç | 50.29 | 80.94 | 72.58 | 62.17 | 67.19 | 26.54 | 1.91 |
+| v1b yönlü | ö+ç | 54.99 | 74.93 | 66.86 | 55.43 | 61.76 | 16.13 | 1.17 |
+| v1b yönsüz | ö+ç | 48.09 | 76.25 | 69.50 | 73.17 | 77.73 | 24.63 | 2.79 |
+
+Not: "birincil = 1. z" (55,13) eşikten bağımsız. "Tür doğru" (51,17) daha düşük, çünkü max z < T olan tekrarlar "doğru" sayılıyor.
+
+### 4. Sınıf başına ve karışıklık (v2 yönlü, ö+ç, katı)
+| sınıf | destek | duyarlılık | kesinlik | F1 |
+| --- | --- | --- | --- | --- |
+| doğru | 681 | 0.900 | 0.899 | 0.899 |
+| omuz | 135 | 0.311 | 0.545 | 0.396 |
+| baş | 138 | 0.341 | 0.580 | 0.429 |
+| öne kaçma | 137 | 0.409 | 0.560 | 0.473 |
+| dirsek | 137 | 0.533 | 0.839 | 0.652 |
+| az kaldırma | 135 | 0.970 | 0.390 | 0.556 |
+
+| gerçek \ karar | doğru | omuz | baş | öne kaçma | dirsek | az kaldırma |
+| --- | --- | --- | --- | --- | --- | --- |
+| doğru | **613** | 10 | 17 | 13 | 8 | 20 |
+| omuz | 6 | **42** | 13 | 13 | 0 | 61 |
+| baş | 19 | 12 | **47** | 6 | 0 | 54 |
+| öne kaçma | 37 | 3 | 3 | **56** | 6 | 32 |
+| dirsek | 4 | 9 | 1 | 12 | **73** | 38 |
+| az kaldırma | 3 | 1 | 0 | 0 | 0 | **131** |
+
+### 5. Az kaldırma kararlarında kol ne kadar eksik kalktı? (`kaldirma.csv`; v2 yönlü, ö+ç; eksik = μ − tepe)
+| grup | tekrar | eksik medyan | Ç1–Ç3 | en az | eksik < 20° |
+| --- | --- | --- | --- | --- | --- |
+| doğru "az kaldırma" kararı | 131 | 39.6° | 29.5–61.2° | 12.6° | 8 |
+| yanlış "az kaldırma" kararı | 205 | 19.6° | 15.0–27.0° | 10.3° | 107 |
+| gerçek sınıf: doğru | 681 | −0.2° | −3.2–2.8° | | |
+| gerçek sınıf: omuz | 135 | 9.0° | −3.9–24.5° | | |
+| gerçek sınıf: baş | 138 | 5.3° | −6.2–15.0° | | |
+| gerçek sınıf: öne kaçma | 137 | 0.3° | −10.8–8.5° | | |
+| gerçek sınıf: dirsek | 137 | 4.7° | −0.5–12.1° | | |
+| gerçek sınıf: az kaldırma | 135 | 38.7° | 28.3–61.1° | | |
+
+Not: İlk sürümdeki "eksik" tablosu μ yerine kalibrasyon tepelerinin **medyanını** kullanıyordu. Bu yüzden iki tablo birebir karşılaştırılamaz.
+
+### 6. Eşikler ve ölçek (`esikler.csv`, v2 yönlü)
+| | Honza | Mima | Petra | Terka | Vasil |
+| --- | --- | --- | --- | --- | --- |
+| T | 3.137 | 3.676 | 3.688 | 3.748 | 3.457 |
+| kaldırma medyanı | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| kaldırma ölçeği (IQR + ε) | **0.01** | **0.01** | **0.01** | **0.01** | **0.01** |
+| YENI ölçeği (karşılaştırma için) | 0.0811 | 0.0771 | 0.0836 | 0.0797 | 0.0847 |
+
+- Doğru tekrarların %3,1'inde kaldırma E'si 0'dan büyük. Yüzdelikler (50/75/90/95): 0, 0, 0, 0.
+- E en fazla 1 olduğu için kaldırma z'si 100'e kadar çıkabiliyor (galeride max z = 100,00). Duruş ölçütlerinde z yaklaşık 12'de kalıyor.
+- Öne kaçma ölçütü 20 seçimin 20'sinde yine `kol_boyu`. Yönler ilk sürümle aynı.
+
+### 7. Kişi bazlı (v2 yönlü, ö+ç; `kisi.csv`)
+| | Honza | Mima | Petra | Terka | Vasil |
+| --- | --- | --- | --- | --- | --- |
+| makro-F1 revize | 0.749 | 0.400 | 0.500 | 0.608 | 0.422 |
+| makro-F1 ilk | 0.776 | 0.501 | 0.634 | 0.731 | 0.368 |
+| tür doğru /100 revize | 77.04 | 35.51 | 48.91 | 56.30 | 38.69 |
+| hatalılarda "doğru" dedi /100 | 2.96 | 6.52 | 0.73 | 17.78 | 22.63 |
+| birincil ilk iki z içinde /100 | 84.44 | 60.87 | 82.48 | 88.15 | 63.50 |
+
+Makro-F1 Vasil dışındaki dört kişide düştü. Vasil'de 0,368'den 0,422'ye yükseldi; sebebi daha az kaçırma.
+
+### 8. Sistemler arası bootstrap farkları (revize; `bootstrap.csv`)
+| görüş | fark | nokta | %95 GA |
+| --- | --- | --- | --- |
+| ö+ç | v2 yönlü − v1b yönlü | +0.0057 | −0.0055 – +0.0130 |
+| ö+ç | v2 yönsüz − v1b yönsüz | +0.0155 | +0.0056 – +0.0251 |
+| ö+ç | v2 yönlü − v2 yönsüz | **+0.0555** | +0.0234 – +0.0778 |
+| ö+ç | v1b yönlü − v1b yönsüz | +0.0653 | +0.0369 – +0.0886 |
+
+### Galeri (`sonuclar/deney2/galeri/`)
+- En sık karışan iki çift artık **omuz → az kaldırma (61)** ve **baş → az kaldırma (54)**.
+- Sonra gelenler: dirsek → az kaldırma (38), öne kaçma → az kaldırma (32).
+- Kaçırılan hata: 69 tekrar.
+- İlk sürümün galeri videoları `sonuclar/deney2_ilk/galeri/` altında.
+
+### Ne çıktı?
+- **Karar 13'ün amacı sağlanamadı.** Amaç, az kaldırmanın argmax'ı haksız yere kazanmasını önlemekti. Puanı 0–1 aralığına getirmek yetmedi, çünkü z ölçeği puanın kendisini değil, doğru tekrarlardaki **yayılımını** kullanıyor. Kaldırma E'si doğrularda 0'da yığıldığı için yayılım 0, ölçek de ε oldu.
+- **10° alt sınır çalışıyor ama tek başına yetmiyor.** Yanlış kararlarda en küçük eksik 10,3°; yani 10°'nin altında hiçbir "az kaldırma" kararı yok. Ancak eksiği 10,3–20° arasında kalan 107 yanlış karar, z = 100·E yüzünden eşiği kolayca geçiyor.
+- **Etiket sınırlılığı görünür oldu.** Gerçek "omuz" sınıfında eksik medyanı 9,0°, Ç3 24,5°. Silkmeli tekrarların en az dörtte birinde kol, normalden yaklaşık 25°'den fazla az kalkıyor. "İlk iki" metriği bunu kısmen yakalıyor: birincil hata 100 tekrarın 76'sında ilk iki içinde.
+- **Yönlü bant artık yönsüzden anlamlı olarak iyi** (+0,056). Bu, Karar 15 ile (ana sistem v2 yönlü) tutarlı.
+
+## Kararlar ve sapmalar
+- **Kaldırmanın yönü sabit +1** (Karar 13: "yönlüde yalnızca eksik"). Eğitimden öğrenme kaldırıldı; ilk sürümde 20 seçimin 20'sinde zaten +1 idi.
+- **n ve s:** n, bir modeldeki kalibrasyon tepesi sayısı. Doğru tekrarda bu, birini-dışarıda-bırak modelinin n−1 tekrarı; hatalıda n alt modelin her biri. s, örneklem standart sapması (ddof = 1). Karar 7 gereği hatalı tekrarda E ve eksik, n alt modelin ortalaması.
+- **Tablo 5'te eksik μ'ye (ortalama) göre.** İlk sürümün incelemesi medyan kullanıyordu.
+- **Ölçeklemeye dokunulmadı.** Sorun sınamada görüldü. Kuralı sonuç gördükten sonra değiştirmek, test verisiyle ayar yapmak olurdu. Danışmana soru olarak aşağıda.
+- Galeri klasöründeki ilk sürüm videoları (9 dosya) `deney2/galeri/` altından kaldırıldı; kopyaları `deney2_ilk/galeri/` içinde.
+
+## Açık sorular / danışmana notlar
+- **Adım 5 ve uygulama hangi kaldırma sürümünü kullanacak?** Seçenekler aşağıda. Hepsi sonuçlar görüldükten sonra düşünüldü; hiçbiri uygulanmadı.
+  - (a) İlk sürüme dönmek (makro-F1 0,631) ve sınırlılığı yazmak.
+  - (b) Revizeyi korumak, ama 0'da yığılan kaldırma dağılımı için IQR yerine sabit bir ölçek kullanmak. Örneğin ölçek = 1, yani z = E; o zaman "τ'nun bir katı kadar fazladan eksik" z = 1 eder. Bu, duruş ölçütleriyle aynı "birim" değil; önceden gerekçelendirilmesi gerekir.
+  - (c) Duruş ölçütlerinde de z'yi kaldırıp E'leri (0–1) doğrudan karşılaştırmak: tek bir T, ölçekleme yok.
+  - Hangisi seçilirse seçilsin, sonuçlara bakılarak seçildiği raporda açıkça yazılmalı ve Ex7 ile kendi kayıtlarımızda doğrulanmalı. Ex7'de az kaldırma sınıfı olmadığı için Adım 4b bu karardan etkilenmiyor.
+- **"İlk iki" Adım 5 için umut verici.** Geri bildirim iki hata söylerse, birincil hata 100 hatalı tekrarın 69'unda söylenmiş oluyor. Doğru tekrarlarda ikinci bir uyarı yalnızca %1,6 oranında çıkıyor.

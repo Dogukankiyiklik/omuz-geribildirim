@@ -6,11 +6,11 @@ Her hata türünün bir ölçütü vardır (PLAN.md, Adım 4):
   ERR_HEAD_TO_SIDE      : bas (M39 F3)                               — açı bandı
   ERR_ARM_FORWARD       : on_kacma (M39 F1) ya da kol_boyu           — açı bandı; hangisi, eğitim kişilerinde seçilir
   ERR_BENT_ARM          : dirsek (M39 F4)                            — açı bandı
-  ERR_LOW_ABDUCTION     : kaldirma = tepe kol açısı sapması          — bant yok (Güncelleme 02)
+  ERR_LOW_ABDUCTION     : kaldirma = tepe kol açısının "tepe bandı" hatası (Güncelleme 05, Karar 13)
 
 Karar kuralı (basit ve açıklanabilir):
-  1. Her ölçüt için tekrarın puanı: duruş ölçütlerinde bant hatası E (yönsüz ya da yönlü),
-     kaldırmada tepe açısı sapması d (yönsüz: |d|, yönlü: beklenen yöndeki kısmı).
+  1. Her ölçüt için tekrarın puanı E (0–1): duruş ölçütlerinde açı/zaman bandı hatası (yönsüz ya da
+     yönlü), kaldırmada tek kutulu tepe bandının hatası (kaldirma_puanlari; yönlüde yalnızca eksik).
   2. Puan, EĞİTİM kişilerinin doğru tekrarlarındaki dağılımla ölçeklenir:
      z = (puan − medyan) / (çeyrekler arası açıklık + ε).
   3. max z < T ise "DOGRU"; değilse hata türü = argmax z.
@@ -39,7 +39,8 @@ KISA_AD = {DOGRU: "doğru", "ERR_ELEVATED_SHOULDER": "omuz", "ERR_HEAD_TO_SIDE":
 
 KALDIRMA = "kaldirma"
 ON_KACMA_ADAYLARI = ("on_kacma", "kol_boyu")
-TEPE_IQR_ALT_SINIR = 5.0   # derece (Güncelleme 02)
+TEPE_ALT_SINIR = 10.0      # derece; tepe bandının yarı genişliği en az bu (Karar 13; literatürden, değiştirilmez)
+TEPE_GUVEN = 0.975         # τ = t(0,975; n−1)·s/√n
 EPS = 0.01                 # z ölçeğinde payda: IQR + ε (E 0–1 aralığında; %1)
 ESIK_IZGARASI = np.linspace(0, 100, 201)  # T adayları: eğitimdeki max z'nin yüzdelikleri
 
@@ -67,21 +68,37 @@ def fark_sutunu(olcut: str) -> str:
     return f"F_{olcut}"
 
 
-def kaldirma_sapmasi(tepe: float, kalibrasyon_tepeleri) -> float:
+def tepe_bandi(kalibrasyon_tepeleri) -> tuple[float, float]:
     """
-    Yetersiz kaldırma (Güncelleme 02): d = (kalibrasyon tepelerinin medyanı − tekrarın tepesi) /
-    max(kalibrasyon tepelerinin IQR'si, 5°). Pozitif = kol normalden az kalktı.
+    Tek kutulu tepe bandı (Güncelleme 05, Karar 13): μ = kalibrasyon tepelerinin ortalaması,
+    τ = max(t(0,975; n−1) · s / √n, 10°). s örneklem standart sapması (n−1 paydalı).
+    10° alt sınır: MediaPipe–gonyometre uyumu ≈ ±7° (M20), tek kamerada uçta 15°'ye varan hata (M41, M42).
     """
-    t = np.asarray(kalibrasyon_tepeleri, dtype=float)
-    q1, q3 = np.percentile(t, [25, 75])
-    return float((np.median(t) - tepe) / max(q3 - q1, TEPE_IQR_ALT_SINIR))
+    from scipy.stats import t as t_dagilimi
+    x = np.asarray(kalibrasyon_tepeleri, dtype=float)
+    n = len(x)
+    mu = float(x.mean())
+    yari = float(t_dagilimi.ppf(TEPE_GUVEN, n - 1) * x.std(ddof=1) / np.sqrt(n)) if n >= 2 else np.inf
+    return mu, max(yari, TEPE_ALT_SINIR)
+
+
+def kaldirma_puanlari(tepe: float, kalibrasyon_tepeleri) -> tuple[dict[int, float], float]:
+    """
+    Az kaldırma puanı, duruş ölçütlerinin E'siyle aynı biçimde (0–1).
+    eksik = μ − tepe (pozitif = kol normalden az kalktı). Sapma a için E = 0 (a ≤ τ), değilse
+    min(1, (a − τ)/τ). Dönüş: ({yon: E}, eksik) — yon +1: yalnızca eksik (az kalkma), −1: yalnızca
+    fazla, 0: |eksik| (yönsüz).
+    """
+    mu, tau = tepe_bandi(kalibrasyon_tepeleri)
+    eksik = mu - float(tepe)
+
+    def E(a):
+        return 0.0 if a <= tau else float(min(1.0, (a - tau) / tau))
+    return {1: E(eksik), -1: E(-eksik), 0: E(abs(eksik))}, eksik
 
 
 def olcut_puani(df: pd.DataFrame, olcut: str, yon: int) -> pd.Series:
-    """Bir ölçütün tekrar puanı. yon = 0 yönsüz; ±1 yalnızca o yöndeki sapma."""
-    if olcut == KALDIRMA:
-        d = df[fark_sutunu(KALDIRMA)]
-        return d.abs() if yon == 0 else np.maximum(np.sign(yon) * d, 0.0)
+    """Bir ölçütün tekrar puanı (E). yon = 0 yönsüz; ±1 yalnızca o yöndeki sapma."""
     return df[puan_sutunu(olcut, yon)]
 
 
@@ -89,9 +106,13 @@ def beklenen_yonler(egitim: pd.DataFrame, on_olcut: str) -> dict[str, int]:
     """
     Her ölçütün beklenen hata yönü, eğitim tekrarlarından: işaret(ilgili hatalı tekrarların ortalama
     imzalı farkı − doğru tekrarlarınki). Fark 0 ya da tanımsızsa +1.
+    Kaldırmada yön sabit +1 (yalnızca eksik sayılır; Karar 13).
     """
     yonler = {}
     for hata, k in hata_olcutleri(on_olcut).items():
+        if k == KALDIRMA:
+            yonler[k] = 1
+            continue
         f = egitim[fark_sutunu(k)]
         fark = f[egitim.hata == hata].mean() - f[egitim.hata == DOGRU].mean()
         yonler[k] = -1 if fark < 0 else 1
@@ -168,6 +189,25 @@ def esik_sec(egitim: pd.DataFrame, yonlu: bool, adaylar=ON_KACMA_ADAYLARI) -> Ka
     kural.T = T
     kural.bilgi = {"egitim_makro_f1": f1}
     return kural
+
+
+# ---------------------------------------------------------------- ilk iki hata (Karar 14)
+def ilk_iki(z: pd.DataFrame, T: float) -> pd.DataFrame:
+    """
+    Tekrar başına en yüksek iki z'nin hataları ve kuralın söyleyeceği hatalar.
+    Sütunlar: z1_hata, z2_hata (eşikten bağımsız sıralama), z1, z2,
+              soylenen1 (max z ≥ T ise z1_hata, değilse DOGRU), soylenen2 (z2 ≥ T ise z2_hata, değilse "").
+    Eşitlikte HATALAR sırası (karar kuralıyla aynı). NaN z dikkate alınmaz.
+    """
+    Z = z[HATALAR].to_numpy(float)
+    Zd = np.where(np.isnan(Z), -np.inf, Z)
+    sira = np.argsort(-Zd, axis=1, kind="stable")
+    ad = np.array(HATALAR, dtype=object)
+    i = np.arange(len(Zd))
+    z1, z2 = Zd[i, sira[:, 0]], Zd[i, sira[:, 1]]
+    return pd.DataFrame({"z1_hata": ad[sira[:, 0]], "z2_hata": ad[sira[:, 1]], "z1": z1, "z2": z2,
+                         "soylenen1": np.where(z1 >= T, ad[sira[:, 0]], DOGRU),
+                         "soylenen2": np.where((z1 >= T) & (z2 >= T), ad[sira[:, 1]], "")}, index=z.index)
 
 
 # ---------------------------------------------------------------- temel çizgi

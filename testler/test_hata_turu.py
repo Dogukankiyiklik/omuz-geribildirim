@@ -80,10 +80,41 @@ def test_coklu_model_puanlari_ayni_hesap():
     assert fark["Y"] > 0
 
 
-def test_kaldirma_sapmasi():
-    assert ht.kaldirma_sapmasi(150, [170, 170, 170, 170]) == pytest.approx(20 / 5)   # IQR 0 → alt sınır 5°
-    assert ht.kaldirma_sapmasi(150, [160, 170, 180, 190]) == pytest.approx(25 / 15)
-    assert ht.kaldirma_sapmasi(185, [170] * 4) < 0
+def test_tepe_bandi():
+    from scipy.stats import t as td
+    mu, tau = ht.tepe_bandi([170, 170, 170, 170])
+    assert mu == 170 and tau == 10.0                                  # s = 0 → alt sınır 10°
+    x = np.array([120.0, 150, 170, 190])
+    mu, tau = ht.tepe_bandi(x)
+    beklenen = td.ppf(0.975, 3) * x.std(ddof=1) / 2
+    assert beklenen > 10 and mu == pytest.approx(157.5) and tau == pytest.approx(beklenen)
+
+
+def test_kaldirma_puanlari():
+    t = [170] * 4                      # μ = 170, τ = 10
+    E, eksik = ht.kaldirma_puanlari(165, t)
+    assert eksik == 5 and E == {1: 0.0, -1: 0.0, 0: 0.0}           # τ içinde
+    E, eksik = ht.kaldirma_puanlari(150, t)
+    assert eksik == 20 and E[1] == pytest.approx(1.0) and E[-1] == 0.0 and E[0] == pytest.approx(1.0)
+    E, _ = ht.kaldirma_puanlari(155, t)
+    assert E[1] == pytest.approx(0.5)
+    E, _ = ht.kaldirma_puanlari(100, t)
+    assert E[1] == 1.0                                               # üst sınır 1
+    E, _ = ht.kaldirma_puanlari(185, t)                               # fazla kalkma: yalnızca yönsüz ve −1
+    assert E[1] == 0.0 and E[-1] == pytest.approx(0.5) and E[0] == pytest.approx(0.5)
+
+
+def test_ilk_iki():
+    z = pd.DataFrame({h: [0.0, 1.0, 0.0] for h in ht.HATALAR})
+    z.loc[0, "ERR_BENT_ARM"], z.loc[0, "ERR_HEAD_TO_SIDE"] = 7.0, 3.0
+    z.loc[1, "ERR_BENT_ARM"], z.loc[1, "ERR_HEAD_TO_SIDE"] = 2.0, 1.5
+    z.loc[2, "ERR_LOW_ABDUCTION"] = np.nan
+    r = ht.ilk_iki(z, T=2.5)
+    assert list(r.z1_hata[:2]) == ["ERR_BENT_ARM", "ERR_BENT_ARM"]
+    assert list(r.z2_hata[:2]) == ["ERR_HEAD_TO_SIDE", "ERR_HEAD_TO_SIDE"]
+    assert list(r.soylenen1) == ["ERR_BENT_ARM", ht.DOGRU, ht.DOGRU]
+    assert list(r.soylenen2) == ["ERR_HEAD_TO_SIDE", "", ""]
+    assert list(r.soylenen1) == list(ht._karar(z, 2.5))              # 1. hata karar kuralıyla aynı
 
 
 def _yapay_tablo(rng, kisiler=("A", "B", "C", "D", "E"), n_dogru=30, n_hata=10):
@@ -101,7 +132,10 @@ def _yapay_tablo(rng, kisiler=("A", "B", "C", "D", "E"), n_dogru=30, n_hata=10):
                     e = abs(f) if y == 0 else max(np.sign(y) * f, 0)
                     r[ht.puan_sutunu(o, y)] = e + abs(rng.normal(0, 0.01))
                 r[ht.fark_sutunu(o)] = f
-            r[ht.fark_sutunu(ht.KALDIRMA)] = (5.0 if h == "ERR_LOW_ABDUCTION" else 0.0) + rng.normal(0, 0.5)
+            eksik = (30.0 if h == "ERR_LOW_ABDUCTION" else 0.0) + rng.normal(0, 2.0)
+            E, r[ht.fark_sutunu(ht.KALDIRMA)] = ht.kaldirma_puanlari(170 - eksik, [170.0] * 4)
+            for y in (0, 1, -1):
+                r[ht.puan_sutunu(ht.KALDIRMA, y)] = E[y] + abs(rng.normal(0, 0.01))
             satir.append(r)
     return pd.DataFrame(satir)
 

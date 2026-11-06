@@ -6,7 +6,7 @@ Soru: Sistem bir tekrarın doğru olup olmadığını, yanlışsa HANGİ hatayı
 1) Tekrar puanları (her tekrar, her ölçüt; yönsüz ve iki yönlü E, ortalama imzalı fark):
    v2  : açı bandı (ana yöntem, Karar 6)
    v1b : zaman bandı, çoklu referans (yalnızca karşılaştırma temel çizgisi, Karar 6)
-   Kaldırma: tepe kol açısı sapması (bant yok).
+   Kaldırma: tek kutulu tepe bandı, E 0–1 (Güncelleme 05, Karar 13; ilk sürüm sonuclar/deney2_ilk/).
    Adillik: doğru tekrar birini-dışarıda-bırak; hatalı tekrar tüm (n−1)'li modellerin ortalaması (Karar 7).
    Bir gruptaki n alt küme modeli bir kez kurulur: doğru tekrar i, i'nci alt kümeyle (kendisi dışarıda)
    değerlendirilir; bu, Deney 1 v2'deki birini-dışarıda-bırak ile aynı modeldir.
@@ -14,6 +14,7 @@ Soru: Sistem bir tekrarın doğru olup olmadığını, yanlışsa HANGİ hatayı
    öne kaçma ölçütü ve T seçilir; 5. kişide test edilir. Ayar yalnızca eğitim kişilerinin
    önden + çapraz (|görüş| ≤ 60°) tekrarlarıyla yapılır (uygulama senaryosu).
 3) Temel çizgi: tek toplam hata (z'lerin ortalaması) ile yalnızca doğru/yanlış.
+4) "İlk iki" (Karar 14): birincil hata en yüksek iki z içinde mi; ikinci z de T'yi geçiyor mu.
 
 Kullanım:
     python -m deneyler.deney2                 # ~5–10 dk (puanlar), sonra karar kuralı ve tablolar
@@ -91,7 +92,8 @@ def _model_puani(model, alt_f, f, bant):
     else:
         E, fark = coklu_model_puanlari(model, f, OLCUTLER, YONLER)
         ek = {}
-    fark[ht.KALDIRMA] = ht.kaldirma_sapmasi(tepe, tepeler)
+    Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe, tepeler)
+    E.update({(ht.KALDIRMA, y): Ek[y] for y in YONLER})
     return E, fark, ek
 
 
@@ -118,7 +120,7 @@ def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True) -> pd.DataFrame:
             r = {"bant": bant, "video": t.video, "kisi": t.kisi, "kamera": t.kamera, "yonelim": t.yonelim,
                  "tekrar_no": t.tekrar_no, "satir": t.satir, "gorus": t.gorus, "hata": t.hata,
                  "ek_hata": t.ek_hata, "model_sayisi": len(sonuc), "tepe_acisi": tepe_acisi(f["kol"])}
-            r.update({ht.puan_sutunu(k, y): E[(k, y)] for k in OLCUTLER for y in YONLER})
+            r.update({ht.puan_sutunu(k, y): E[(k, y)] for k in OLCUTLER + [ht.KALDIRMA] for y in YONLER})
             r.update({ht.fark_sutunu(k): v for k, v in fark.items()})
             if bant == "v2":
                 r["kapsam"] = float(np.mean([s[2]["kapsam"] for s in sonuc]))
@@ -149,6 +151,8 @@ def loso(puan: pd.DataFrame, yonlu: bool):
         p["tahmin"] = tah
         p["esnek_gercek"] = ht.esnek_gercek(test.hata, test.ek_hata, tah)
         p["max_z"] = z.max(axis=1)
+        p["T"] = kural.T
+        p = p.join(ht.ilk_iki(z, kural.T))
         for h in ht.HATALAR:
             p[f"z_{ht.KISA_AD[h]}"] = z[h]
         p["toplam_hata"] = toplam
@@ -188,6 +192,23 @@ def ozet_satiri(p: pd.DataFrame) -> dict:
     return r
 
 
+def ilk_iki_satiri(p: pd.DataFrame) -> dict:
+    """Karar 14: hatalı tekrarlarda birincil hata en yüksek iki z içinde mi; ikinci z de T'yi geçiyor mu."""
+    h = p[p.hata != ht.DOGRU]
+    d = p[p.hata == ht.DOGRU]
+    ilk2 = (h.z1_hata == h.hata) | (h.z2_hata == h.hata)
+    soylenen = (h.soylenen1 == h.hata) | (h.soylenen2 == h.hata)
+    yakalanan = h.soylenen1 != ht.DOGRU
+    return {"tekrar": len(p), "hatalı tekrar": len(h),
+            "hatalılarda birincil 1. z /100": 100 * float((h.z1_hata == h.hata).mean()),
+            "hatalılarda birincil ilk iki z içinde /100": 100 * float(ilk2.mean()),
+            "hatalılarda birincil söylenen ilk iki içinde /100": 100 * float(soylenen.mean()),
+            "hatalılarda 2. z ≥ T /100": 100 * float((h.soylenen2 != "").mean()),
+            "yakalanan hatalılarda 2. z ≥ T (%)": 100 * float((h.soylenen2 != "")[yakalanan].mean()),
+            "hatalılarda söylenen 2. hata = birincil /100": 100 * float((h.soylenen2 == h.hata).mean()),
+            "doğrularda 2. z ≥ T /100": 100 * float((d.soylenen2 != "").mean())}
+
+
 def temel_satiri(p: pd.DataFrame) -> dict:
     hatali = p.hata != ht.DOGRU
     r = {"tekrar": len(p), "hatalı tekrar": int(hatali.sum())}
@@ -197,12 +218,13 @@ def temel_satiri(p: pd.DataFrame) -> dict:
 
 def tablolar_uret(tahminler: dict, kurallar: dict, puanlar: dict, bootstrap_n=2000) -> dict:
     T = {}
-    ozet, temel, sinif, gorus_grup, kisi, kar = [], [], [], [], [], {}
+    ozet, temel, sinif, gorus_grup, kisi, kar, ilk2 = [], [], [], [], [], {}, []
     for (bant, yonlu), p in tahminler.items():
         ad = sistem_adi(bant, yonlu)
         for gorus in GORUSLER + ("profil (70–90°)",):
             g = p[gorus_maskesi(p, gorus)]
             ozet.append({"sistem": ad, "görüş": gorus, **ozet_satiri(g)})
+            ilk2.append({"sistem": ad, "görüş": gorus, **ilk_iki_satiri(g)})
             temel.append({"sistem": ad, "görüş": gorus, "yöntem": "temel çizgi: tek toplam hata (doğru/yanlış)",
                           **temel_satiri(g)})
             o = ozet_satiri(g)
@@ -233,9 +255,15 @@ def tablolar_uret(tahminler: dict, kurallar: dict, puanlar: dict, bootstrap_n=20
                 kisi.append({"sistem": ad, "görüş": gorus, "kisi": k,
                              "makro-F1 (katı)": makro_f1(g.hata, g.tahmin, ht.SINIFLAR),
                              "hatalılarda tür doğru /100 (katı)":
-                                 100 * float((g.tahmin == g.hata)[g.hata != ht.DOGRU].mean())})
+                                 100 * float((g.tahmin == g.hata)[g.hata != ht.DOGRU].mean()),
+                             "hatalılarda 'doğru' dedi /100":
+                                 100 * float((g.tahmin == ht.DOGRU)[g.hata != ht.DOGRU].mean()),
+                             "hatalılarda birincil ilk iki z içinde /100":
+                                 ilk_iki_satiri(g)["hatalılarda birincil ilk iki z içinde /100"]})
     T["ozet"] = pd.DataFrame(ozet)
     T["temel_cizgi"] = pd.DataFrame(temel)
+    T["ilk_iki"] = pd.DataFrame(ilk2)
+    T["kaldirma"] = kaldirma_tablosu(tahminler, puanlar)
     T["siniflar"] = pd.concat(sinif, ignore_index=True)
     T["gorus_grubu"] = pd.DataFrame(gorus_grup)
     T["kisi"] = pd.DataFrame(kisi)
@@ -252,6 +280,37 @@ def tablolar_uret(tahminler: dict, kurallar: dict, puanlar: dict, bootstrap_n=20
         T["bootstrap"] = bootstrap_tablosu(tahminler, bootstrap_n)
     T["_kar"] = kar
     return T
+
+
+def kaldirma_tablosu(tahminler: dict, puanlar: dict) -> pd.DataFrame:
+    """
+    "Az kaldırma" kararlarının dökümü (ADIM_04 inceleme tablosunun revize karşılığı): kolun kişinin
+    normalinden ne kadar az kalktığı, eksik = μ − tepe (derece; hatalıda Karar 7 ortalaması).
+    """
+    anahtar = ["video", "kamera", "yonelim", "satir"]
+    sut = ht.fark_sutunu(ht.KALDIRMA)
+
+    def satir(ad, gorus, grup, e):
+        bos = len(e) == 0
+        return {"sistem": ad, "görüş": gorus, "grup": grup, "tekrar": len(e),
+                "eksik medyan (°)": np.nan if bos else float(e.median()),
+                "eksik Ç1 (°)": np.nan if bos else float(e.quantile(0.25)),
+                "eksik Ç3 (°)": np.nan if bos else float(e.quantile(0.75)),
+                "eksik en az (°)": np.nan if bos else float(e.min()),
+                "eksik < 20° olan": int((e < 20).sum())}
+
+    satirlar = []
+    for (bant, yonlu), p in tahminler.items():
+        ad = sistem_adi(bant, yonlu)
+        q = p.merge(puanlar[bant][anahtar + [sut]], on=anahtar)
+        for gorus in GORUSLER:
+            g = q[gorus_maskesi(q, gorus)]
+            k = g[g.tahmin == "ERR_LOW_ABDUCTION"]
+            satirlar.append(satir(ad, gorus, "doğru 'az kaldırma' kararı", k[k.hata == "ERR_LOW_ABDUCTION"][sut]))
+            satirlar.append(satir(ad, gorus, "yanlış 'az kaldırma' kararı", k[k.hata != "ERR_LOW_ABDUCTION"][sut]))
+            for h in ht.SINIFLAR:
+                satirlar.append(satir(ad, gorus, f"gerçek sınıf: {ht.KISA_AD[h]}", g[g.hata == h][sut]))
+    return pd.DataFrame(satirlar)
 
 
 def aralik_disi_tablosu(p: pd.DataFrame) -> pd.DataFrame:
@@ -304,6 +363,64 @@ def bootstrap_tablosu(tahminler: dict, n=2000, tohum=1) -> pd.DataFrame:
                          "GA %2,5": alt, "GA %97,5": ust,
                          "GA sıfırı içeriyor": bool(alt <= 0 <= ust) if "farkı" in olcu else ""})
     return pd.DataFrame(satirlar)
+
+
+ILK_SURUM = veri.KOK / "sonuclar" / "deney2_ilk" / "tahminler.csv"
+
+
+def ilk_surumle_karsilastir(tahminler: dict, yol: Path = ILK_SURUM, n=2000, tohum=1) -> pd.DataFrame | None:
+    """
+    Güncelleme 05: revize (Karar 13) − ilk sürüm, aynı tekrarlarda; kişi bazlı bootstrap %95 GA.
+    İlk sürümün tahminleri sonuclar/deney2_ilk/tahminler.csv dosyasından okunur (yoksa None).
+    """
+    if not Path(yol).exists():
+        return None
+    ilk = pd.read_csv(yol, encoding="utf-8-sig", keep_default_na=False)
+    anahtar = ["video", "kamera", "yonelim", "satir"]
+    taban = None
+    adlar = []
+    for s, p in tahminler.items():
+        ad = sistem_adi(*s)
+        q = p.set_index(anahtar)[["kisi", "gorus", "hata", "tahmin"]].rename(columns={"tahmin": f"{ad}|revize"})
+        e = ilk[ilk.sistem == ad].set_index(anahtar)[["tahmin"]].rename(columns={"tahmin": f"{ad}|ilk"})
+        q = q.join(e, how="inner")
+        taban = q if taban is None else taban.join(q[[f"{ad}|revize", f"{ad}|ilk"]], how="inner")
+        adlar.append(ad)
+    taban = taban.reset_index()
+
+    def olculer(g, c):
+        h = g.hata != ht.DOGRU
+        return {"makro-F1 (katı)": makro_f1(g.hata, g[c], ht.SINIFLAR),
+                "hatalılarda tür doğru /100": 100 * float((g[c][h] == g.hata[h]).mean()),
+                "hatalılarda 'doğru' dedi /100": 100 * float((g[c][h] == ht.DOGRU).mean()),
+                "doğrularda 'doğru' dedi /100": 100 * float((g[c][~h] == ht.DOGRU).mean()),
+                "'az kaldırma' kararı kesinliği":
+                    float((g.hata[g[c] == "ERR_LOW_ABDUCTION"] == "ERR_LOW_ABDUCTION").mean())}
+
+    def istatistik(b):
+        c = {}
+        for gorus in GORUSLER:
+            g = b[gorus_maskesi(b, gorus)]
+            for ad in adlar:
+                r, i = olculer(g, f"{ad}|revize"), olculer(g, f"{ad}|ilk")
+                for k in r:
+                    c[f"{gorus}|{ad}|{k}|ilk"] = i[k]
+                    c[f"{gorus}|{ad}|{k}|revize"] = r[k]
+                    c[f"{gorus}|{ad}|{k}|fark"] = r[k] - i[k]
+        return c
+
+    nokta = istatistik(taban)
+    bs = kisi_bootstrap(taban, istatistik, n=n, tohum=tohum) if n else None
+    satirlar = {}
+    for c, v in nokta.items():
+        gorus, ad, olcu, tur = c.split("|")
+        r = satirlar.setdefault((gorus, ad, olcu), {"görüş": gorus, "sistem": ad, "büyüklük": olcu,
+                                                    "tekrar": int(gorus_maskesi(taban, gorus).sum())})
+        r[tur] = v
+        if tur == "fark" and bs is not None:
+            alt, ust = guven_araligi(bs[c])
+            r.update({"fark GA %2,5": alt, "fark GA %97,5": ust, "GA sıfırı içeriyor": bool(alt <= 0 <= ust)})
+    return pd.DataFrame(list(satirlar.values()))
 
 
 def karisiklik_sekli(m: pd.DataFrame, baslik: str, yol: Path):
@@ -359,6 +476,9 @@ def calistir(cikti=CIKTI, puan_hazir=False, bootstrap_n=2000, yazdir=True):
     T = tablolar_uret(tahminler, kurallar, puanlar, bootstrap_n)
     kar = T.pop("_kar")
     T["tahminler"] = pd.concat([p.assign(sistem=sistem_adi(*s)) for s, p in tahminler.items()], ignore_index=True)
+    ilk = ilk_surumle_karsilastir(tahminler, n=bootstrap_n)
+    if ilk is not None:
+        T["ilk_surum_karsilastirma"] = ilk
     sonuclari_yaz(T, cikti)
     for gorus, ek in ((ONDEN_CAPRAZ, "oc"), (TUMU, "tum")):
         for s in SISTEMLER:
@@ -383,6 +503,11 @@ def yazdir_ozet(T):
     print("\n2) Temel çizgi (tek toplam hata, doğru/yanlış) ve 6 sınıflı kural:")
     t = T["temel_cizgi"]
     print(t[t["görüş"] != "profil (70–90°)"].round(3).to_string(index=False))
+    print("\n2b) İlk iki (Karar 14):")
+    print(T["ilk_iki"].round(2).to_string(index=False))
+    print("\n2c) Az kaldırma kararları ve eksik açı (ana sistem):")
+    kd = T["kaldirma"]
+    print(kd[kd.sistem == sistem_adi(*ANA_SISTEM)].round(1).to_string(index=False))
     print("\n3) Sınıf başına (ana sistem, önden+çapraz, katı):")
     s = T["siniflar"]
     print(s[(s.sistem == sistem_adi(*ANA_SISTEM)) & (s["görüş"] == ONDEN_CAPRAZ) & (s["değerlendirme"] == "katı")]
@@ -402,6 +527,9 @@ def yazdir_ozet(T):
     if "bootstrap" in T:
         print("\n8) Kişi bazlı bootstrap %95 GA:")
         print(T["bootstrap"].round(3).to_string(index=False))
+    if "ilk_surum_karsilastirma" in T:
+        print("\n9) Revize − ilk sürüm (Güncelleme 05; kişi bazlı bootstrap %95 GA):")
+        print(T["ilk_surum_karsilastirma"].round(3).to_string(index=False))
 
 
 def main():

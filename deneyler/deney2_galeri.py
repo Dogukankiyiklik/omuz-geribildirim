@@ -7,7 +7,7 @@ Gruplar (her birinden n video, tohum 0):
   * kaçırılan hatalar (gerçek hata → sistem "doğru" dedi).
 Görsel, KARARI VEREN ölçütün eğrisini ve bandını gösterir: karışmada sistemin seçtiği hatanın ölçütü,
 kaçırmada gerçek hatanın ölçütü. Kaldırma ölçütünde bant yoktur; kol açısı zamana göre ve kalibrasyon
-tepelerinin medyanı ± IQR çizilir.
+tepelerinin tepe bandı μ ± τ çizilir (Güncelleme 05, Karar 13).
 
 Kullanım (Deney 2'den sonra; puanlar.csv ve tahminler.csv hazır olmalı):
     python -m deneyler.deney2_galeri
@@ -89,19 +89,19 @@ class Deney2Gorseli(AciBandiGorseli):
             return super()._grafik_hazirla()
         kol = self.f_tam["kol"]
         tepeler = np.concatenate([np.asarray(x) for x in self.d["kalibrasyon_tepeleri"]])
-        q1, q2, q3 = np.percentile(self.d["kalibrasyon_tepeleri"][0], [25, 50, 75])
+        mu, tau = ht.tepe_bandi(self.d["kalibrasyon_tepeleri"][0])
         x = np.arange(len(kol))
         fig, ax = plt.subplots(figsize=(SAG_G / 100, GRAFIK_Y / 100), dpi=100)
-        ax.axhspan(q2 - max(q3 - q1, ht.TEPE_IQR_ALT_SINIR) / 2, q2 + max(q3 - q1, ht.TEPE_IQR_ALT_SINIR) / 2,
-                   color=M_MAVI, alpha=0.15, lw=0, label="kalibrasyon tepeleri: medyan ± IQR/2")
-        ax.axhline(q2, color=M_MAVI, lw=1, ls="--")
+        ax.axhspan(mu - tau, mu + tau, color=M_MAVI, alpha=0.15, lw=0,
+                   label=f"tepe bandı μ ± τ = {mu:.0f}° ± {tau:.0f}°")
+        ax.axhline(mu, color=M_MAVI, lw=1, ls="--")
         ax.plot(x, kol, color=M_TURUNCU, lw=2, label="bu tekrarın kol açısı")
         ax.axhline(self.ek["tepe_acisi"], color=M_TURUNCU, lw=1, ls=":", label=f"bu tekrarın tepesi {self.ek['tepe_acisi']:.0f}°")
         ax.set_xlim(-1, len(kol))
         ax.set_ylim(0, max(185, float(np.nanmax(kol)) + 5, float(tepeler.max()) + 5))
         ax.set_xlabel("kare")
         ax.set_ylabel("kol açısı (°)")
-        ax.set_title(f"kaldırma — tepe açısı sapması d = {self.satir_d():.2f} (pozitif = az kalktı)", loc="left", fontsize=10)
+        ax.set_title(f"kaldırma — eksik {self.satir_eksik():.0f}° · E = {self.satir_d():.3f}", loc="left", fontsize=10)
         ax.spines[["top", "right"]].set_visible(False)
         ax.yaxis.grid(True, color="#e4e3df", lw=0.8)
         ax.legend(loc="best", frameon=False, fontsize=7.5)
@@ -116,7 +116,12 @@ class Deney2Gorseli(AciBandiGorseli):
         plt.close(fig)
 
     def satir_d(self) -> float:
-        return float(np.mean([ht.kaldirma_sapmasi(self.ek["tepe_acisi"], t) for t in self.d["kalibrasyon_tepeleri"]]))
+        """Kaldırmanın yönlü E'si (Karar 7: modellerin ortalaması)."""
+        return float(np.mean([ht.kaldirma_puanlari(self.ek["tepe_acisi"], t)[0][1]
+                              for t in self.d["kalibrasyon_tepeleri"]]))
+
+    def satir_eksik(self) -> float:
+        return float(np.mean([ht.kaldirma_puanlari(self.ek["tepe_acisi"], t)[1] for t in self.d["kalibrasyon_tepeleri"]]))
 
     def _imlec_ciz(self, g, j):
         if not self.kaldirma:
@@ -153,7 +158,7 @@ class Deney2Gorseli(AciBandiGorseli):
             o = ht.hata_olcutleri(k["öne kaçma ölçütü"])[h]
             z = r[f"z_{ht.KISA_AD[h]}"]
             ok = "▶ " if o == self.olcut_karar else "   "
-            puan = f"d = {self.satir_d():.2f}" if o == ht.KALDIRMA else f"E = {self.E[o]:.3f}"
+            puan = f"E = {self.satir_d():.3f}" if o == ht.KALDIRMA else f"E = {self.E[o]:.3f}"
             satirlar.append((f"{ok}{ht.KISA_AD[h]:11s} ({o}) {puan}   z = {z:6.2f}{'  ≥ T' if z >= k['T'] else ''}",
                              13, o == self.olcut_karar, M_METIN))
         satirlar += [("", 4, False, M_METIN),

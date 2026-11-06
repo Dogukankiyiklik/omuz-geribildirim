@@ -291,7 +291,8 @@ def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM) -> None:
           ""]
     for n, (grup, i) in enumerate(secim, 1):
         r = g.iloc[i]
-        ek = ", ".join(ad(e) for e in sorted(ht.etiket_kumesi(r.hata, r.ek_hata) - {r.hata})) or "–"
+        ek_ham = "" if pd.isna(r.ek_hata) or str(r.ek_hata) == "nan" else str(r.ek_hata)
+        ek = ", ".join(ad(e) for e in sorted(ht.etiket_kumesi(r.hata, ek_ham) - {r.hata})) or "–"
         soy = ad(r.soylenen1) + (f" + {ad(r.soylenen2)}" if r.soylenen2 else "")
         md += [f"## {n}. ({grup}) {r.video} · {r.kamera} · yönelim {r.yonelim}° · görüş {r.gorus}° · tekrar {r.tekrar_no}",
                "",

@@ -1,7 +1,7 @@
 # ADIM 05 — Deney 3: kural tabanlı Türkçe geri bildirim
 
 **Tarih:** 2026-11-07
-**Durum:** Kısmen. Önceden belirlenenler commit'lendi (`23f9129`). Kod yazıldı ve sınandı. **Tam çalıştırma kullanıcıda**; sonuçlar ve kullanıcının örnek cümle yorumu bekleniyor.
+**Durum:** Kısmen. Önceden belirlenenler commit'lendi (`23f9129`), kod yazıldı ve sınandı, kullanıcı tam çalıştırmayı yaptı ve sonuçlar aşağıda. Yalnızca kullanıcının örnek cümle yorumu bekleniyor (kabul ölçütü).
 
 ## Önceden belirlenenler (kod ve sonuçlardan önce)
 Kaynaklar: PLAN Adım 5, Güncelleme 01, 05 ve 06. Kod bu tanımlarla yazılacak. Sınama ve tam çalıştırmadan sonra hiçbiri değiştirilmeyecek. Sınama sırasında bir **kod hatası** bulunursa düzeltilir ve "Kararlar ve sapmalar" bölümüne yazılır. Tanımın kendisi değişmez.
@@ -191,12 +191,103 @@ Kod bir kez, geçici klasörde ve bootstrap'sız çalıştırıldı. Amaç yaln�
   - Kural değiştirilmedi. Bu bir sınırlılık olarak raporlanacak; sağlam alternatif `docs/GELECEK_CALISMA.md` madde 6'da.
 
 ## Sonuçlar
-*Kullanıcının tam çalıştırmasından sonra `sonuclar/deney3/ozet.csv`, `bootstrap.csv`, `kisi.csv`, `gorus_grubu.csv`, `olcu.csv` dosyalarından kopyalanacak.*
+Kullanıcı `python -m deneyler.deney3` komutunu çalıştırdı (7 Kas, 02:01). Sayılar `sonuclar/deney3/` altındaki CSV dosyalarından kopyalandı; iki basamağa yuvarlandı.
+
+### En önemli sonuç (basit anlatım, önden + çapraz)
+- 100 hatalı tekrarın **57**'sinde (56,60) cümlenin söylediği ilk hata, videonun gerçek hatası.
+- Cümle iki hata söyleyebildiği için gerçek hata, 100 tekrarın **67**'sinde (67,45) cümlede geçiyor.
+- 100 doğru tekrarın **7,5**'inde (7,49) sistem gereksiz yere uyarıyor.
+- Çıkarıcı, sistemin söylemek istediği hataları cümlelerin **%100**'ünde doğru okudu. Yani cümleler hatayı açık ve anlaşılır biçimde adlandırıyor; doğruluk tamamen Deney 2'nin kararından geliyor. Denetim satırları Deney 2 ile aynı (56,60 ve 67,45).
+
+### 1. Özet (`ozet.csv`)
+| metrik | önden + çapraz | tüm görüşler | profil |
+| --- | --- | --- | --- |
+| tekrar (hatalı / doğru) | 1363 (682 / 681) | 1668 (834 / 834) | 305 (152 / 153) |
+| **katı:** ilk söylenen = birincil /100 | **56.60** | 49.28 | 16.45 |
+| esnek: ilk söylenen ∈ birincil + ek /100 | 59.82 | 52.04 | 17.11 |
+| **ilk iki:** birincil söylendi /100 | **67.45** | 58.75 | 19.74 |
+| ilk iki (esnek) /100 | 70.38 | 61.51 | 21.71 |
+| hatalılarda olumlu cümle (kaçırma) /100 | 15.54 | 23.50 | 59.21 |
+| **doğrularda gereksiz uyarı** /100 | **7.49** | 7.31 | 6.54 |
+| doğrularda iki uyarı /100 | 1.62 | 1.68 | 1.96 |
+| hatalılarda iki hata söylendi /100 | 46.33 | 41.13 | 17.76 |
+| çıkarıcı uyumu /100 | 100.0 | 100.0 | 100.0 |
+| denetim: Deney 2 tür doğru (katı) | 56.60 | 49.28 | 16.45 |
+| denetim: Deney 2 birincil söylenen ilk iki içinde | 67.45 | 58.75 | 19.74 |
+
+### 2. Kişi bazlı bootstrap %95 GA (`bootstrap.csv`, 2000 tekrar, tohum 1)
+| görüş | metrik | nokta | %95 GA |
+| --- | --- | --- | --- |
+| ö+ç | katı | 56.60 | 42.25 – 70.40 |
+| ö+ç | esnek | 59.82 | 44.01 – 71.37 |
+| ö+ç | ilk iki | 67.45 | 50.58 – 80.06 |
+| ö+ç | doğrularda gereksiz uyarı | 7.49 | 3.85 – 10.40 |
+| tüm | katı | 49.28 | 36.92 – 61.25 |
+| tüm | esnek | 52.04 | 38.35 – 62.21 |
+| tüm | ilk iki | 58.75 | 44.32 – 69.31 |
+| tüm | doğrularda gereksiz uyarı | 7.31 | 3.82 – 10.31 |
+
+### 3. Görüş grubuna göre (`gorus_grubu.csv`)
+| metrik | önden (0–20°) | çapraz (30–60°) | profil (70–90°) |
+| --- | --- | --- | --- |
+| katı | 59.71 | 54.46 | 16.45 |
+| ilk iki | 71.22 | 64.85 | 19.74 |
+| hatalılarda olumlu cümle | 16.19 | 15.10 | 59.21 |
+| doğrularda gereksiz uyarı | 7.91 | 7.20 | 6.54 |
+
+### 4. Kişi bazlı, önden + çapraz (`kisi.csv`)
+| | Honza | Mima | Petra | Terka | Vasil |
+| --- | --- | --- | --- | --- | --- |
+| katı | 77.04 | 47.10 | 60.58 | 69.63 | 29.20 |
+| esnek | 77.04 | 63.04 | 60.58 | 69.63 | 29.20 |
+| ilk iki | 82.22 | 61.59 | 78.83 | 78.52 | 36.50 |
+| hatalılarda olumlu cümle | 4.44 | 6.52 | 1.46 | 18.52 | 46.72 |
+| doğrularda gereksiz uyarı | 6.67 | 11.68 | 0.74 | 10.37 | 7.91 |
+
+Vasil yine en zayıf kişi; hatalı tekrarlarının 46,72'sinde olumlu cümle aldı. Karar 5 gereği Vasil'in etiketleri yorumlanmıyor.
+
+### 5. Gerçek sınıfa göre, önden + çapraz (`sinif.csv`)
+| gerçek sınıf | tekrar | katı | ilk iki | olumlu cümle (kaçırma) |
+| --- | --- | --- | --- | --- |
+| doğru | 681 | – | – | gereksiz uyarı 7.49 |
+| omuz | 135 | 41.48 | **73.33** | 14.81 |
+| baş | 138 | 51.45 | 57.25 | 18.12 |
+| öne kaçma | 137 | 40.15 | 44.53 | 35.04 |
+| dirsek | 137 | 56.20 | 67.15 | 6.57 |
+| az kaldırma | 135 | 94.07 | 95.56 | 2.96 |
+
+Omuz silkmesinde (projenin odağı) ikinci hatanın da söylenmesi büyük fark yaratıyor: 41,48 → 73,33. Silkmeli tekrarlarda başka bir hata da (çoğunlukla az kaldırma) aynı anda görülüyor.
+
+### 6. Söylenen hatanın ölçüsü, faz ve şiddet (`olcu.csv`, önden + çapraz)
+| söylenen hata | kez (1. veya 2.) | birim | \|fark\| medyan (Ç1–Ç3) | hafif / belirgin / çok belirgin | kaldırırken / en üstte / indirirken |
+| --- | --- | --- | --- | --- | --- |
+| omuz | 204 | % gövde | 8 (6–11) | 41 / 74 / 89 | 115 / 78 / 11 |
+| baş | 127 | ° | 14 (10–17) | 0 / 66 / 61 | 33 / 80 / 14 |
+| öne kaçma | 189 | % gövde | 29 (19–55) | 0 / 74 / 115 | 99 / 48 / 42 |
+| dirsek | 164 | ° | 48 (34–80,25) | 24 / 90 / 50 | 76 / 49 / 39 |
+| az kaldırma | 270 | ° | 31 (21–48) | 148 / 52 / 70 | 0 / 270 / 0 |
+
+- Omuz cümlelerinin 199'unda omuz çizgisi eğimi de söylendi (\|fark\| ≥ 1°); eğim farkının medyanı 7°.
+- Bütün cümlelerde ölçü var ("ölçüsüz cümle" = 0).
+
+### 7. Şiddet eşikleri (`siddet_esikleri.csv`)
+Her test kişisi için diğer 4 kişiden alındı. Örnek (test kişisi Honza): omuz q₁ = 0.443, q₂ = 0.610; dirsek 0.419 / 0.709; az kaldırma (d) 5.92 / 11.15. Tablonun tamamı dosyada.
+
+### Ne çıktı?
+- **Cümle üretimi kayıpsız.** Çıkarıcı uyumu %100. Geri bildirimin doğruluğunu tamamen Deney 2'nin kararı belirliyor; cümleye çevirme adımı hata eklemiyor.
+- **İki hata söylemek işe yarıyor.** Katı 56,60 → ilk iki 67,45. Silkmede 41,48 → 73,33. Bedeli küçük: doğru tekrarlarda iki uyarı yalnızca 1,62.
+- **Gereksiz uyarı düşük:** 100 doğru tekrarda 7,49 (GA 3,85 – 10,40).
+- **Profil yine çalışmıyor:** hatalı tekrarların 59,21'inde olumlu cümle. Bu, Karar 6 ve 20'deki sınırlılıkla tutarlı.
+- **Beklenmeyen 1: "hafif" sınıfı baş ve öne kaçmada hiç çıkmadı.** Şiddet eşikleri, o hatayla etiketli bütün tekrarlardan (sistemin yakalayamadıkları dahil) hesaplanıyor; önceden böyle belirlenmişti. Yakalanamayanların puanı çok düşük olduğu için q₁ küçük kalıyor (öne kaçmada q₁ ≈ 0,04). Sistemin eşiği geçip söylediği hatalar ise zaten bu sınırın üstünde. Bu nedenle şiddet kelimesi pratikte iki kademeye iniyor. Tanım değiştirilmedi; sınırlılık.
+- **Beklenmeyen 2: dirsek ve öne kaçmada ölçüler büyük ve dağınık.** Dirsek \|fark\| medyanı 48°, Ç3 80°. Öne kaçmada bir örnekte "%112'si kadar görünürken %11'e kısaldı". Sebep sınamada görülen sorun: ölçü, sapmanın en büyük olduğu **tek kareden** alınıyor; o karede 2B iskelet çökmüş olabiliyor. Omuz (medyan 8 puan) ve baş (14°) daha makul. Raporda sınırlılık olarak yazılmalı; önerilen çözüm `docs/GELECEK_CALISMA.md` madde 6'da.
+
+### Sonuçtan sonra yapılan küçük düzeltme (yalnızca görüntü)
+`ornek_cumleler.md` dosyasında boş "ek hatalar" alanı "nan" diye yazılıyordu. `deneyler/deney3.py` içindeki yazdırma satırı düzeltildi. Dosya, kullanıcının çalıştırdığı `cumleler.csv`'den yeniden üretildi; aynı 20 tekrar ve aynı cümleler, yalnızca "nan" → "–". Metrikler bundan etkilenmiyor ("nan" hiçbir tahminle eşleşmiyor).
 
 ## Kabul ölçütü kontrolü
-- [ ] Metrik tablosu var (tam çalıştırmadan sonra)
-- [ ] 20 örnek cümle var (`sonuclar/deney3/ornek_cumleler.md`)
-- [ ] Kullanıcı örnekleri okudu; yorumu buraya not edildi
+- [x] Metrik tablosu var (`ozet.csv`, `bootstrap.csv`, `gorus_grubu.csv`, `kisi.csv`, `sinif.csv`, `olcu.csv`)
+- [x] 20 örnek cümle var (`sonuclar/deney3/ornek_cumleler.md`)
+- [ ] **Kullanıcı örnekleri okudu; yorumu buraya not edildi — BEKLİYOR.** Adım 5 bu madde tamamlanınca kapanır.
 - [x] Çıkarıcı, şablon birleşimlerinin %100'ünde doğru (`test_cikarici_*_sablonlari`)
 - [x] Elle yazılmış 24 cümlenin 23'ü doğru. Biri bilinen sınırlılık: "Omzun kalkmadı, kolun düzdü, güzel tekrar." cümlesinde omuz bulunuyor, çünkü olumsuz geçmiş zaman ayırt edilmiyor. Not: Sözlük bu 24 cümleyle geliştirildi, bu yüzden bu oran iyimser. Asıl bağımsız sınav Deney 4'teki LLM cümleleri olacak.
 - [x] `pytest`: `112 passed, 1 xfailed`
@@ -210,4 +301,5 @@ Kod bir kez, geçici klasörde ve bootstrap'sız çalıştırıldı. Amaç yaln�
 - **`omuz_egim` bandı ayrı modelle** kuruldu (madde 6). Deney 2 puanları değişmedi; denetim bunu doğruluyor.
 
 ## Açık sorular / danışmana notlar
-- Dirsek ölçüsündeki tek kare uç değerleri (yukarıdaki gözlem). Raporda bir "sınırlılık" cümlesi yeterli mi?
+- **Tek kare ölçüsü:** Dirsek ve öne kaçmadaki tek kare uç değerleri (dirsek \|fark\| medyanı 48°). Raporda bir "sınırlılık" cümlesi yeterli mi? Uygulamada (Adım 6) kullanıcıya "dirsek açın 6 dereceye indi" gibi bir cümle gösterilecek. Karar 18 yöntemi donduruyor; bu bir anlatım ayrıntısı olsa da değiştirmeden önce danışmanın onayı gerekiyor.
+- **Şiddet:** Baş ve öne kaçmada "hafif" hiç çıkmıyor (yukarıda, beklenmeyen 1). Şiddet kelimesinin tanımı olduğu gibi kalsın mı?

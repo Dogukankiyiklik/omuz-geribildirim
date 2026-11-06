@@ -24,8 +24,8 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | --- | --- | --- | --- | --- | --- |
 | 1 | 4 (ek) | **Deney 2 revize** (Karar 13–14): yeni az kaldırma puanı + "ilk iki" metriği; `ADIM_04.md` sonuna "Ek: Güncelleme 05" | 7 Kas | Zorunlu 📤 | ✅ |
 | 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 | ✅ |
-| 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 | 🔄 |
-| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ⏳ |
+| 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 | ✅ |
+| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | 🔄 |
 | 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker) | 10–11 Kas | Zorunlu 📤 | ⏳ |
 | 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ⏳ |
 | 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ |
@@ -35,7 +35,7 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
 | — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |
 
-Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026, Güncelleme 07 öncesi). Ana tablodaki Adım 0–4 de tamamlandı.
+Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026; Adım 5, Güncelleme 07 ile kapandı). Ana tablodaki Adım 0–4 de tamamlandı.
 
 Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 

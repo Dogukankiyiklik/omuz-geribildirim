@@ -20,7 +20,7 @@ OMUZ, BAS, ONE, DIRSEK, KALDIRMA = ("ERR_ELEVATED_SHOULDER", "ERR_HEAD_TO_SIDE",
 
 _AYIRICI = re.compile(r"[.!?;:,]|\b(?:ama|ancak|fakat|ayrıca|yalnız)\b")
 _OLUMLU = re.compile(r"normal aralık|normal sınır|doğru yaptın|doğru tekrar|tekrar doğru|devam et|"
-                     r"\bharika\b|\bgüzel\b|iyi iş|sorun yok")
+                     r"\bharika\b|\bgüzel\b|iyi iş|sorun yok|yerinde")
 
 _KOL = r"\bkol\w*"
 # Her hata türü: (kök deseni, eylem deseni). Eylem None ise kök yeter. Birden çok kural "veya" ile.

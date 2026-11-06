@@ -17,6 +17,8 @@ Tanımlar ADIM_05.md "Önceden belirlenenler" bölümünde (kod ve sonuçlardan 
 Kullanım:
     python -m deneyler.deney3                  # ~1–3 dk; önce python -m deneyler.deney2 çalışmış olmalı
     python -m deneyler.deney3 --bootstrap 0    # bootstrap'sız (hızlı sınama)
+    python -m deneyler.deney3 --olcu-surumu saglam   # + sağlam ölçü çıktıları (Güncelleme 07, Karar 21)
+Güncelleme 07 (Karar 28): her tekrar için hasta_cumlesi ve uzman_ayrintisi; çıkarıcı ikisinde de çalışır.
 Çıktı: sonuclar/deney3/
 """
 from __future__ import annotations
@@ -120,22 +122,30 @@ def ayrintilar(tekrarlar) -> dict:
             beklenen_tepe = float(np.mean([np.median([tepe_acisi(u["kol"]) for u in altlar[i]]) for i in secim]))
             cikti[(t.video, t.kamera, int(t.yonelim), int(t.satir))] = {
                 "kol": f["kol"], "deger": {k: f[k] for k in OLCUTLER}, "mu": mu, "bd": bd,
+                "gor": {k: gb.olcut_gorunurlugu(t.dizi[t.etiketli], k) for k in OLCUTLER},
                 "ek_deger": f[gb.OMUZ_ANLATIM], "ek_mu": mu_ek,
                 "tepe": tepe_acisi(f["kol"]), "beklenen_tepe": beklenen_tepe}
     return cikti
 
 
-def kod_uret(hata: str, siddet: str, kural: ht.KararKurali, a: dict) -> gb.SapmaKodu:
+def kod_uret(hata: str, siddet: str, kural: ht.KararKurali, a: dict,
+             olcu_surumu: str = "tek_kare") -> gb.SapmaKodu:
     k = kural.esleme[hata]
     yon = kural.yon(k)
     if k == ht.KALDIRMA:
         return gb.kaldirma_kodu(yon, siddet, a["tepe"], a["beklenen_tepe"])
     ek = (a["ek_deger"], a["ek_mu"]) if hata == ht.SILKME else (None, None)
-    return gb.durus_kodu(hata, k, yon, siddet, a["kol"], a["deger"][k], a["mu"][k], a["bd"][k], *ek)
+    return gb.durus_kodu(hata, k, yon, siddet, a["kol"], a["deger"][k], a["mu"][k], a["bd"][k], *ek,
+                         olcu_surumu=olcu_surumu, gorunurluk=a["gor"][k])
 
 
-def cumleler(p: pd.DataFrame, kurallar: dict, ayr: dict, tohum: int = TOHUM) -> pd.DataFrame:
-    """Her tekrar için sapma kodları, cümle ve çıkarılan hata listesi."""
+def _sayi_var(metin: str) -> bool:
+    return any(ch.isdigit() for ch in metin)
+
+
+def cumleler(p: pd.DataFrame, kurallar: dict, ayr: dict, tohum: int = TOHUM,
+             olcu_surumu: str = "tek_kare") -> pd.DataFrame:
+    """Her tekrar için sapma kodları, iki metin (Karar 28) ve her metinden çıkarılan hata listesi."""
     kayit = []
     for _, r in p.iterrows():
         a = ayr[(r.video, r.kamera, int(r.yonelim), int(r.satir))]
@@ -144,23 +154,36 @@ def cumleler(p: pd.DataFrame, kurallar: dict, ayr: dict, tohum: int = TOHUM) -> 
         for sira in (1, 2):
             h = r[f"soylenen{sira}"]
             if h and h != ht.DOGRU:
-                kodlar.append(kod_uret(h, r[f"siddet{sira}"], kural, a))
-        metin = gb.geri_bildirim(kodlar, a["tepe"], int(r.satir), tohum)
-        L = cozumle(metin)
+                kodlar.append(kod_uret(h, r[f"siddet{sira}"], kural, a, olcu_surumu))
+        metin = gb.iki_katman(kodlar, a["tepe"], int(r.satir), tohum)
         niyet = [k.hata for k in kodlar]
         s = {c: r[c] for c in ANAHTAR + ["kisi", "tekrar_no", "gorus", "gorus_grubu", "hata", "ek_hata",
                                           "tahmin", "soylenen1", "soylenen2", "z1", "z2", "T"]}
+        s["olcu_surumu"] = olcu_surumu
         s["tepe_acisi"] = gb.yuvarla(a["tepe"])
         for i in (0, 1):
             d = kodlar[i].sozluk() if i < len(kodlar) else {}
             for alan in ("hata", "faz", "yon", "siddet", "olcut", "olcu", "beklenen", "fark", "birim",
-                         "omuz_egim_fark"):
+                         "omuz_egim_fark", "olcu_yolu", "olcu_kare_sayisi"):
                 s[f"{i + 1}_{alan}"] = d.get(alan, "")
-        s["cumle"] = metin
+            hc = gb.hasta_cumlesi(kodlar[i]) if i < len(kodlar) else ""
+            s[f"{i + 1}_hasta_sayili"] = _sayi_var(hc) if hc else ""
+            s[f"{i + 1}_hasta_kelime"] = len(hc.split()) if hc else ""
+        s["hasta_cumlesi"] = metin["hasta_cumlesi"]
+        s["uzman_ayrintisi"] = metin["uzman_ayrintisi"]
         s["soylenmek_istenen"] = "|".join(niyet)
-        s["cikarilan"] = "|".join(L)
+        s["cikarilan"] = "|".join(cozumle(metin["uzman_ayrintisi"]))
+        s["cikarilan_hasta"] = "|".join(cozumle(metin["hasta_cumlesi"]))
         kayit.append(s)
     return pd.DataFrame(kayit)
+
+
+METINLER = {"uzman": "cikarilan", "hasta": "cikarilan_hasta"}
+
+
+def metin_secimi(c: pd.DataFrame, metin: str) -> pd.DataFrame:
+    """Metrikler 'cikarilan' sütunundan hesaplanır; hasta metni için o sütun hasta cümlesinin listesi olur."""
+    return c if metin == "uzman" else c.assign(cikarilan=c[METINLER[metin]])
 
 
 # ---------------------------------------------------------------- 3) metrikler
@@ -227,10 +250,11 @@ def olcu_tablosu(c: pd.DataFrame) -> pd.DataFrame:
     """Betimsel: söylenen her hata için |fark| dağılımı, şiddet ve faz dağılımı (önden + çapraz)."""
     g = c[gorus_maskesi(c, ONDEN_CAPRAZ)]
     parca = []
+    alanlar = ("hata", "faz", "siddet", "fark", "birim", "omuz_egim_fark", "olcu_yolu", "olcu_kare_sayisi")
     for i in (1, 2):
-        x = g[g[f"{i}_hata"] != ""][[f"{i}_{a}" for a in ("hata", "faz", "siddet", "fark", "birim", "omuz_egim_fark")]
-                                    + ["hata"]].copy()
-        x.columns = ["söylenen", "faz", "siddet", "fark", "birim", "omuz_egim_fark", "gerçek"]
+        x = g[g[f"{i}_hata"] != ""][[f"{i}_{a}" for a in alanlar] + ["hata"]].copy()
+        x.columns = ["söylenen", "faz", "siddet", "fark", "birim", "omuz_egim_fark", "olcu_yolu",
+                     "olcu_kare_sayisi", "gerçek"]
         x["sıra"] = i
         parca.append(x)
     x = pd.concat(parca)
@@ -249,13 +273,58 @@ def olcu_tablosu(c: pd.DataFrame) -> pd.DataFrame:
             r[f"faz: {fz}"] = int((y.faz == fz).sum())
         if h == ht.SILKME:
             r["omuz eğimi |fark| medyan (°)"] = e.median()
+            r["omuz eğimi |fark| Ç1 (°)"] = e.quantile(0.25)
+            r["omuz eğimi |fark| Ç3 (°)"] = e.quantile(0.75)
             r["omuz eğimi söylenen (|fark| ≥ 1°)"] = int((e >= 1).sum())
+        for yol in (gb.YOL_TEK, gb.YOL_GORUNUR, gb.YOL_GORUNURLUKSUZ, gb.YOL_YEDEK, gb.YOL_TEPE):
+            r[f"yol: {yol}"] = int((y.olcu_yolu == yol).sum())
+        r["ölçü kare sayısı medyan"] = pd.to_numeric(y.olcu_kare_sayisi, errors="coerce").median()
         satir.append(r)
     return pd.DataFrame(satir)
 
 
+def metin_tablosu(c: pd.DataFrame) -> pd.DataFrame:
+    """Karar 28, betimsel (önden + çapraz): iki metnin kelime sayısı ve hasta cümlesinde sayı içerme oranı."""
+    g = c[gorus_maskesi(c, ONDEN_CAPRAZ)]
+    kel_h = g.hasta_cumlesi.str.split().str.len()
+    kel_u = g.uzman_ayrintisi.str.split().str.len()
+    satir = []
+    for ad, m in [("bütün tekrarlar", np.ones(len(g), bool)), ("olumlu cümle (hata söylenmedi)", g.soylenen1 == ht.DOGRU),
+                  ("bir hata söylendi", (g.soylenen1 != ht.DOGRU) & (g.soylenen2 == "")),
+                  ("iki hata söylendi", g.soylenen2 != "")]:
+        m = np.asarray(m)
+        satir.append({"grup": ad, "tekrar": int(m.sum()),
+                      "hasta: ortalama kelime (bütün metin)": kel_h[m].mean(),
+                      "uzman: ortalama kelime (bütün metin)": kel_u[m].mean(),
+                      "hasta: sayı içeren metin /100": 100 * g.hasta_cumlesi[m].map(_sayi_var).mean(),
+                      "uzman: sayı içeren metin /100": 100 * g.uzman_ayrintisi[m].map(_sayi_var).mean()})
+    # hata türüne göre: o hatanın kendi hasta cümlesi (1. ya da 2. sırada söylenmiş)
+    for h in ht.HATALAR:
+        say, kel = [], []
+        for i in (1, 2):
+            y = g[g[f"{i}_hata"] == h]
+            say += [bool(v) for v in y[f"{i}_hasta_sayili"]]
+            kel += [int(v) for v in y[f"{i}_hasta_kelime"]]
+        satir.append({"grup": f"hata cümlesi: {ht.KISA_AD[h]}", "tekrar": len(say),
+                      "hasta: ortalama kelime (bütün metin)": np.nan, "uzman: ortalama kelime (bütün metin)": np.nan,
+                      "hasta: hata cümlesi ortalama kelime": float(np.mean(kel)) if kel else np.nan,
+                      "hasta: sayı içeren hata cümlesi /100": 100 * float(np.mean(say)) if say else np.nan})
+    return pd.DataFrame(satir)
+
+
+def ozet_tablosu(c: pd.DataFrame) -> pd.DataFrame:
+    """Karar 28: metrikler iki metin için ayrı ayrı; kararlar aynı olduğundan eşit olmalı (assert)."""
+    satir = []
+    for gr in GORUSLER:
+        m = {metin: metrik_satiri(metin_secimi(c, metin)[gorus_maskesi(c, gr)]) for metin in ("hasta", "uzman")}
+        a, b = m["hasta"], m["uzman"]
+        assert all((a[k] == b[k]) or (np.isnan(a[k]) and np.isnan(b[k])) for k in a), (gr, a, b)
+        satir += [{"görüş": gr, "metin": metin, **m[metin]} for metin in ("hasta", "uzman")]
+    return pd.DataFrame(satir)
+
+
 def tablolar_uret(c: pd.DataFrame, esikler: pd.DataFrame, bootstrap_n=2000) -> dict:
-    T = {"ozet": pd.DataFrame([{"görüş": gr, **metrik_satiri(c[gorus_maskesi(c, gr)])} for gr in GORUSLER]),
+    T = {"ozet": ozet_tablosu(c),
          "gorus_grubu": pd.DataFrame([{"görüş grubu": gg, **metrik_satiri(c[c.gorus_grubu == gg])}
                                       for gg in GORUS_GRUPLARI]),
          "kisi": pd.DataFrame([{"görüş": gr, "kisi": k, **metrik_satiri(g)}
@@ -264,6 +333,7 @@ def tablolar_uret(c: pd.DataFrame, esikler: pd.DataFrame, bootstrap_n=2000) -> d
                                 for gr in (ONDEN_CAPRAZ, TUMU) for g in [c[gorus_maskesi(c, gr)]]
                                 for h in ht.SINIFLAR]),
          "olcu": olcu_tablosu(c),
+         "metin": metin_tablosu(c),
          "siddet_esikleri": esikler}
     if bootstrap_n:
         T["bootstrap"] = bootstrap_tablosu(c, bootstrap_n)
@@ -271,7 +341,7 @@ def tablolar_uret(c: pd.DataFrame, esikler: pd.DataFrame, bootstrap_n=2000) -> d
     return T
 
 
-def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM) -> None:
+def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM, baslik_eki: str = "") -> None:
     """Önden + çapraz: her gerçek sınıftan 3 + iki hata söylenen 2 tekrar = 20 (tohum sabit)."""
     rng = np.random.default_rng(tohum)
     g = c[gorus_maskesi(c, ONDEN_CAPRAZ)].reset_index(drop=True)
@@ -285,10 +355,12 @@ def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM) -> None:
 
     def ad(h):
         return ht.KISA_AD.get(h, h) if h else "–"
-    md = ["# Deney 3 — örnek geri bildirim cümleleri", "",
+    surum = str(c.olcu_surumu.iloc[0]) if "olcu_surumu" in c else "tek_kare"
+    md = [f"# Deney 3 — örnek geri bildirim cümleleri{baslik_eki}", "",
           f"Önden + çapraz, tohum {tohum}. Her gerçek sınıftan 3 tekrar ve sistemin iki hata söylediği 2 tekrar.",
           "Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma (Karar 18). Ölçüler kişinin kendi kalibrasyonuna göre.",
-          ""]
+          f"Ölçü sürümü: `{surum}` (Karar 21). Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), "
+          "altında **uzman ayrıntısı** (Karar 28).", ""]
     for n, (grup, i) in enumerate(secim, 1):
         r = g.iloc[i]
         ek_ham = "" if pd.isna(r.ek_hata) or str(r.ek_hata) == "nan" else str(r.ek_hata)
@@ -298,15 +370,23 @@ def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM) -> None:
                "",
                f"- **Gerçek etiket:** {ad(r.hata)} · **ek hatalar:** {ek}",
                f"- **Sistemin söylediği:** {soy} · çıkarıcının bulduğu: {', '.join(ad(x) for x in _liste(r.cikarilan)) or '–'}",
-               "", f"> {r.cumle}", ""]
-    md += ["## Okurken", "- Cümle anlaşılır mı? Ne yapman gerektiğini söylüyor mu?",
-           "- Ölçü (derece, gövde %'si) mantıklı görünüyor mu?",
+               "", f"**Hasta cümlesi:** {r.hasta_cumlesi}", "",
+               f"<sub>Uzman ayrıntısı: {r.uzman_ayrintisi}</sub>", ""]
+    md += ["## Okurken", "- Hasta cümlesi anlaşılır mı? Ne yapman gerektiğini söylüyor mu?",
+           "- Uzman ayrıntısındaki ölçü (derece, gövde %'si) mantıklı görünüyor mu?",
            "- Yanlış etiketlenmiş görünen örnekleri `araclar/gorsel_kontrol.py` ile videoda izleyebilirsin.", ""]
     yol.write_text("\n".join(md), encoding="utf-8")
 
 
 # ---------------------------------------------------------------- çalıştır
-def calistir(cikti=CIKTI, bootstrap_n=2000, yazdir=True, tohum: int = TOHUM):
+def calistir(cikti=CIKTI, bootstrap_n=2000, yazdir=True, tohum: int = TOHUM, olcu_surumu: str = "tek_kare"):
+    """
+    Birincil sonuç tek kare ölçüsüyle (ADIM_05). olcu_surumu = "saglam" (Karar 21) ise ana tablolar yine tek
+    kare sürümünden yazılır; ek olarak olcu_saglam.csv, cumleler_saglam.csv, ornek_cumleler_saglam.md
+    üretilir ve iki sürümün çıkarılan hata listelerinin (yani bütün metriklerin) aynı olduğu denetlenir.
+    """
+    if olcu_surumu not in gb.OLCU_SURUMLERI:
+        raise ValueError(olcu_surumu)
     t0 = time.time()
     cikti = Path(cikti)
     cikti.mkdir(parents=True, exist_ok=True)
@@ -316,12 +396,27 @@ def calistir(cikti=CIKTI, bootstrap_n=2000, yazdir=True, tohum: int = TOHUM):
     if yazdir:
         print(f"  kararlar: {len(p)} tekrar; Deney 2 ile birebir aynı ({n} satır denetlendi)")
     ayr = ayrintilar(veri.tekrarlari_yukle(1))
-    c = cumleler(p, kurallar, ayr, tohum)
+    c = cumleler(p, kurallar, ayr, tohum, "tek_kare")
+    assert (c.cikarilan == c.cikarilan_hasta).all(), "hasta ve uzman metinleri farklı hata listesi verdi"
     if yazdir:
-        print(f"  cümleler: {len(c)} ({time.time() - t0:.1f} s)")
+        print(f"  cümleler: {len(c)} ({time.time() - t0:.1f} s); hasta = uzman çıkarılan liste: "
+              f"{int((c.cikarilan == c.cikarilan_hasta).sum())}/{len(c)}")
     T = tablolar_uret(c, esikler, bootstrap_n)
     sonuclari_yaz(T, cikti)
     ornek_cumleler(c, cikti / "ornek_cumleler.md", tohum)
+    if olcu_surumu == "saglam":
+        cs = cumleler(p, kurallar, ayr, tohum, "saglam")
+        # Karar 21: ölçü yalnızca anlatımda; çıkarılan listeler (metriklerin tek girdisi) değişmemeli.
+        for sutun in ("soylenmek_istenen", "cikarilan", "cikarilan_hasta"):
+            assert (cs[sutun].to_numpy() == c[sutun].to_numpy()).all(), sutun
+        assert ozet_tablosu(cs).equals(T["ozet"]), "sağlam sürümde ana metrikler değişti"
+        olcu_s = olcu_tablosu(cs)
+        sonuclari_yaz({"olcu_saglam": olcu_s, "cumleler_saglam": cs, "metin_saglam": metin_tablosu(cs)},
+                      cikti, xlsx_adi="sonuclar_saglam.xlsx")
+        ornek_cumleler(cs, cikti / "ornek_cumleler_saglam.md", tohum, " (sağlam ölçü)")
+        T["olcu_saglam"] = olcu_s
+        if yazdir:
+            print("  sağlam ölçü: çıkarılan listeler ve ana metrikler tek kare sürümüyle aynı (assert geçti)")
     if yazdir:
         yazdir_ozet(T)
         print(f"\nSüre: {time.time() - t0:.1f} s · Çıktı: {cikti}")
@@ -340,6 +435,11 @@ def yazdir_ozet(T):
     print(k[k["görüş"] == ONDEN_CAPRAZ].set_index("kisi")[ANA_METRIKLER + ["çıkarıcı uyumu /100"]].round(2).to_string())
     print("\n4) Söylenen hatanın ölçüsü (önden+çapraz):")
     print(T["olcu"].round(1).to_string(index=False))
+    if "olcu_saglam" in T:
+        print("\n4b) Söylenen hatanın ölçüsü, sağlam ölçü (önden+çapraz):")
+        print(T["olcu_saglam"].round(1).to_string(index=False))
+    print("\n4c) İki metin (önden+çapraz):")
+    print(T["metin"].round(1).to_string(index=False))
     if "bootstrap" in T:
         print("\n5) Kişi bazlı bootstrap %95 GA:")
         print(T["bootstrap"].round(2).to_string(index=False))
@@ -350,10 +450,12 @@ def main():
     ap.add_argument("--cikti", default=str(CIKTI))
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--tohum", type=int, default=TOHUM)
+    ap.add_argument("--olcu-surumu", choices=gb.OLCU_SURUMLERI, default="tek_kare",
+                    help="saglam: ana tablolara ek olarak sağlam ölçü çıktıları (Karar 21)")
     args = ap.parse_args()
     utf8_cikti()
     print("Deney 3 — kural tabanlı Türkçe geri bildirim (ana sistem: v2 yönlü, kaldırma ilk sürüm)")
-    calistir(args.cikti, args.bootstrap, tohum=args.tohum)
+    calistir(args.cikti, args.bootstrap, tohum=args.tohum, olcu_surumu=args.olcu_surumu)
 
 
 if __name__ == "__main__":

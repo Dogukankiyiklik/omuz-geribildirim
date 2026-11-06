@@ -14,6 +14,15 @@ belirlenenler" bölümünde, kod ve sonuçlardan önce sabitlendi:
   birimler : açı → derece; YENI ve kol_boyu → gövde boyunun %'si; omuz için ayrıca omuz çizgisi
              eğimi (omuz_egim, yalnızca anlatım). En yakın 1'e yuvarlanır; fark yuvarlanmış
              değerlerin farkıdır. Santimetre yok.
+
+Güncelleme 07:
+  Karar 21 : "sağlam ölçü" (olcu_surumu = "saglam"): ölçü tek kare yerine seçilen fazdaki K karelerinin
+             medyanı. K = beklenen yönde fazlalığı > 0 olan ve ölçütün eklemlerinin hepsinin görünürlüğü
+             ≥ 0,5 olan kareler; |K| < 3 ise görünürlük koşulu kalkar; yine < 3 ise tek kare kuralı.
+             Tespit, faz ve faz seçimi değişmez. Uygulamanın varsayılanı "saglam"; Deney 3'ün birincil
+             sonucu "tek_kare".
+  Karar 28 : iki katmanlı geri bildirim. Aynı SapmaKodu'ndan hasta_cumlesi (kısa; yüzde ve şiddet kelimesi
+             yok; yalnızca 5°'ye yuvarlanmış derece) ve uzman ayrıntısı (hata_cumlesi, bugünkü ölçülü cümle).
 """
 from __future__ import annotations
 
@@ -34,6 +43,22 @@ SIDDET_METNI = {"hafif": "biraz", "belirgin": "belirgin şekilde", "çok belirgi
 YUZDE_OLCUTLERI = {"YENI", "kol_boyu"}   # gövde boyuna bölünmüş uzunluklar → %
 OMUZ_ANLATIM = "omuz_egim"
 TARAF = "sağ"                            # Ex1'de sağ kol
+
+# Karar 21
+OLCU_SURUMLERI = ("tek_kare", "saglam")
+VARSAYILAN_OLCU = "saglam"               # uygulamanın varsayılanı; Deney 3'ün birincil sonucu "tek_kare" ile
+GORUNURLUK_ESIGI = 0.5                   # MediaPipe'ın varsayılan görünürlük eşiği (veriye bakılmadan)
+EN_AZ_KARE = 3
+# Ölçütün kare başına kullandığı eklemler (MediaPipe indeksleri). YENI ve kol_boyu'nun böldüğü dinlenme
+# gövde boyu (g0) tekrar başındaki karelerden gelir, kare başına değildir; bu yüzden listede yok.
+GORUNURLUK_EKLEMLERI = {"YENI": (8, 12), "bas": (7, 8, 11, 12, 23, 24), "on_kacma": (12, 16, 24),
+                        "kol_boyu": (12, 16), "dirsek": (12, 14, 16), "omuz_egim": (11, 12, 23, 24)}
+# cumleler.csv'deki "olcu_yolu" değerleri
+YOL_TEK = "tek_kare"                         # olcu_surumu = "tek_kare"
+YOL_GORUNUR = "saglam_gorunur"               # K: fazlalık > 0 ve görünürlük ≥ 0,5, |K| ≥ 3
+YOL_GORUNURLUKSUZ = "saglam_gorunurluksuz"   # görünürlük koşulu kaldırıldı, |K| ≥ 3
+YOL_YEDEK = "saglam_tek_kare_yedek"          # yine |K| < 3: ADIM_05 tek kare kuralı
+YOL_TEPE = "tepe"                            # az kaldırma: tepe açısı (değişmez)
 
 
 # ---------------------------------------------------------------- Türkçe sayı ekleri
@@ -106,12 +131,17 @@ def model_ortalamasi(ayrintilar: list[dict], olcut: str) -> tuple[np.ndarray, np
     return mu, bd
 
 
+def fazlalik(bant_disi: np.ndarray, yon: int) -> np.ndarray:
+    """Kare başına beklenen yöndeki bant dışı büyüklük, max(yön · bant_disi, 0); NaN → 0."""
+    bd = np.asarray(bant_disi, float)
+    fazla = np.abs(bd) if yon == 0 else np.maximum(np.sign(yon) * bd, 0.0)
+    return np.where(np.isnan(fazla), 0.0, fazla)
+
+
 def an_sec(kol: np.ndarray, deger: np.ndarray, mu: np.ndarray, bant_disi: np.ndarray, yon: int):
     """(faz, kare) — ADIM_05 madde 1–2. Ölçülecek kare yoksa (None, None)."""
     faz = anlatim_fazlari(kol)
-    bd = np.asarray(bant_disi, float)
-    fazla = np.abs(bd) if yon == 0 else np.maximum(np.sign(yon) * bd, 0.0)
-    fazla = np.where(np.isnan(fazla), 0.0, fazla)
+    fazla = fazlalik(bant_disi, yon)
     if (fazla > 0).any():
         p = int(np.argmax([fazla[faz == f].sum() for f in (KALDIRIRKEN, USTTE, INDIRIRKEN)]))
         idx = np.flatnonzero(faz == p)
@@ -123,6 +153,32 @@ def an_sec(kol: np.ndarray, deger: np.ndarray, mu: np.ndarray, bant_disi: np.nda
         return None, None
     j = int(np.argmax(d))
     return int(faz[j]), j
+
+
+def olcut_gorunurlugu(dizi: np.ndarray, olcut: str) -> np.ndarray:
+    """Kare başına ölçütün kullandığı eklemlerin en küçük görünürlüğü (dizi: (kare, 33, 4))."""
+    return np.min(np.asarray(dizi)[:, list(GORUNURLUK_EKLEMLERI[olcut]), 3], axis=1)
+
+
+def saglam_kareler(kol, bant_disi, yon: int, faz_secimi: int, gorunurluk=None):
+    """
+    Karar 21: seçilen fazdaki K kareleri ve yolu. Dönüş (indeksler, yol); |K| < 3 ise (None, YOL_YEDEK).
+    gorunurluk None ise görünürlük koşulu uygulanamaz ve doğrudan görünürlüksüz yola geçilir.
+    """
+    K0 = (anlatim_fazlari(kol) == faz_secimi) & (fazlalik(bant_disi, yon) > 0)
+    if gorunurluk is not None:
+        K1 = K0 & (np.nan_to_num(np.asarray(gorunurluk, float), nan=0.0) >= GORUNURLUK_ESIGI)
+        if K1.sum() >= EN_AZ_KARE:
+            return np.flatnonzero(K1), YOL_GORUNUR
+    if K0.sum() >= EN_AZ_KARE:
+        return np.flatnonzero(K0), YOL_GORUNURLUKSUZ
+    return None, YOL_YEDEK
+
+
+def _medyan(x, idx):
+    v = np.asarray(x, float)[idx]
+    v = v[np.isfinite(v)]
+    return float(np.median(v)) if len(v) else None
 
 
 # ---------------------------------------------------------------- sapma kodu
@@ -140,6 +196,8 @@ class SapmaKodu:
     ek_olcu: float | None = None      # omuz: omuz çizgisi eğimi (°)
     ek_beklenen: float | None = None
     taraf: str = TARAF
+    olcu_yolu: str = ""               # Karar 21: ölçünün hangi yoldan alındığı (YOL_*)
+    olcu_kare_sayisi: int = 0         # ölçünün alındığı kare sayısı (|K|; tek kare = 1)
 
     @property
     def birim(self) -> str:
@@ -173,24 +231,39 @@ class SapmaKodu:
     def sozluk(self) -> dict:
         return {"hata": self.hata, "taraf": self.taraf, "faz": FAZ_ADLARI.get(self.faz, ""), "yon": self.yon,
                 "siddet": self.siddet, "olcut": self.olcut, "olcu": self.olcu_g, "beklenen": self.beklenen_g,
-                "fark": self.fark, "birim": self.birim, "kare": self.kare, "omuz_egim_fark": self.ek_fark}
+                "fark": self.fark, "birim": self.birim, "kare": self.kare, "omuz_egim_fark": self.ek_fark,
+                "olcu_yolu": self.olcu_yolu, "olcu_kare_sayisi": self.olcu_kare_sayisi}
 
 
 def durus_kodu(hata: str, olcut: str, yon: int, siddet: str, kol, deger, mu, bant_disi,
-               ek_deger=None, ek_mu=None) -> SapmaKodu:
-    """Duruş hatası (omuz, baş, öne kaçma, dirsek) için sapma kodu."""
+               ek_deger=None, ek_mu=None, olcu_surumu: str = VARSAYILAN_OLCU, gorunurluk=None) -> SapmaKodu:
+    """
+    Duruş hatası (omuz, baş, öne kaçma, dirsek) için sapma kodu. Faz ve an: ADIM_05 madde 1–2.
+    olcu_surumu "tek_kare": ölçü o anki tek kare; "saglam": K karelerinin medyanı (Karar 21).
+    gorunurluk: kare başına ölçütün eklemlerinin en küçük görünürlüğü (olcut_gorunurlugu).
+    """
+    if olcu_surumu not in OLCU_SURUMLERI:
+        raise ValueError(olcu_surumu)
     faz, j = an_sec(kol, deger, mu, bant_disi, yon)
     if j is None:
         return SapmaKodu(hata, olcut, yon, siddet, None, None)
-    eo = eb = None
-    if ek_deger is not None and ek_mu is not None:
-        eo, eb = float(ek_deger[j]), float(ek_mu[j])
-    return SapmaKodu(hata, olcut, yon, siddet, float(deger[j]), float(mu[j]), faz, j, eo, eb)
+    ek = ek_deger is not None and ek_mu is not None
+    yol = YOL_TEK
+    if olcu_surumu == "saglam":
+        K, yol = saglam_kareler(kol, bant_disi, yon, faz, gorunurluk)
+        if K is not None:
+            eo, eb = (_medyan(ek_deger, K), _medyan(ek_mu, K)) if ek else (None, None)
+            return SapmaKodu(hata, olcut, yon, siddet, _medyan(deger, K), _medyan(mu, K), faz, j, eo, eb,
+                             olcu_yolu=yol, olcu_kare_sayisi=len(K))
+    eo, eb = (float(ek_deger[j]), float(ek_mu[j])) if ek else (None, None)
+    return SapmaKodu(hata, olcut, yon, siddet, float(deger[j]), float(mu[j]), faz, j, eo, eb,
+                     olcu_yolu=yol, olcu_kare_sayisi=1)
 
 
 def kaldirma_kodu(yon: int, siddet: str, tepe: float, beklenen_tepe: float) -> SapmaKodu:
     """Az kaldırma: ölçü = tekrarın tepe açısı, beklenen = kalibrasyon tepelerinin medyanı; faz 'en üstte'."""
-    return SapmaKodu("ERR_LOW_ABDUCTION", ht.KALDIRMA, yon, siddet, float(tepe), float(beklenen_tepe), USTTE)
+    return SapmaKodu("ERR_LOW_ABDUCTION", ht.KALDIRMA, yon, siddet, float(tepe), float(beklenen_tepe), USTTE,
+                     olcu_yolu=YOL_TEPE)
 
 
 # ---------------------------------------------------------------- şiddet
@@ -313,3 +386,103 @@ def geri_bildirim(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum: int = 
     if len(kodlar) > 1:
         metin += " Ayrıca " + _ilk_kucuk(hata_cumlesi(kodlar[1], kisa=True))
     return metin
+
+
+# ---------------------------------------------------------------- Karar 28: hasta cümlesi
+# Kısa: ne oldu (fazıyla) + ne yapmalı. Yüzde, "gövde boyu" ve şiddet kelimesi yok. Sayı yalnızca derece,
+# 5°'ye yuvarlanmış; söylenen fark yuvarlanmış iki değerin farkı. Fark 0 ise (ya da işareti cümlenin
+# yönüyle çelişiyorsa) sayı söylenmez. Öne kaçmada sayı yok (GELECEK_CALISMA madde 5).
+HASTA_FAZ = {KALDIRIRKEN: "Kolunu kaldırırken", USTTE: "Kolun yukarıdayken", INDIRIRKEN: "Kolunu indirirken"}
+HASTA_ADIM = 5
+
+
+def yuvarla5(x) -> int | None:
+    """En yakın 5'in katı (yarımlar yukarı); None/NaN → None."""
+    if x is None or not np.isfinite(x):
+        return None
+    return HASTA_ADIM * yuvarla(float(x) / HASTA_ADIM)
+
+
+def _fark5(a, b) -> int | None:
+    """yuvarla5(a) − yuvarla5(b); biri yoksa None."""
+    ya, yb = yuvarla5(a), yuvarla5(b)
+    return None if ya is None or yb is None else ya - yb
+
+
+def _yaklasik(d) -> str:
+    return f" yaklaşık {d} derece" if d is not None and d > 0 else ""
+
+
+def hasta_cumlesi(k: SapmaKodu) -> str:
+    """Bir sapma kodunun hasta cümlesi (ne oldu + ne yapmalı; hata başına ~20 kelimeyi geçmez)."""
+    F = HASTA_FAZ.get(k.faz, "Hareket sırasında")
+    h, yukari = k.hata, k.yon >= 0
+
+    if h == "ERR_ELEVATED_SHOULDER":
+        e = _fark5(k.ek_olcu, k.ek_beklenen)   # omuz çizgisi eğimi; pozitif = sağ omuz yukarı
+        if not yukari:   # silkme: kulak–omuz mesafesi azaldı
+            return f"{F} {k.taraf} omzunu kulağına doğru{_yaklasik(e)} kaldırdın. Omzunu aşağıda ve gevşek tut."
+        d = -e if e is not None else None
+        return (f"{F} {k.taraf} omzun normalden{_yaklasik(d)} aşağıdaydı. "
+                "Omzunu doğal yüksekliğinde ve gevşek tut.")
+
+    if h == "ERR_HEAD_TO_SIDE":
+        if yukari:
+            return f"{F} başını{_yaklasik(_fark5(k.olcu, k.beklenen))} yana eğdin. Başını dik tut, karşıya bak."
+        return f"{F} başının duruşu normalden farklıydı. Başını dik tut, karşıya bak."
+
+    if h == "ERR_ARM_FORWARD":
+        if k.olcut == "kol_boyu" and yukari:
+            c = f"{F} kolun vücut hizasından çıktı."
+        else:
+            c = "Kolun yukarıdayken öne kaçtı." if k.faz == USTTE else f"{F} kolun öne kaçtı."
+        return c + " Kolunu tam yana, vücudunla aynı hizada kaldır."
+
+    if h == "ERR_BENT_ARM":
+        if not yukari:
+            return f"{F} dirseğini{_yaklasik(_fark5(k.beklenen, k.olcu))} büktün. Kolunu düz tut."
+        return f"{F} dirseğin normalden{_yaklasik(_fark5(k.olcu, k.beklenen))} fazla açıldı. Kolunu doğal ve düz tut."
+
+    if h == "ERR_LOW_ABDUCTION":
+        o, b = yuvarla5(k.olcu), yuvarla5(k.beklenen)
+        if yukari:   # eksik kaldırma (hocanın örneği)
+            d = _fark5(k.beklenen, k.olcu)
+            if d is None or d <= 0:
+                return "Kolunu yeterince kaldırmadın. Kolunu daha yukarı kaldır."
+            return (f"Kolunu {o} dereceye kadar kaldırdın; normalde {b} dereceye çıkıyorsun. "
+                    f"Kolunu yaklaşık {d} derece daha yukarı kaldır.")
+        d = _fark5(k.olcu, k.beklenen)
+        if d is None or d <= 0:
+            return "Kolunu normalden fazla kaldırdın. Kolunu normal yüksekliğine kadar kaldırman yeterli."
+        return (f"Kolunu normalden fazla kaldırdın; {o} dereceye çıktı, normalde {b} dereceye çıkıyorsun. "
+                f"Kolunu {b} dereceye kadar kaldırman yeterli.")
+    raise ValueError(h)
+
+
+OLUMLU_HASTA = [
+    "Hareketi doğru yaptın. Kolun yaklaşık {t} dereceye çıktı, omzun ve dirseğin yerindeydi.",
+    "Güzel bir tekrar. Kolunu yaklaşık {t} dereceye kaldırdın; omzun, başın ve dirseğin yerindeydi.",
+    "Doğru tekrar. Kolun yaklaşık {t} dereceye çıktı ve duruşun düzgündü. Böyle devam et.",
+    "Bu tekrar doğru. Kolunu yaklaşık {t} dereceye kadar kaldırdın, omzun yerindeydi. Aynı şekilde devam et.",
+]
+
+
+def olumlu_hasta_cumlesi(tepe: float, sira: int, tohum: int = 0) -> str:
+    """Doğru tekrar için kısa hasta cümlesi; varyasyon seçimi olumlu_cumle ile aynı ((sıra + tohum) mod 4)."""
+    return OLUMLU_HASTA[(int(sira) + int(tohum)) % len(OLUMLU_HASTA)].format(t=yuvarla5(tepe))
+
+
+def hasta_geri_bildirimi(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum: int = 0) -> str:
+    """En fazla 2 hata: '1. hata cümlesi' + ' Ayrıca ' + '2. hata cümlesi'. Hata yoksa olumlu cümle."""
+    if not kodlar:
+        return olumlu_hasta_cumlesi(tepe, sira, tohum)
+    metin = hasta_cumlesi(kodlar[0])
+    if len(kodlar) > 1:
+        metin += " Ayrıca " + _ilk_kucuk(hasta_cumlesi(kodlar[1]))
+    return metin
+
+
+def iki_katman(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum: int = 0) -> dict:
+    """Karar 28: {'hasta_cumlesi', 'uzman_ayrintisi'}; uygulama paneli ve Deney 3 bunu kullanır."""
+    return {"hasta_cumlesi": hasta_geri_bildirimi(kodlar, tepe, sira, tohum),
+            "uzman_ayrintisi": geri_bildirim(kodlar, tepe, sira, tohum)}

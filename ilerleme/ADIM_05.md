@@ -287,7 +287,12 @@ Her test kişisi için diğer 4 kişiden alındı. Örnek (test kişisi Honza): 
 ## Kabul ölçütü kontrolü
 - [x] Metrik tablosu var (`ozet.csv`, `bootstrap.csv`, `gorus_grubu.csv`, `kisi.csv`, `sinif.csv`, `olcu.csv`)
 - [x] 20 örnek cümle var (`sonuclar/deney3/ornek_cumleler.md`)
-- [ ] **Kullanıcı örnekleri okudu; yorumu buraya not edildi — BEKLİYOR.** Adım 5 bu madde tamamlanınca kapanır.
+- [x] **Kullanıcı örnekleri okudu (7 Kas). Yorumu (kendi sözleriyle):** "Çok garip geldi. Çok fazla sayısal analiz var gibi. Hasta olarak okusam hiçbir şey anlamam. Hastaya daha kısa ve öz bildiriler gitmesi gerekmez mi? Örneğin 'hareketi doğru yaptın', 'bu hareketi yanlış yaptın, sebebi şu' gibi. Ama burada '… kaldırman gerekiyordu', 'boy oranının %53'üne göre' gibi saçma ifadeler var."
+  - **Değerlendirme:** Cümleler hasta için fazla teknik. En anlaşılmaz kısım "gövde boyunun %'si" ifadeleri. Hocanın P1 şartı ise hatanın büyüklüğünün fiziksel olarak söylenmesini istiyor. İki istek çelişiyor.
+  - **Öneri (uygulanmadı, karar bekliyor):** İki katmanlı geri bildirim.
+    - Hastaya kısa cümle: hata + ne yapmalı. Sayı yalnızca hastanın anlayacağı yerde olur, örneğin "kolunu yaklaşık 20 derece daha yukarı kaldır".
+    - Ölçülü ayrıntı (bugünkü cümleler): fizyoterapist, hoca ve rapor için.
+  - Bu değişiklik yalnızca anlatımı etkiler; karar kuralı (Karar 18) değişmez. Kısa cümleler aynı hatayı adlandırdığı sürece Deney 3'ün metrikleri değişmemeli; çıkarıcı testi ve deney yeniden çalıştırılarak doğrulanır.
 - [x] Çıkarıcı, şablon birleşimlerinin %100'ünde doğru (`test_cikarici_*_sablonlari`)
 - [x] Elle yazılmış 24 cümlenin 23'ü doğru. Biri bilinen sınırlılık: "Omzun kalkmadı, kolun düzdü, güzel tekrar." cümlesinde omuz bulunuyor, çünkü olumsuz geçmiş zaman ayırt edilmiyor. Not: Sözlük bu 24 cümleyle geliştirildi, bu yüzden bu oran iyimser. Asıl bağımsız sınav Deney 4'teki LLM cümleleri olacak.
 - [x] `pytest`: `112 passed, 1 xfailed`

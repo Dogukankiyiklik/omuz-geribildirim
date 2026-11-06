@@ -20,20 +20,22 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 
 **Yeni sıra (Güncelleme 05).** Tabloda yukarıdan aşağı yapılır:
 
-| Sıra | Adım | İş | Hedef tarih | Katman |
-| --- | --- | --- | --- | --- |
-| 1 | 4 (ek) | **Deney 2 revize** (Karar 13–14): yeni az kaldırma puanı + "ilk iki" metriği; `ADIM_04.md` sonuna "Ek: Güncelleme 05" | 7 Kas | Zorunlu 📤 |
-| 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 |
-| 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 |
-| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 |
-| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker) | 10–11 Kas | Zorunlu 📤 |
-| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 |
-| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 |
-| 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı |
-| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 |
-| — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu |
-| — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu |
-| — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — |
+| Sıra | Adım | İş | Hedef tarih | Katman | Durum |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 4 (ek) | **Deney 2 revize** (Karar 13–14): yeni az kaldırma puanı + "ilk iki" metriği; `ADIM_04.md` sonuna "Ek: Güncelleme 05" | 7 Kas | Zorunlu 📤 | ✅ |
+| 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 | ✅ |
+| 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 | 🔄 |
+| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ⏳ |
+| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker) | 10–11 Kas | Zorunlu 📤 | ⏳ |
+| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ⏳ |
+| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ |
+| 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⏳ |
+| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | ⏳ |
+| — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu | ⏳ |
+| — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
+| — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |
+
+Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026, Güncelleme 07 öncesi). Ana tablodaki Adım 0–4 de tamamlandı.
 
 Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 
@@ -346,6 +348,12 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 
 **Güncelleme 06:** Dondurulmuş yöntem (Karar 18) kullanılır; kaldırma ilk sürüm. Değerlendirme katı / esnek / ilk iki + "cümle doğru hatayı adlandırdı mı" (çıkarıcı ile) + doğrularda gereksiz uyarı. Ana tablo önden + çapraz; tüm görüşler de verilir. Sonuçlardan bağımsız seçimler (faz sınırları, şiddet eşikleri, ölçünün anı, hatalıda μ, az kaldırmanın şiddeti) kod yazılmadan önce `ADIM_05.md` "Önceden belirlenenler" bölümüne yazılıp commit'lenir.
 
+**Güncelleme 07** (ayrıntı: `ilerleme/GUNCELLEME_07.md`, `KARARLAR.md`):
+- **Karar 21 — sağlam ölçü:** cümledeki ölçü tek kare yerine seçilen fazın güvenilir karelerinin medyanından; `olcu_surumu = "tek_kare" | "saglam"`, uygulamada varsayılan `"saglam"`. Tespit ve metrikler değişmez (`assert`); tek deneme.
+- **Karar 22–23:** şiddet tanımı değişmez ("hafif"in çıkmaması sınırlılık); Deney 3 iddialarının gücü tablo halinde (çıkarıcı uyumu zayıf kanıt).
+- **Karar 28 — iki katmanlı geri bildirim:** aynı `SapmaKodu`'ndan `hasta_cumlesi` (kısa, yüzde yok, yalnızca 5°'ye yuvarlanmış derece, şiddet kelimesi yok) ve `uzman_ayrintisi` (bugünkü ölçülü cümle). Çıkarıcı ikisinde de çalışır; metrikler eşit olmalı.
+- Adım 5, ADIM_05'e "Ek: Güncelleme 07" yazılıp kullanıcı yeni hasta cümlelerini onaylayınca kapanır.
+
 **Kabul ölçütü:** Metrik tablosu ve örnek cümleler var. Kullanıcı örnekleri okuyup anlaşılır bulduğunu veya düzeltme önerilerini ADIM dosyasına not etti.
 
 ---
@@ -391,6 +399,12 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 - Kullanıcı kendi kamerasıyla kalibrasyon yapıp en az 5 tekrar değerlendirdi.
 - Video dosyası modu çalışıyor.
 - Uygulama kararları çekirdek kodu içe aktarıyor; kopya kod yok.
+
+**Güncelleme 07** (ayrıntı: `ilerleme/GUNCELLEME_07.md`, `KARARLAR.md`):
+- **Karar 24 — kural parametreleri:** beş kişinin önden + çapraz tekrarlarıyla, LOSO eğitim adımıyla aynı prosedür; `python -m araclar.kural_disa_aktar` → `modeller/kural_ex1.json` (sürüm bilgisiyle). Değerler ADIM_06'da LOSO değerleriyle yan yana.
+- **Karar 25 — tekrar ayırma:** önceden sabit kural (`cekirdek/tekrar_ayirici.py`; 30°/20°, tepe ≥ 60°, ≥ 0,8 s, sınırlar dinlenmeye uzatılır); `python -m deneyler.tekrar_ayirma` ile `Segmentation.csv`'ye karşı sınanır (IoU ≥ 0,5). Eşikler sonuca göre değiştirilmez.
+- **Karar 26 — kamera açısı uyarısı:** eşik, çapraz (30–60°) doğru tekrarlardaki omuz genişliği / gövde boyu oranının 10. yüzdeliği (yukarıdaki "önden" ifadesinin yerini alır); uyarı kalibrasyonu engellemez.
+- **Karar 27 — demo güvenliği:** video dosyası modu birincil demo yolu, yedek kayıt hazır; mümkünse MediaPipe v0.10.20 + `pose_landmarker_full`; yalnızca Ex1. Panelde hasta cümlesi büyük, uzman ayrıntısı küçük (Karar 28).
 
 ---
 

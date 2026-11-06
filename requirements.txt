@@ -2,7 +2,9 @@ numpy>=1.26
 pandas>=2.1
 scipy>=1.11
 matplotlib>=3.8
-mediapipe>=0.10.14
+# Karar 27: veri seti MediaPipe 0.10.20 ile üretildi; 0.10.20 numpy<2 gerektirdiği için kurulmadı,
+# uygulama 1.2.2 ile sınandı (pose_landmarker_full). Fark ADIM_06 ve sınırlılıklarda.
+mediapipe==1.2.2
 opencv-python>=4.9
 pillow>=10.0
 pytest>=8.0

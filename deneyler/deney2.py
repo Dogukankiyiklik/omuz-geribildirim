@@ -40,6 +40,7 @@ import pandas as pd
 
 from cekirdek import veri
 from cekirdek import hata_turu as ht
+from cekirdek import degerlendirici
 from cekirdek.aci_bandi import aci_bandi_modeli, aci_bandi_puanlari, tepe_acisi
 from cekirdek.adil_model import birini_disarida_alt_kumeler
 from cekirdek.bant import coklu_model_puanlari, coklu_referans_modelleri
@@ -88,18 +89,12 @@ def grup_modelleri(dogrular_f: list[dict], bant: str, olcutler=OLCUTLER) -> list
 
 def _model_puani(model, alt_f, f, bant, olcutler=OLCUTLER, kaldirma=True):
     """Tek bir (n−1)'li modelle puanlar: (E, fark, ek). kaldirma=False: tepe bandı hesaplanmaz (Ex7)."""
-    if bant == "v2":
-        E, fark, ek = aci_bandi_puanlari(model, f, olcutler, YONLER)
-        ek = {"kapsam": ek["kapsam"], "aralik_disi": float(ek["aralik_disi"])}
-    else:
-        E, fark = coklu_model_puanlari(model, f, olcutler, YONLER)
-        ek = {}
+    if bant == "v2":   # uygulamayla ortak kod (cekirdek/degerlendirici.py)
+        return degerlendirici.tekrar_puanlari(model, alt_f, f, olcutler, kaldirma)
+    E, fark = coklu_model_puanlari(model, f, olcutler, YONLER)
     if kaldirma:
-        tepeler = [tepe_acisi(u["kol"]) for u in alt_f]
-        Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe_acisi(f["kol"]), tepeler)   # revize
-        E.update({(ht.KALDIRMA, y): Ek[y] for y in YONLER})
-        fark[ht.KALDIRMA_ILK] = ht.kaldirma_sapmasi(tepe_acisi(f["kol"]), tepeler)      # ilk (d)
-    return E, fark, ek
+        degerlendirici.kaldirma_ekle(E, fark, f, alt_f, YONLER)
+    return E, fark, {}
 
 
 def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True, olcutler=OLCUTLER, kaldirma=True) -> pd.DataFrame:

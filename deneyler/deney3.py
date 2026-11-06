@@ -30,6 +30,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from cekirdek import degerlendirici
 from cekirdek import geribildirim as gb
 from cekirdek import hata_turu as ht
 from cekirdek import veri
@@ -128,15 +129,7 @@ def ayrintilar(tekrarlar) -> dict:
     return cikti
 
 
-def kod_uret(hata: str, siddet: str, kural: ht.KararKurali, a: dict,
-             olcu_surumu: str = "tek_kare") -> gb.SapmaKodu:
-    k = kural.esleme[hata]
-    yon = kural.yon(k)
-    if k == ht.KALDIRMA:
-        return gb.kaldirma_kodu(yon, siddet, a["tepe"], a["beklenen_tepe"])
-    ek = (a["ek_deger"], a["ek_mu"]) if hata == ht.SILKME else (None, None)
-    return gb.durus_kodu(hata, k, yon, siddet, a["kol"], a["deger"][k], a["mu"][k], a["bd"][k], *ek,
-                         olcu_surumu=olcu_surumu, gorunurluk=a["gor"][k])
+kod_uret = degerlendirici.kod_uret   # uygulamayla ortak (cekirdek/degerlendirici.py)
 
 
 def _sayi_var(metin: str) -> bool:

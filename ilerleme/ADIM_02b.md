@@ -1,7 +1,7 @@
 # ADIM 02b — Görsel kontrol aracı
 
 **Tarih:** 2026-11-06
-**Durum:** Kısmen — araç ve galeri hazır; **kullanıcının en az 5 tekrarı izleyip gözlemlerini yazması bekleniyor** (aşağıda "Kullanıcı gözlemleri").
+**Durum:** Tamamlandı (kullanıcı iki galeriden 13 videoyu yorumladı ve kalanları izledi; gözlemler ve onlardan çıkan ölçümler aşağıda)
 
 ## Basit anlatım (kullanıcı için, 3–6 cümle)
 Şimdiye kadar sistem bize sadece sayılar veriyordu. Bu adımda herhangi bir tekrarı videoda izleyip sistemin ne gördüğünü kendi gözünle kontrol edebileceğin bir araç yaptık. Solda video ve üstünde iki iskelet var. **Yeşil** iskelet, veri setinin MediaPipe iskeleti; bandın dışına çıkan bölge **kırmızı** oluyor. **Turkuaz** iskelet, kişinin kendi doğru tekrarlarından biri (referans). Bu iskelet zamanda (DTW) ve konumda (kalça, gövde boyu, gövde ekseni) kişinin üstüne oturtulmuş, böylece "doğrusu böyle olmalıydı" görülebiliyor. Sağ üstte bant grafiği ve hareket eden bir imleç, sağ altta gerçek etiket, puanlar ve sistemin geçici kararı var. Bu, hocanın Problem 3'ünün (referans ve kullanıcı hareketini çakıştırma) ilk sürümü.
@@ -71,18 +71,79 @@ Not: İki yanlış alarm Terka'nın 10. tekrarları, ama yönelimleri farklı (2
 - Terka t10 (yanlış alarm): YENI, kol inerken ve tekrarın sonunda bandın altında kalıyor (0.35 civarı; bant ~0.50). Bu, kişinin tekrar bitiminde omzunu aşağı bırakmaması ya da tekrarın kısa kesilmesi olabilir (91 kare, diğer tekrarlardan kısa). Videoda bakılmalı.
 
 ## Kabul ölçütü kontrolü
-- [ ] Kullanıcı en az 5 tekrarı izledi — **bekleniyor**.
-- [ ] İskeletin videoya oturduğu ve kararların görüntüyle tutarlı olup olmadığı ADIM dosyasına not edildi — **bekleniyor** (aşağıdaki bölüm).
-- [x] Araç ve galeri çalışıyor; testler: `26 passed in 9.86s`.
+- [x] Kullanıcı en az 5 tekrarı izledi: 13 videoyu tek tek yorumladı, kalanları da izledi.
+- [x] İskeletin videoya oturduğu ve kararların görüntüyle tutarlı olup olmadığı not edildi (aşağıda).
+- [x] Araç ve galeri çalışıyor; testler: `26 passed`.
 
-## Kullanıcı gözlemleri (kullanıcı dolduracak)
-| Video | İskelet oturuyor mu? | Referans (turkuaz) mantıklı mı? | Karar görüntüyle tutarlı mı? | Not |
-| --- | --- | --- | --- | --- |
-| | | | | |
-| | | | | |
-| | | | | |
-| | | | | |
-| | | | | |
+## Kullanıcı gözlemleri (kullanıcının sözleri, kısaltılmış)
+`galeri/` (tüm görüşler) ve `galeri_onden/` (yalnızca önden):
+
+| # | Video | Kullanıcının gözlemi |
+| --- | --- | --- |
+| 1 | `galeri/kacirilan_silkme_1_ex1_Honza_cam3_o0_t5` (profil) | Mantıklı görünüyor ama yandan çekim olduğu için iskeletler birbirine girmiş, tam seçilmiyor. "Tam yandan bir görüntüde insan olsan bile yana açışı değerlendirebilir misin, muamma." |
+| 2 | `galeri/kacirilan_silkme_2_ex1_Mima_cam1_o30_t5` (çapraz) | Açı nedeniyle yanlış etiketlenmiş (kaçırılmış) gibi. |
+| 3 | `galeri/kacirilan_silkme_3_ex1_Mima_cam1_o60_t4` (çapraz) | İskeletler arada titriyor, açı nedeniyle olabilir. |
+| 4 | `galeri/yakalanan_silkme_1_ex1_Petra_cam1_o50_t5` | Turkuaz iskelet daha yukarıda. |
+| 5 | `galeri/yakalanan_silkme_2_ex1_Petra_cam3_o60_t5` | Turkuaz iskelet aşırı yukarıda (kullanıcı ~90°, referans ~180°). |
+| 6 | `galeri/yakalanan_silkme_3_ex1_Terka_cam3_o45_t5` | Güzel yakalanmış, iskeletler güzel. |
+| 7 | `galeri/yanlis_alarm_1_ex1_Terka_cam1_o20_t10` | Sonlarda kolunu çok hızlı indiriyor; yanlış alarm sırf sondaki sapmadan (bandın altında kalmasından). |
+| 8 | `galeri/yanlis_alarm_2_ex1_Terka_cam2_o80_t10` | Yine hızlı indirme / sondaki sapma kaynaklı yanlış alarm gibi. |
+| 9 | `galeri/yanlis_alarm_3_ex1_Vasil_cam3_o10_t9` | Hızlı indirmeye kurban gitmiş gibi. |
+| 10 | `galeri_onden/kacirilan_silkme_1_ex1_Petra_cam1_o0_t5` | Turkuaz çok yukarıda; **bariz omuz silkmesi var, neden normal dediğini anlamadım.** |
+| 11 | `galeri_onden/kacirilan_silkme_2_ex1_Vasil_cam3_o80_t6` | Kişi elini neredeyse 180° kaldırmış; yanlış karar bundan mı? |
+| 12 | `galeri_onden/kacirilan_silkme_3_ex1_Vasil_cam3_o90_t5` | Yine Vasil; Vasil'in videolarında saptamak zor olsa gerek. |
+| 13 | `galeri_onden/yakalanan_silkme_1_ex1_Petra_cam2_o30_t5` | Turkuaz yine yukarıda, ama doğru tespit edilmiş. |
+
+Genel yorum: "Bazılarında kişi kolunu 180° kaldırıyor ya da çok hızlı indiriyor; turuncu çizgide şaşmalar oluyor. Vasil her tekrarda elini ~180° kaldırıyor ama bazıları silkme, bazıları doğru etiketlenmiş; garip geldi. Genel olarak bir gariplik var ama ifade edemiyorum."
+
+İskeletin videoya oturması hakkında kullanıcı bir sorun bildirmedi. Bildirilen: profil görüşte iskeletlerin üst üste binmesi (#1) ve çapraz görüşte titreme (#3).
+
+## Gözlemlerden çıkan ölçümler (Claude Code)
+Kullanıcının "ifade edemediği gariplik" üç ayrı soruna ayrıldı. Hepsi sayılarla doğrulandı.
+
+**Bulgu A — Yanlış alarmlar tekrarın SONUNDAN geliyor (#7, #8, #9).**
+- ex1_Terka cam1 yönelim 20 tekrar 10 (91 kare): kol 77. karede inmiş (2°). Sonraki karelerde kol aşağıdayken YENI 0.428 → 0.397 (kare 84) → 0.346 (kare 90) düşmeye devam ediyor; başlangıçta 0.520'ydi. Yani sapma hareketin kendisinde değil, kol indikten **sonra**. Son 10 kare, Adım 0'da eklenen **pay**; bu karelerde kişi muhtemelen bir sonraki duruşa hazırlanıyor ya da gevşiyor. Tekrar 10, o yönelimin son tekrarı.
+- Tüm veride: Yanlış alarm veren doğru tekrarlarda E'nin inişten sonraki bölümden gelen payı medyan **0.31**; diğer doğru tekrarlarda **0.14**, silkmelerde **0.13**.
+- Kullanıcının "hızlı indirme" açıklaması kısmen tutmuyor: İniş süresinin referansa oranı yanlış alarmlarda da diğer doğru tekrarlarda da medyan **1.0**. Sorun hız değil, iniş sonrasındaki karelerde omuz/başın yerinin değişmesi.
+- **Keşif amaçlı deneme** (Deney 1 değiştirilmedi): E, referansın baştaki ve sondaki 10 pay karesi hariç tutularak hesaplanınca:
+
+  | | AUC silkme/doğru | AUC silkme/diğer | %90 eşikte yakalanan silkme | %90 eşikte yanlış alarm |
+  | --- | --- | --- | --- | --- |
+  | E (Deney 1, pay dahil) | 0.909 | 0.705 | 124/165 | 84/834 |
+  | E (pay hariç) | 0.932 | 0.714 | 130/165 | 81/834 |
+
+  Pay kareleri yalnızca dinlenme başlangıcı (ilk 8 kare) için gerekli; bant hatasına katılmaları referans koddan gelen bir davranış. Öneri: E'yi yalnızca etiketli tekrar karelerinde hesaplamak. Bu, test verisinde görülüp yapılan bir değişiklik olduğu için Deney 1'e dokunulmadı; karar danışmanın.
+
+**Bulgu B — Petra'nın bariz silkmesi kolun az kalkması yüzünden kaçırılıyor (#10, ayrıca #4, #5, #13).**
+- ex1_Petra cam1 yönelim 0 tekrar 5 (önden): E = 0.176 (eşik 0.286) → kaçırıldı. Ama **aynı kol açısında** karşılaştırınca silkme apaçık:
+
+  | Kol bu açıyı geçerken | Silkmeli tekrar 5'in YENI'si | 5 doğru tekrarın YENI'si |
+  | --- | --- | --- |
+  | 60° | 0.422 | 0.491 – 0.516 |
+  | 90° | 0.380 | 0.448 – 0.473 |
+  | 110° | 0.338 | 0.396 – 0.428 |
+
+  Silkmeli tekrarın değeri, her açıda **bütün** doğru tekrarlardan belirgin şekilde düşük.
+- Sebep, "İnceleme 1"de bulunan kol yüksekliği karışması. Petra silkerken kolu medyan 121° kaldırıyor, doğruda 169°. DTW eğrinin şeklini eşlediği için 121°'lik tepe 169°'lik tepeyle eşleniyor ve omuz, "kol 169°'deyken normal" olan omuz yüksekliğiyle karşılaştırılıyor. Turkuazın hep yukarıda olması da bundan.
+- Kolu ≥ 30° az kalkan silkmelerin E medyanı 0.358 (n = 30); diğer silkmelerinki 0.425 (n = 135).
+- Bu, **hizalamayı gerçek kol açısına göre yapma** önerisini güçlü şekilde destekliyor.
+
+**Bulgu C — Kişiler arası fark: Vasil'de ayrım en zayıf (#11, #12).** Kişi bazlı AUC (silkme/doğru, bant YENI):
+
+| Kişi | AUC | Silkmede kol (medyan) | Doğruda kol (medyan) | Silkme E (medyan) | Doğru E (medyan) |
+| --- | --- | --- | --- | --- | --- |
+| Honza | 0.985 | 158° | 148° | 0.713 | 0.050 |
+| Mima | 0.947 | 114° | 135° | 0.481 | 0.072 |
+| Petra | 0.884 | 121° | 169° | 0.371 | 0.068 |
+| Terka | 0.926 | 157° | 171° | 0.458 | 0.067 |
+| Vasil | **0.800** | 162° | 153° | **0.224** | 0.044 |
+
+Vasil'in silkmelerinin E medyanı (0.224) geçici eşiğin (~0.27) altında, bu yüzden çoğu kaçırılıyor. Vasil silkerken kolu doğru tekrarlarından **daha yükseğe** kaldırıyor. Silkmesi bu ölçütle zayıf görünüyor. Etiketlerin yanlış olup olmadığını söyleyemeyiz; ama 5 kişiden birinde ayrımın belirgin şekilde düşük olması raporlanmalı.
+
+**Diğer gözlemler:**
+- Profil görüş (#1): Kullanıcı da insan gözüyle değerlendirmenin zor olduğunu söylüyor. Bu, Deney 1'deki profil AUC'sinin düşüklüğüyle (0.779) uyumlu ve bir sınırlılık olarak raporlanabilir.
+- Titreme (#3): MediaPipe noktalarının kareden kareye titremesi. Adım 3'teki Deney 1c (yumuşatma) bunu ele alacak.
+- Turuncu çizgideki "şaşmalar": Tekrar ile referansın temposu ya da kol yüksekliği farklı olunca DTW birçok kareyi aynı referans karesine eşliyor. Hizalanmış eğri bu yüzden basamaklı ya da düzlüklü görünüyor (ör. Petra'da tepedeki düz kısım).
 
 ## Kararlar ve sapmalar
 - **Geometrik hizalama, PLAN'dan küçük bir sapma:** PLAN, "gövde merkezine öteleme, gövde uzunluğu oranında ölçekleme, gövde ekseni açısı kadar döndürme" diyor. Uygulanan:
@@ -130,6 +191,9 @@ Silkmeli tekrarların **%18,2'si** kendi referansından en az 30° daha az kalkm
 **Önden galerisi:** Kullanıcı isteğiyle `--gorus onden` seçeneği eklendi → `sonuclar/deney1/galeri_onden/` (9 MP4 + `liste.md`). Önden görüşte grup büyüklükleri: yakalanan silkme = 47, kaçırılan silkme = 8, yanlış alarm = 30. Tüm görüşlerde ise 124 / 41 / 84.
 
 ## Açık sorular / danışmana notlar
+- **Pay kareleri E'ye katılıyor** (Bulgu A): Tekrar sonrasındaki 10 pay karesi yanlış alarmların önemli bir kaynağı. Keşif denemesinde pay hariç E ile AUC 0.909 → 0.932. E yalnızca etiketli tekrar karelerinde mi hesaplansın? (Referans koddan sapma; Deney 1 sayılarını değiştirir.)
+- **Hizalama açıya göre mi?** (Bulgu B): Petra'da aynı kol açısında silkme her açıda bütün doğru tekrarlardan ayrılıyor, ama şekle göre DTW onu kaçırıyor.
+- **Kişiler arası fark** (Bulgu C): Kişi bazlı AUC 0.800 (Vasil) – 0.985 (Honza). Sunumda/raporda ortalamanın yanında kişi aralığı da verilmeli.
 - **Kol yüksekliği karışması** (yukarıda, "İnceleme 1"): silkmeli tekrarların %18,2'sinde kol referanstan ≥ 30° az kalkıyor; DTW şekil eşlediği için omuz farklı kol açılarında karşılaştırılıyor. Yönlü bant (Adım 4) ve/veya açıya göre hizalama önerisi.
 - Kaçırılan silkmelerin 2'si **çapraz** görüşte ve **ek hatalı** (dirsek bükük, baş eğik). Ek hata, kişinin kendi bandında da bir şeyleri değiştirmiş olabilir. Kullanıcının gözlemine göre Adım 4'te incelenebilir.
 - Yanlış alarmlarda E'nin tekrarın **sonunda** yükseldiği bir örnek var (Terka t10). Tekrar sınırlarının (Segmentation.csv) bazı tekrarlarda kısa kesilmesi E'yi şişiriyor olabilir; gözlem bekleniyor.

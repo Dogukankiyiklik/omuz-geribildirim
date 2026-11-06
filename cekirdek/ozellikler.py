@@ -146,6 +146,17 @@ def dirsek(s: Iskelet) -> np.ndarray:
     return aci(s.p(12) - s.p(14), s.p(16) - s.p(14))
 
 
+# ---------------------------------------------------------------- Adım 5: yalnızca anlatım
+@olcut("omuz_egim")
+def omuz_egim(s: Iskelet) -> np.ndarray:
+    """
+    Omuz çizgisinin gövde eksenine göre eğimi (°): 90 − açı(sağ omuz − sol omuz, omuz ortası − kalça ortası).
+    Pozitif = sağ omuz, gövde eksenine dik çizginin üstünde. Hocanın P2 listesindeki "omuz çizgisinin gövde
+    eksenine göre açısı". Tespite girmez; Adım 5'te silkme cümlesinde derece vermek için (ADIM_05 madde 6).
+    """
+    return 90.0 - aci(s.p(12) - s.p(11), _orta(s, 11, 12) - _orta(s, 23, 24))
+
+
 # ---------------------------------------------------------------- Adım 4b: Ex7 (omuz ekstansiyonu) ölçütleri
 # Güncelleme 05'te önceden belirlendi; açı bandıyla değerlendirilir.
 @olcut("govde_egim")

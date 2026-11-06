@@ -1,0 +1,4 @@
+﻿görüş,etiketli,bulunan,kaçırılan,fazladan,bulunan /100,IoU medyan,başlangıç farkı medyan (kare),başlangıç farkı Ç1 (kare),başlangıç farkı Ç3 (kare),bitiş farkı medyan (kare),bitiş farkı Ç1 (kare),bitiş farkı Ç3 (kare)
+önden+çapraz,1363,1295,68,34,95.01100513573,0.8518518518518519,4.0,2.0,6.0,-10.0,-13.0,-7.0
+tüm görüşler,1668,1457,211,63,87.35011990407673,0.8461538461538461,4.0,2.0,7.0,-10.0,-14.0,-8.0
+profil (70–90°),305,162,143,29,53.114754098360656,0.7205817954332187,9.0,5.0,16.0,-17.5,-26.0,-12.0

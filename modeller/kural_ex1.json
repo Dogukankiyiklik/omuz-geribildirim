@@ -1,0 +1,74 @@
+{
+  "dosya_surumu": 1,
+  "esleme": {
+    "ERR_ELEVATED_SHOULDER": "YENI",
+    "ERR_HEAD_TO_SIDE": "bas",
+    "ERR_ARM_FORWARD": "kol_boyu",
+    "ERR_BENT_ARM": "dirsek",
+    "ERR_LOW_ABDUCTION": "kaldirma"
+  },
+  "yonlu": true,
+  "yonler": {
+    "YENI": -1,
+    "bas": 1,
+    "kol_boyu": -1,
+    "dirsek": -1,
+    "kaldirma": 1
+  },
+  "medyan": {
+    "YENI": 0.015584865276077558,
+    "bas": 0.009922890440499581,
+    "kol_boyu": 0.02608343391938537,
+    "dirsek": 0.03062971352199191,
+    "kaldirma": 0.0
+  },
+  "olcek": {
+    "YENI": 0.07980294638213752,
+    "bas": 0.08080389820555409,
+    "kol_boyu": 0.0809810970468297,
+    "dirsek": 0.08896953165613507,
+    "kaldirma": 0.5648994797751598
+  },
+  "T": 3.804342300854362,
+  "kaldirma_surumu": "ilk",
+  "siddet_esikleri": {
+    "ERR_ELEVATED_SHOULDER": [
+      0.48182999023446005,
+      0.6724457779283239
+    ],
+    "ERR_HEAD_TO_SIDE": [
+      0.2807608445056778,
+      0.6171565111112803
+    ],
+    "ERR_ARM_FORWARD": [
+      0.04327667870712265,
+      0.5260355725557557
+    ],
+    "ERR_BENT_ARM": [
+      0.5446569560321155,
+      0.751834476908644
+    ],
+    "ERR_LOW_ABDUCTION": [
+      5.364338196063315,
+      9.14242975983232
+    ]
+  },
+  "bilgi": {
+    "egitim_makro_f1": 0.633744125344293,
+    "egzersiz": "ex1",
+    "sistem": "v2_yonlu",
+    "kaldirma_surumu": "ilk",
+    "olcu_surumu": "saglam",
+    "egitim_gorusu": "önden+çapraz",
+    "kisiler": [
+      "Honza",
+      "Mima",
+      "Petra",
+      "Terka",
+      "Vasil"
+    ],
+    "egitim_tekrar": 1363,
+    "commit": "d978bfc",
+    "tarih": "2026-11-07T02:39:51"
+  }
+}

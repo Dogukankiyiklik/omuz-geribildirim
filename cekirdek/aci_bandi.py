@@ -167,7 +167,13 @@ def aci_bandi_hatasi(model: AciBandi, tekrar: dict, olcutler, yon: dict[str, int
     """
     Tekrarın her ölçüt için açı bandı hatası E (geçerli karelerin ortalaması; geçerli kare yoksa NaN).
     Dönüş: (E, ek) — ek: kapsam, aralik_disi; ayrinti=True ise kare başına faz, kutu, geçerlilik,
-    μ, τ ve kare hataları (geçersiz karelerde NaN).
+    μ, τ ve kare hataları (geçersiz karelerde NaN), ayrıca (Adım 5'teki "normalde X, sende Y"
+    cümleleri için):
+      kol       : kare başına kol açısı (°)
+      deger     : ölçütün ham değeri (ölçüt -> dizi)
+      fark      : imzalı fark h − μ (geçersiz karelerde NaN)
+      bant_disi : imzalı bant dışı büyüklük: h > μ + τ ise (h − μ − τ) > 0, h < μ − τ ise
+                  (h − μ + τ) < 0, bant içinde 0 (geçersiz karelerde NaN)
     """
     yon = yon or {}
     kol = tekrar["kol"]
@@ -187,9 +193,33 @@ def aci_bandi_hatasi(model: AciBandi, tekrar: dict, olcutler, yon: dict[str, int
         E[k] = float(e[g].mean()) if g.any() else np.nan
         kareler[k], mus[k], taus[k] = e, mu, tau
     if ayrinti:
+        fark, disi = {}, {}
+        for k in olcutler:
+            d = np.where(g, tekrar[k] - mus[k], np.nan)
+            fark[k] = d
+            disi[k] = np.where(np.isnan(d), np.nan, np.sign(d) * np.maximum(np.abs(d) - taus[k], 0.0))
         ek.update({"faz": faz, "tepe": tepe, "kutu": kutu, "gecerli": g,
-                   "kare_hatasi": kareler, "mu": mus, "tau": taus})
+                   "kare_hatasi": kareler, "mu": mus, "tau": taus,
+                   "kol": np.asarray(kol), "deger": {k: np.asarray(tekrar[k]) for k in olcutler},
+                   "fark": fark, "bant_disi": disi})
     return E, ek
+
+
+def aci_bandi_puanlari(model: AciBandi, tekrar: dict, olcutler, yonler=(0, 1, -1)):
+    """
+    Deney 2 için tek geçişte: her ölçüt ve yön için E (aci_bandi_hatasi ile aynı hesap), her ölçüt
+    için geçerli karelerdeki ortalama imzalı fark (h − μ; beklenen yönü bulmak için) ve ek bilgiler.
+    Dönüş: (E[(ölçüt, yön)], fark[ölçüt], ek) — geçerli kare yoksa NaN.
+    """
+    _, ek = aci_bandi_hatasi(model, tekrar, olcutler, ayrinti=True)
+    g = ek["gecerli"]
+    E, fark = {}, {}
+    for k in olcutler:
+        mu, tau = ek["mu"][k][g], ek["tau"][k][g]
+        for y in yonler:
+            E[(k, y)] = float(kare_hatasi(tekrar[k][g], mu, tau, y).mean()) if g.any() else np.nan
+        fark[k] = float(np.mean(tekrar[k][g] - mu)) if g.any() else np.nan
+    return E, fark, ek
 
 
 def aci_eslemesi(ref_kol: np.ndarray, kul_kol: np.ndarray) -> np.ndarray:

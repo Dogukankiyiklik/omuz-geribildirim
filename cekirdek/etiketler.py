@@ -16,6 +16,11 @@ OLCUT_ADLARI = {
     "M01_tek": "sağ omuz kalkışı",
     "M39_F2": "sağ omuz açısı",
     "M33": "sağ omuz – omuz ortası",
+    "bas": "baş eğikliği (°)",
+    "on_kacma": "bilek – omuz – kalça açısı (°)",
+    "kol_boyu": "omuz – bilek mesafesi / gövde",
+    "dirsek": "dirsek açısı (°)",
+    "kaldirma": "tepe kol açısı sapması",
 }
 
 

@@ -258,12 +258,16 @@ class AciBandiGorseli(TekrarGorseli):
     Pay kareleri videoda görünür ama değerlendirilmez.
     """
 
-    def __init__(self, d: dict, esik: dict, olcut: str = "YENI", video_klasoru: Path | None = None):
+    def __init__(self, d: dict, esik: dict, olcut: str = "YENI", video_klasoru: Path | None = None,
+                 olcutler=OLCUTLER, yon: dict[str, int] | None = None):
+        """olcutler / yon: Deney 2 için (varsayılan: Deney 1 v2'nin 5 omuz ölçütü, yönsüz)."""
         self.d, self.esik, self.olcut = d, esik, olcut
+        self.olcutler, self.yon = list(olcutler), yon
         self.t = t = d["t"]
-        E0, self.ek = aci_bandi_hatasi(d["model"], d["f"], OLCUTLER, ayrinti=True)
+        E0, self.ek = aci_bandi_hatasi(d["model"], d["f"], self.olcutler, yon=yon, ayrinti=True)
         if d.get("model_sayisi", 1) == 1:
-            assert all((np.isnan(E0[k]) and np.isnan(d["E"][k])) or abs(E0[k] - d["E"][k]) < 1e-12 for k in OLCUTLER)
+            assert all((np.isnan(E0[k]) and np.isnan(d["E"][k])) or abs(E0[k] - d["E"][k]) < 1e-12
+                       for k in self.olcutler)
         else:
             # Hatalı tekrar (Karar 7): E, n adet (n−1)'li modelin ortalaması; çizilen bant ve kare
             # renkleri bunların ilkinden. Gösterilen E ve kapsam deneydeki (ortalama) değerdir.
@@ -271,7 +275,7 @@ class AciBandiGorseli(TekrarGorseli):
         self.E = d["E"]
         self.bas = t.etiketli.start
         self.n_etiket = len(d["f"]["kol"])
-        self.f_tam = ozellikler(t.dizi, OLCUTLER)
+        self.f_tam = ozellikler(t.dizi, self.olcutler)
         tepe = tepe_acisi(d["f"]["kol"])
         r = int(np.argmin([abs(tepe_acisi(f["kol"]) - tepe) for f in d["digerleri_f"]]))
         self.ref = d["digerleri"][r]

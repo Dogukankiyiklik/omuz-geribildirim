@@ -96,3 +96,21 @@ def coklu_model_hatasi(modeller: list[dict], tekrar: dict, olcutler,
     """Hazır çoklu referans modelleriyle E: her modelde bant hatası, ölçüt başına ortalama."""
     Es = [bant_hatasi(m, tekrar, olcutler, yon) for m in modeller]
     return {k: float(np.mean([e[k] for e in Es])) for k in olcutler}
+
+
+def coklu_model_puanlari(modeller: list[dict], tekrar: dict, olcutler, yonler=(0, 1, -1)):
+    """
+    Deney 2 için tek geçişte (hizalama her referansta bir kez): her ölçüt ve yön için çoklu referans
+    E'si (coklu_model_hatasi ile aynı hesap) ve her ölçüt için ortalama imzalı fark (hizalı h − μ).
+    Dönüş: (E[(ölçüt, yön)], fark[ölçüt])
+    """
+    E = {(k, y): [] for k in olcutler for y in yonler}
+    fark = {k: [] for k in olcutler}
+    for m in modeller:
+        h = hizala(m["ref_kol"], tekrar, olcutler)
+        for k in olcutler:
+            mu, tau = m[k]
+            for y in yonler:
+                E[(k, y)].append(kare_hatasi(h[k], mu, tau, y).mean())
+            fark[k].append(np.mean(h[k] - mu))
+    return ({a: float(np.mean(v)) for a, v in E.items()}, {k: float(np.mean(v)) for k, v in fark.items()})

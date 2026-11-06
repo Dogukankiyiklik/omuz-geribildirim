@@ -253,6 +253,13 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 - **Karar 6:** Duruş ölçütleri için **yalnızca açı bandı**; görüşe göre yöntem değiştiren karma çözüm yok. Her ana sonuç iki biçimde: "uygulama senaryosu: önden + çapraz (|görüş| ≤ 60°)" ve "tüm görüşler". Profil (70–90°) gerekçesiyle sınırlılık olarak ayrıca raporlanır. **v1b** (zaman bandı, çoklu referans) karşılaştırma temel çizgisi olarak raporlanır, karar kuralına girmez.
 - **Karar 7:** Hatalı tekrarlar tüm (n−1)'li modellerin E ortalamasıyla değerlendirilir (`cekirdek/adil_model.py`).
 
+**Güncelleme 04 değişiklikleri:**
+- Açı bandı ayrıntı çıktısı kare bazında imzalı sapma, faz, kol açısı, ölçütün ham değeri ve μ'yü verir (Adım 5'teki "normalde X, sende Y" için); davranış değişmez.
+- Galeri `sonuclar/deney2/galeri/` (önden + çapraz): en sık karışan iki hata çifti + kaçırılan hatalar, her gruptan 3 video; görsel kararı veren ölçütün eğrisini ve bandını gösterir.
+- Temel çizgi (tek toplam hata, doğru/yanlış) ve 6 sınıflı kural aynı tabloda.
+- Basit anlatım: "100 hatalı tekrarın kaçında hatanın türünü doğru söyledi?"
+- Karar 10–12: yumuşatma kullanılmaz; kişiye özel kalibrasyon zorunlu; Karar 7 pürüzsüzleştirme notu.
+
 **Kabul ölçütü:** Tüm tablolar var; T seçiminin her kişide hangi değere düştüğü yazılmış.
 
 ---

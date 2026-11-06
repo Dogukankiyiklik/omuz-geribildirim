@@ -1,0 +1,7 @@
+﻿,tahmin: doğru,tahmin: omuz,tahmin: baş,tahmin: öne kaçma,tahmin: dirsek,tahmin: az kaldırma
+gerçek: doğru,773,11,13,12,8,17
+gerçek: omuz,34,61,15,10,2,43
+gerçek: baş,45,22,73,7,1,20
+gerçek: öne kaçma,67,3,4,56,9,29
+gerçek: dirsek,30,18,0,24,83,13
+gerçek: az kaldırma,20,4,0,3,0,138

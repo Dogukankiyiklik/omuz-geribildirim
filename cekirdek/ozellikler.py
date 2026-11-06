@@ -115,6 +115,42 @@ def yeni(s: Iskelet) -> np.ndarray:
 DENEY1_OLCUTLERI = ["M01", "M01_tek", "M39_F2", "M33", "YENI"]
 
 
+# ---------------------------------------------------------------- Deney 2: hata türü ölçütleri
+# M39 Tablo 1'den uyarlama (sağ kol). MediaPipe: 7/8 sol/sağ kulak, 16 sağ bilek.
+def _orta(s: Iskelet, a: int, b: int) -> np.ndarray:
+    return (s.p(a) + s.p(b)) / 2
+
+
+@olcut("bas")
+def bas(s: Iskelet) -> np.ndarray:
+    """Baş eğikliği (M39 F3): (omuz ortası → kulak ortası) ile (kalça ortası → omuz ortası) arasındaki açı."""
+    omuz = _orta(s, 11, 12)
+    return aci(_orta(s, 7, 8) - omuz, omuz - _orta(s, 23, 24))
+
+
+@olcut("on_kacma")
+def on_kacma(s: Iskelet) -> np.ndarray:
+    """Kolun gövde düzlemindeki açısı (M39 F1): sağ bilek – sağ omuz – sağ kalça açısı."""
+    return aci(s.p(16) - s.p(12), s.p(24) - s.p(12))
+
+
+@olcut("kol_boyu")
+def kol_boyu(s: Iskelet) -> np.ndarray:
+    """Sağ omuz – sağ bilek mesafesi / dinlenme gövde uzunluğu. Öne giden kol önden kamerada kısa görünür."""
+    return np.linalg.norm(s.p(16) - s.p(12), axis=1) / s.g0
+
+
+@olcut("dirsek")
+def dirsek(s: Iskelet) -> np.ndarray:
+    """Dirsek açısı (M39 F4): sağ omuz – sağ dirsek – sağ bilek. 180° = düz kol."""
+    return aci(s.p(12) - s.p(14), s.p(16) - s.p(14))
+
+
+# Deney 2'nin duruş ölçütleri (açı bandıyla değerlendirilir). "omuz" = YENI.
+# Yetersiz kaldırma bant değil, tepe kol açısıyla ele alınır (cekirdek/hata_turu.py).
+DENEY2_OLCUTLERI = ["YENI", "bas", "on_kacma", "kol_boyu", "dirsek"]
+
+
 def ozellikler(dizi: np.ndarray, olcutler=DENEY1_OLCUTLERI, en_boy: float = EN_BOY) -> dict[str, np.ndarray]:
     """Bir tekrar dizisinden kare başına kol açısı ("kol") ve istenen ölçütler."""
     s = Iskelet(dizi, en_boy)

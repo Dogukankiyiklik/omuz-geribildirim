@@ -7,6 +7,10 @@ HATA_ADLARI = {
     "ERR_ARM_FORWARD": "kol öne kaçıyor",
     "ERR_BENT_ARM": "dirsek bükük",
     "ERR_LOW_ABDUCTION": "kol yeterince kalkmıyor",
+    # Ex7 (omuz ekstansiyonu)
+    "ERR_TORSO_FORWARD": "gövde öne eğiliyor",
+    "ERR_TORSO_ROTATION": "gövde dönüyor",
+    "ERR_ARM_TO_SIDE": "kol yana kaçıyor",
 }
 
 OLCUT_ADLARI = {
@@ -20,7 +24,9 @@ OLCUT_ADLARI = {
     "on_kacma": "bilek – omuz – kalça açısı (°)",
     "kol_boyu": "omuz – bilek mesafesi / gövde",
     "dirsek": "dirsek açısı (°)",
-    "kaldirma": "tepe kol açısı sapması",
+    "kaldirma": "tepe kol açısı eksikliği (tepe bandı)",
+    "govde_egim": "gövde öne eğimi (°)",
+    "govde_donme": "omuz genişliği / kalça genişliği",
 }
 
 

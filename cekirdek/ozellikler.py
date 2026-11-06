@@ -146,6 +146,23 @@ def dirsek(s: Iskelet) -> np.ndarray:
     return aci(s.p(12) - s.p(14), s.p(16) - s.p(14))
 
 
+# ---------------------------------------------------------------- Adım 4b: Ex7 (omuz ekstansiyonu) ölçütleri
+# Güncelleme 05'te önceden belirlendi; açı bandıyla değerlendirilir.
+@olcut("govde_egim")
+def govde_egim(s: Iskelet) -> np.ndarray:
+    """Gövde öne eğimi: (kalça ortası → omuz ortası) vektörünün yukarı dikeyle açısı (°). 0 = dik gövde."""
+    return aci(_orta(s, 11, 12) - _orta(s, 23, 24), -s.asagi)
+
+
+@olcut("govde_donme")
+def govde_donme(s: Iskelet) -> np.ndarray:
+    """Gövde dönmesi: omuz genişliği / kalça genişliği. Gövde dönünce 2B'de omuz çizgisi kısalır."""
+    return np.linalg.norm(s.p(11) - s.p(12), axis=1) / np.linalg.norm(s.p(23) - s.p(24), axis=1)
+
+
+EX7_OLCUTLERI = ["YENI", "govde_egim", "govde_donme", "dirsek", "kol_boyu"]
+
+
 # Deney 2'nin duruş ölçütleri (açı bandıyla değerlendirilir). "omuz" = YENI.
 # Yetersiz kaldırma bant değil, tepe kol açısıyla ele alınır (cekirdek/hata_turu.py).
 DENEY2_OLCUTLERI = ["YENI", "bas", "on_kacma", "kol_boyu", "dirsek"]

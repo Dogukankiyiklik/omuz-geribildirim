@@ -162,6 +162,48 @@ def test_esik_secimi_test_kisisine_bagli_degil():
     assert k1.T == k2.T and k1.medyan == k2.medyan and k1.olcek == k2.olcek
 
 
+def test_ex7_olcutleri():
+    s = _iskelet(90)
+    # omuz ortası (0.5, 0.4), kalça ortası (0.5, 0.8): dik gövde
+    assert OLCUTLER["govde_egim"](s)[0] == pytest.approx(0, abs=0.05)
+    assert OLCUTLER["govde_donme"](s)[0] == pytest.approx(0.2 / 0.16)
+    d = s.dizi.copy()
+    d[0, 11, 0], d[0, 12, 0] = 0.6 + 0.4 * np.tan(np.radians(30)), 0.4 + 0.4 * np.tan(np.radians(30))
+    assert OLCUTLER["govde_egim"](Iskelet(d, en_boy=1.0))[0] == pytest.approx(30, abs=0.05)
+
+
+def test_hata_tanimi_eslemeleri():
+    e1 = ht.EX1.eslemeler()
+    assert [e["ERR_ARM_FORWARD"] for e in e1] == ["on_kacma", "kol_boyu"]
+    assert e1[0] == ht.hata_olcutleri("on_kacma")
+    e7 = ht.EX7.eslemeler()
+    assert len(e7) == 1 and list(e7[0]) == ht.EX7_HATALAR
+    assert ht.EX7.siniflar[0] == ht.DOGRU and "ERR_LOW_ABDUCTION" not in ht.EX7.siniflar
+
+
+def test_karar_kurali_ex7_yapay_veride_ayirir():
+    rng = np.random.default_rng(5)
+    esleme = ht.EX7.eslemeler()[0]
+    yon = {"YENI": -1, "govde_egim": 1, "govde_donme": -1, "dirsek": -1, "kol_boyu": -1}
+    satir = []
+    for k in ("A", "B", "C", "D", "E"):
+        for h in [ht.DOGRU] * 30 + [h for h in ht.EX7_HATALAR for _ in range(10)]:
+            r = {"kisi": k, "hata": h, "ek_hata": "", "gorus": 45}
+            for o in yon:
+                f = yon[o] * (0.3 if esleme.get(h) == o else 0.0) + rng.normal(0, 0.02)
+                for y in (0, 1, -1):
+                    r[ht.puan_sutunu(o, y)] = (abs(f) if y == 0 else max(np.sign(y) * f, 0)) + abs(rng.normal(0, 0.01))
+                r[ht.fark_sutunu(o)] = f
+            satir.append(r)
+    df = pd.DataFrame(satir)
+    egitim, test = df[df.kisi != "E"], df[df.kisi == "E"]
+    kural = ht.esik_sec(egitim, True, ht.EX7)
+    assert kural.yonler == yon and kural.on_olcut is None
+    tah = kural.karar(test)
+    assert set(tah) <= set(ht.EX7.siniflar)
+    assert makro_f1(test.hata, tah, ht.EX7.siniflar) > 0.95
+
+
 def test_karar_nan_ve_esik():
     z = pd.DataFrame({h: [0.0, 5.0, np.nan] for h in ht.HATALAR})
     z.loc[1, "ERR_BENT_ARM"] = 7.0

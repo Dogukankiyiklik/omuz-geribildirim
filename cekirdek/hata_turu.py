@@ -23,6 +23,7 @@ Girdi: tekrar başına puan tablosu (pandas), sütunlar puan_sutunu() / fark_sut
 """
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -46,11 +47,42 @@ ESIK_IZGARASI = np.linspace(0, 100, 201)  # T adayları: eğitimdeki max z'nin y
 
 
 def hata_olcutleri(on_olcut: str = "on_kacma") -> dict[str, str]:
-    """Hata kodu -> ölçüt."""
+    """Ex1: hata kodu -> ölçüt."""
     if on_olcut not in ON_KACMA_ADAYLARI:
         raise ValueError(on_olcut)
     return {"ERR_ELEVATED_SHOULDER": "YENI", "ERR_HEAD_TO_SIDE": "bas", "ERR_ARM_FORWARD": on_olcut,
             "ERR_BENT_ARM": "dirsek", "ERR_LOW_ABDUCTION": KALDIRMA}
+
+
+@dataclass(frozen=True)
+class HataTanimi:
+    """
+    Bir egzersizin hata türleri ve her hatanın aday ölçütleri (ilk aday eşitlikte seçilir).
+    hatalar sırası z tablosunun sütun sırası ve argmax eşitliğinde öncelik sırasıdır.
+    """
+    ad: str
+    hatalar: tuple
+    adaylar: dict
+
+    @property
+    def siniflar(self) -> list[str]:
+        return [DOGRU] + list(self.hatalar)
+
+    def eslemeler(self) -> list[dict[str, str]]:
+        """Aday ölçütlerin tüm birleşimleri: [{hata: ölçüt}, ...] (sıra: adayların sırası)."""
+        listeler = [self.adaylar[h] for h in self.hatalar]
+        return [dict(zip(self.hatalar, secim)) for secim in itertools.product(*listeler)]
+
+
+EX1 = HataTanimi("ex1", tuple(HATALAR), {"ERR_ELEVATED_SHOULDER": ("YENI",), "ERR_HEAD_TO_SIDE": ("bas",),
+                                         "ERR_ARM_FORWARD": ON_KACMA_ADAYLARI, "ERR_BENT_ARM": ("dirsek",),
+                                         "ERR_LOW_ABDUCTION": (KALDIRMA,)})
+# Ex7 (Adım 4b, Güncelleme 05): eşleme önceden belirlendi; aday seçimi yok, az kaldırma sınıfı yok.
+EX7_HATALAR = ["ERR_ELEVATED_SHOULDER", "ERR_TORSO_FORWARD", "ERR_TORSO_ROTATION", "ERR_BENT_ARM", "ERR_ARM_TO_SIDE"]
+EX7 = HataTanimi("ex7", tuple(EX7_HATALAR), {"ERR_ELEVATED_SHOULDER": ("YENI",), "ERR_TORSO_FORWARD": ("govde_egim",),
+                                             "ERR_TORSO_ROTATION": ("govde_donme",), "ERR_BENT_ARM": ("dirsek",),
+                                             "ERR_ARM_TO_SIDE": ("kol_boyu",)})
+KISA_AD.update({"ERR_TORSO_FORWARD": "gövde öne", "ERR_TORSO_ROTATION": "gövde dönme", "ERR_ARM_TO_SIDE": "kol yana"})
 
 
 # ---------------------------------------------------------------- tekrar başına puanlar
@@ -102,14 +134,15 @@ def olcut_puani(df: pd.DataFrame, olcut: str, yon: int) -> pd.Series:
     return df[puan_sutunu(olcut, yon)]
 
 
-def beklenen_yonler(egitim: pd.DataFrame, on_olcut: str) -> dict[str, int]:
+def beklenen_yonler(egitim: pd.DataFrame, esleme) -> dict[str, int]:
     """
     Her ölçütün beklenen hata yönü, eğitim tekrarlarından: işaret(ilgili hatalı tekrarların ortalama
     imzalı farkı − doğru tekrarlarınki). Fark 0 ya da tanımsızsa +1.
     Kaldırmada yön sabit +1 (yalnızca eksik sayılır; Karar 13).
     """
+    esleme = hata_olcutleri(esleme) if isinstance(esleme, str) else esleme
     yonler = {}
-    for hata, k in hata_olcutleri(on_olcut).items():
+    for hata, k in esleme.items():
         if k == KALDIRMA:
             yonler[k] = 1
             continue
@@ -122,8 +155,9 @@ def beklenen_yonler(egitim: pd.DataFrame, on_olcut: str) -> dict[str, int]:
 # ---------------------------------------------------------------- karar kuralı
 @dataclass
 class KararKurali:
-    """Eğitim kişilerinden kurulmuş kural. z = (puan − medyan) / (IQR + ε); max z < T → DOGRU."""
-    on_olcut: str
+    """Eğitim kişilerinden kurulmuş kural. z = (puan − medyan) / (IQR + ε); max z < T → DOGRU.
+    esleme: hata -> ölçüt (sıra = z sütunlarının sırası)."""
+    esleme: dict
     yonlu: bool
     yonler: dict[str, int]
     medyan: dict[str, float]
@@ -133,59 +167,71 @@ class KararKurali:
 
     @property
     def olcutler(self) -> dict[str, str]:
-        return hata_olcutleri(self.on_olcut)
+        return self.esleme
+
+    @property
+    def hatalar(self) -> list[str]:
+        return list(self.esleme)
+
+    @property
+    def on_olcut(self):
+        """Ex1'de öne kaçma için seçilen ölçüt (geri uyumluluk); Ex7'de None."""
+        return self.esleme.get("ERR_ARM_FORWARD")
 
     def yon(self, olcut: str) -> int:
         return self.yonler[olcut] if self.yonlu else 0
 
     def z(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Tekrar × hata türü z tablosu (sütunlar HATALAR sırasıyla)."""
+        """Tekrar × hata türü z tablosu (sütunlar esleme sırasıyla; Ex1'de HATALAR)."""
         cikti = {}
         for hata, k in self.olcutler.items():
             cikti[hata] = (olcut_puani(df, k, self.yon(k)) - self.medyan[k]) / self.olcek[k]
-        return pd.DataFrame(cikti, index=df.index)[HATALAR]
+        return pd.DataFrame(cikti, index=df.index)[self.hatalar]
 
     def karar(self, df: pd.DataFrame, z: pd.DataFrame | None = None) -> pd.Series:
         return _karar(self.z(df) if z is None else z, self.T)
 
 
 def _karar(z: pd.DataFrame, T: float) -> pd.Series:
-    """max z < T → DOGRU, değilse argmax z (eşitlikte HATALAR sırasındaki ilk). NaN z dikkate alınmaz."""
+    """max z < T → DOGRU, değilse argmax z (eşitlikte sütun sırasındaki ilk). NaN z dikkate alınmaz."""
     Z = z.to_numpy(float)
     Zd = np.where(np.isnan(Z), -np.inf, Z)
     en = Zd.max(axis=1)
-    tur = np.array(HATALAR, dtype=object)[Zd.argmax(axis=1)]
+    tur = np.array(list(z.columns), dtype=object)[Zd.argmax(axis=1)]
     return pd.Series(np.where(en < T, DOGRU, tur), index=z.index)
 
 
-def kural_kur(egitim: pd.DataFrame, on_olcut: str, yonlu: bool) -> KararKurali:
-    """Ölçekleme (eğitimdeki doğru tekrarların medyanı ve IQR'si) ve yönler; T henüz seçilmemiş."""
-    yonler = beklenen_yonler(egitim, on_olcut)
+def kural_kur(egitim: pd.DataFrame, esleme, yonlu: bool) -> KararKurali:
+    """Ölçekleme (eğitimdeki doğru tekrarların medyanı ve IQR'si) ve yönler; T henüz seçilmemiş.
+    esleme: hata -> ölçüt sözlüğü; Ex1 için öne kaçma ölçütünün adı da verilebilir."""
+    esleme = hata_olcutleri(esleme) if isinstance(esleme, str) else dict(esleme)
+    yonler = beklenen_yonler(egitim, esleme)
     dogru = egitim[egitim.hata == DOGRU]
     medyan, olcek = {}, {}
-    for k in hata_olcutleri(on_olcut).values():
+    for k in esleme.values():
         p = olcut_puani(dogru, k, yonler[k] if yonlu else 0).dropna()
         q1, q2, q3 = np.percentile(p, [25, 50, 75])
         medyan[k], olcek[k] = float(q2), float(q3 - q1) + EPS
-    return KararKurali(on_olcut, yonlu, yonler, medyan, olcek)
+    return KararKurali(esleme, yonlu, yonler, medyan, olcek)
 
 
-def esik_sec(egitim: pd.DataFrame, yonlu: bool, adaylar=ON_KACMA_ADAYLARI) -> KararKurali:
+def esik_sec(egitim: pd.DataFrame, yonlu: bool, tanim: HataTanimi = EX1) -> KararKurali:
     """
-    Eğitim tekrarlarında makro-F1'i (6 sınıf, katı) en yükseğe çıkaran öne kaçma ölçütü ve T.
+    Eğitim tekrarlarında makro-F1'i (DOGRU + hatalar, katı) en yükseğe çıkaran ölçüt eşlemesi ve T.
+    Ex1'de tek seçim öne kaçma ölçütüdür (on_kacma / kol_boyu); Ex7'de eşleme sabittir.
     T adayları: eğitimdeki max z dağılımının yüzdelikleri (ESIK_IZGARASI). Eşitlikte ilk aday
     (öne kaçmada on_kacma, T'de küçük olan) seçilir.
     """
     en_iyi = None
-    for on_olcut in adaylar:
-        kural = kural_kur(egitim, on_olcut, yonlu)
+    for esleme in tanim.eslemeler():
+        kural = kural_kur(egitim, esleme, yonlu)
         z = kural.z(egitim)
         enz = np.nanmax(np.where(np.isnan(z.to_numpy(float)), -np.inf, z.to_numpy(float)), axis=1)
         for T in np.unique(np.percentile(enz[np.isfinite(enz)], ESIK_IZGARASI)):
-            f1 = makro_f1(egitim.hata, _karar(z, T), SINIFLAR)
+            f1 = makro_f1(egitim.hata, _karar(z, T), tanim.siniflar)
             if en_iyi is None or f1 > en_iyi[0] + 1e-12:
-                en_iyi = (f1, on_olcut, float(T), kural)
-    f1, on_olcut, T, kural = en_iyi
+                en_iyi = (f1, float(T), kural)
+    f1, T, kural = en_iyi
     kural.T = T
     kural.bilgi = {"egitim_makro_f1": f1}
     return kural
@@ -197,12 +243,12 @@ def ilk_iki(z: pd.DataFrame, T: float) -> pd.DataFrame:
     Tekrar başına en yüksek iki z'nin hataları ve kuralın söyleyeceği hatalar.
     Sütunlar: z1_hata, z2_hata (eşikten bağımsız sıralama), z1, z2,
               soylenen1 (max z ≥ T ise z1_hata, değilse DOGRU), soylenen2 (z2 ≥ T ise z2_hata, değilse "").
-    Eşitlikte HATALAR sırası (karar kuralıyla aynı). NaN z dikkate alınmaz.
+    Eşitlikte sütun sırası (karar kuralıyla aynı). NaN z dikkate alınmaz.
     """
-    Z = z[HATALAR].to_numpy(float)
+    Z = z.to_numpy(float)
     Zd = np.where(np.isnan(Z), -np.inf, Z)
     sira = np.argsort(-Zd, axis=1, kind="stable")
-    ad = np.array(HATALAR, dtype=object)
+    ad = np.array(list(z.columns), dtype=object)
     i = np.arange(len(Zd))
     z1, z2 = Zd[i, sira[:, 0]], Zd[i, sira[:, 1]]
     return pd.DataFrame({"z1_hata": ad[sira[:, 0]], "z2_hata": ad[sira[:, 1]], "z1": z1, "z2": z2,

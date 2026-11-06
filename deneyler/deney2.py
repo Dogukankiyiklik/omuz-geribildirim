@@ -74,31 +74,33 @@ def _ortalama(sozlukler: list[dict]) -> dict:
     return cikti
 
 
-def grup_modelleri(dogrular_f: list[dict], bant: str) -> list:
+def grup_modelleri(dogrular_f: list[dict], bant: str, olcutler=OLCUTLER) -> list:
     """Bir grubun n alt küme modeli (i. model: i. doğru tekrar dışarıda)."""
     alt = birini_disarida_alt_kumeler(dogrular_f)
     if bant == "v2":
-        return [aci_bandi_modeli(a, OLCUTLER) for a in alt]
-    return [coklu_referans_modelleri(a, OLCUTLER) for a in alt]
+        return [aci_bandi_modeli(a, olcutler) for a in alt]
+    return [coklu_referans_modelleri(a, olcutler) for a in alt]
 
 
-def _model_puani(model, alt_f, f, bant):
-    """Tek bir (n−1)'li modelle puanlar: (E, fark, ek)."""
-    tepeler = [tepe_acisi(u["kol"]) for u in alt_f]
-    tepe = tepe_acisi(f["kol"])
+def _model_puani(model, alt_f, f, bant, olcutler=OLCUTLER, kaldirma=True):
+    """Tek bir (n−1)'li modelle puanlar: (E, fark, ek). kaldirma=False: tepe bandı hesaplanmaz (Ex7)."""
     if bant == "v2":
-        E, fark, ek = aci_bandi_puanlari(model, f, OLCUTLER, YONLER)
+        E, fark, ek = aci_bandi_puanlari(model, f, olcutler, YONLER)
         ek = {"kapsam": ek["kapsam"], "aralik_disi": float(ek["aralik_disi"])}
     else:
-        E, fark = coklu_model_puanlari(model, f, OLCUTLER, YONLER)
+        E, fark = coklu_model_puanlari(model, f, olcutler, YONLER)
         ek = {}
-    Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe, tepeler)
-    E.update({(ht.KALDIRMA, y): Ek[y] for y in YONLER})
+    if kaldirma:
+        tepeler = [tepe_acisi(u["kol"]) for u in alt_f]
+        Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe_acisi(f["kol"]), tepeler)
+        E.update({(ht.KALDIRMA, y): Ek[y] for y in YONLER})
     return E, fark, ek
 
 
-def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True) -> pd.DataFrame:
-    ozl = ozl or {id(t): ozellikler(t.dizi, OLCUTLER) for t in tekrarlar}
+def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True, olcutler=OLCUTLER, kaldirma=True) -> pd.DataFrame:
+    """Tekrar başına puanlar. Ex1: olcutler=DENEY2_OLCUTLERI, kaldirma=True; Ex7: EX7_OLCUTLERI, False."""
+    olcutler = list(olcutler)
+    ozl = ozl or {id(t): ozellikler(t.dizi, olcutler) for t in tekrarlar}
     kayit = []
     for _, grup in veri.gruplara_ayir(tekrarlar).items():
         tl = [(t, _kes(ozl[id(t)], t.etiketli)) for t in grup]
@@ -106,7 +108,7 @@ def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True) -> pd.DataFrame:
         if len(dogrular) < 3:
             continue
         dogrular_f = [f for _, f in dogrular]
-        modeller = grup_modelleri(dogrular_f, bant)
+        modeller = grup_modelleri(dogrular_f, bant, olcutler)
         altlar = birini_disarida_alt_kumeler(dogrular_f)
         for t, f in tl:
             if t.dogru:
@@ -114,13 +116,14 @@ def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True) -> pd.DataFrame:
                 secim = [i]
             else:
                 secim = range(len(dogrular))
-            sonuc = [_model_puani(modeller[i], altlar[i], f, bant) for i in secim]
+            sonuc = [_model_puani(modeller[i], altlar[i], f, bant, olcutler, kaldirma) for i in secim]
             E = _ortalama([s[0] for s in sonuc])
             fark = _ortalama([s[1] for s in sonuc])
             r = {"bant": bant, "video": t.video, "kisi": t.kisi, "kamera": t.kamera, "yonelim": t.yonelim,
                  "tekrar_no": t.tekrar_no, "satir": t.satir, "gorus": t.gorus, "hata": t.hata,
                  "ek_hata": t.ek_hata, "model_sayisi": len(sonuc), "tepe_acisi": tepe_acisi(f["kol"])}
-            r.update({ht.puan_sutunu(k, y): E[(k, y)] for k in OLCUTLER + [ht.KALDIRMA] for y in YONLER})
+            r.update({ht.puan_sutunu(k, y): E[(k, y)] for k in olcutler + ([ht.KALDIRMA] if kaldirma else [])
+                      for y in YONLER})
             r.update({ht.fark_sutunu(k): v for k, v in fark.items()})
             if bant == "v2":
                 r["kapsam"] = float(np.mean([s[2]["kapsam"] for s in sonuc]))
@@ -133,13 +136,14 @@ def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------- 2) birini-dışarıda-bırak karar
-def loso(puan: pd.DataFrame, yonlu: bool):
-    """Kişi bazlı birini-dışarıda-bırak. Dönüş: (tahmin tablosu, kural kaydı)."""
+def loso(puan: pd.DataFrame, yonlu: bool, tanim: ht.HataTanimi = ht.EX1, ayar_gorusu: str = AYAR_GORUSU):
+    """Kişi bazlı birini-dışarıda-bırak. Ayar yalnızca eğitim kişilerinin ayar_gorusu tekrarlarıyla.
+    Dönüş: (tahmin tablosu, kural kaydı)."""
     parcalar, kurallar = [], []
     for kisi in sorted(puan.kisi.unique()):
-        egitim = puan[(puan.kisi != kisi) & gorus_maskesi(puan, AYAR_GORUSU)]
+        egitim = puan[(puan.kisi != kisi) & gorus_maskesi(puan, ayar_gorusu)]
         test = puan[puan.kisi == kisi]
-        kural = ht.esik_sec(egitim, yonlu)
+        kural = ht.esik_sec(egitim, yonlu, tanim)
         z = kural.z(test)
         tah = kural.karar(test, z)
         # temel çizgi: aynı ölçekleme, tek toplam hata, yalnızca doğru/yanlış
@@ -153,7 +157,7 @@ def loso(puan: pd.DataFrame, yonlu: bool):
         p["max_z"] = z.max(axis=1)
         p["T"] = kural.T
         p = p.join(ht.ilk_iki(z, kural.T))
-        for h in ht.HATALAR:
+        for h in kural.hatalar:
             p[f"z_{ht.KISA_AD[h]}"] = z[h]
         p["toplam_hata"] = toplam
         p["temel_tahmin_yanlis"] = toplam >= Tb
@@ -174,12 +178,12 @@ def _ikili(gercek_yanlis, tahmin_yanlis) -> dict:
             "özgüllük (doğruya doğru deme)": float(ozg), "dengeli doğruluk": float((duy + ozg) / 2)}
 
 
-def ozet_satiri(p: pd.DataFrame) -> dict:
+def ozet_satiri(p: pd.DataFrame, siniflar=ht.SINIFLAR) -> dict:
     """Bir tahmin tablosu dilimi için ana sayılar (katı ve esnek)."""
     hatali = p.hata != ht.DOGRU
     r = {"tekrar": len(p), "hatalı tekrar": int(hatali.sum())}
-    r["makro-F1 (katı)"] = makro_f1(p.hata, p.tahmin, ht.SINIFLAR)
-    r["makro-F1 (esnek)"] = makro_f1(p.esnek_gercek, p.tahmin, ht.SINIFLAR)
+    r["makro-F1 (katı)"] = makro_f1(p.hata, p.tahmin, siniflar)
+    r["makro-F1 (esnek)"] = makro_f1(p.esnek_gercek, p.tahmin, siniflar)
     r["doğruluk 6 sınıf (katı)"] = float((p.hata == p.tahmin).mean())
     r["doğruluk 6 sınıf (esnek)"] = float((p.esnek_gercek == p.tahmin).mean())
     r.update(_ikili(hatali, p.tahmin != ht.DOGRU))

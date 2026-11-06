@@ -21,11 +21,16 @@ TEKRAR_ANAHTARI = ["video", "kamera", "yonelim", "satir", "kisi", "hata", "ek_ha
 ONDEN_CAPRAZ = "önden+çapraz"
 TUMU = "tüm görüşler"
 ONDEN_CAPRAZ_SINIR = 60
+# Ex7 (Adım 4b, Güncelleme 05): uygulama senaryosu yan veya çapraz, çünkü ekstansiyon sagital düzlemde
+CAPRAZ_PROFIL = "çapraz+profil"
+CAPRAZ_PROFIL_SINIR = 30
 
 
 def gorus_maskesi(df: pd.DataFrame, gorus: str) -> pd.Series:
     if gorus == TUMU:
         return pd.Series(True, index=df.index)
+    if gorus == CAPRAZ_PROFIL:
+        return df.gorus.abs() >= CAPRAZ_PROFIL_SINIR
     if gorus == ONDEN_CAPRAZ:
         return df.gorus.abs() <= ONDEN_CAPRAZ_SINIR
     return df.gorus.map(veri.gorus_grubu) == gorus

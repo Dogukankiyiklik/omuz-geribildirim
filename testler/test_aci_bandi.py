@@ -129,3 +129,75 @@ def test_etiketli_kareler():
         s = t.etiketli
         assert t.ilk_kare + s.start == r.first_frame
         assert t.ilk_kare + s.stop - 1 == r.last_frame
+
+
+def test_adil_ortalama_hata():
+    """Karar 7: her doğru tekrar sırayla dışarıda, E'lerin ortalaması; NaN'lar atlanır."""
+    from cekirdek.adil_model import adil_ortalama_hata, birini_disarida_alt_kumeler, ortalama_E
+    alt = birini_disarida_alt_kumeler([1, 2, 3, 4])
+    assert alt == [[2, 3, 4], [1, 3, 4], [1, 2, 4], [1, 2, 3]]
+    E, s = adil_ortalama_hata([1, 2, 3, 4], lambda a: ({"Y": float(sum(a))}, {}), ["Y"])
+    assert E["Y"] == pytest.approx(np.mean([9, 8, 7, 6])) and len(s) == 4
+    assert ortalama_E([{"Y": np.nan}, {"Y": 0.4}], ["Y"])["Y"] == pytest.approx(0.4)
+    assert np.isnan(ortalama_E([{"Y": np.nan}, {"Y": np.nan}], ["Y"])["Y"])
+
+
+@pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")
+def test_v1b_v2_tohumdan_bagimsiz():
+    """Karar 7 kabul ölçütü: v1b ve v2'de tohum 0 ile 1 arasında |ΔE| = 0 (hatalı tekrarlar dahil)."""
+    from deneyler import deney1_v2
+    ts = [t for t in veri.tekrarlari_yukle(1) if t.video in ("ex1_Petra", "ex1_Honza")]
+    ozl = deney1_v2.ozellik_tablosu(ts)
+    for kosul in ("v1b", "v2"):
+        a = deney1_v2.skor_tablosu(ts, kosul, 0, ozl)
+        b = deney1_v2.skor_tablosu(ts, kosul, 1, ozl)
+        assert (a.hata != "DOGRU").any()
+        for k in deney1_v2.OLCUTLER:
+            assert np.array_equal(a[f"bant_{k}"].values, b[f"bant_{k}"].values, equal_nan=True)
+
+
+def test_yumusatma():
+    """One Euro ve Savitzky–Golay: sabit sinyali bozmaz, gürültüyü azaltır, z/görünürlüğe dokunmaz."""
+    from cekirdek.yumusatma import yumusat
+    rng = np.random.default_rng(0)
+    n = 120
+    temiz = np.zeros((n, 33, 4))
+    temiz[:, :, 1] = np.sin(np.linspace(0, np.pi, n))[:, None] * 0.1 + 0.5
+    temiz[:, :, 0] = 0.3
+    temiz[:, :, 2] = 7.0
+    temiz[:, :, 3] = 0.9
+    gurultulu = temiz.copy()
+    gurultulu[..., :2] += rng.normal(0, 0.003, (n, 33, 2))
+    for y, p in [("one_euro", {"min_kesim": 1.0, "beta": 1.0}), ("savgol", {"pencere": 9, "derece": 2})]:
+        sabit = yumusat(temiz[:, :, :], y, **p)
+        assert np.allclose(sabit[:, :, 0], 0.3)
+        out = yumusat(gurultulu, y, **p)
+        assert np.array_equal(out[..., 2:], gurultulu[..., 2:])
+        assert np.std(np.diff(out[..., 1], n=2, axis=0)) < 0.5 * np.std(np.diff(gurultulu[..., 1], n=2, axis=0))
+    assert yumusat(gurultulu, "yok") is gurultulu
+
+
+def test_genel_bant_test_kisisini_icermez():
+    """Deney 1b: genel bantta test kişisinin hiçbir tekrarı modele girmez (aynı kamera/yönelim, diğer kişiler)."""
+    from deneyler import deney1b
+    import deneyler.deney1b as m
+    gorulen = []
+    eski = m._Model.__init__
+
+    def kaydet(self, bant, fl):
+        gorulen.append([id(f["kol"]) for f in fl])
+        eski(self, bant, fl)
+
+    ts = [t for t in veri.tekrarlari_yukle(1) if t.kamera == "cam1" and t.yonelim == 0]
+    ozl = deney1b.d2.ozellik_tablosu(ts)
+    m._Model.__init__ = kaydet
+    try:
+        deney1b.genel_skorlar(ts, "v2", ozl)
+    finally:
+        m._Model.__init__ = eski
+    # modeller etiketli dilimin kopyalarını alır; kişi kontrolünü tekrar sayısıyla yap
+    dogru_say = {k: sum(t.dogru for t in ts if t.kisi == k) for k in {t.kisi for t in ts}}
+    tum_modeller = [g for g in gorulen if len(g) > max(dogru_say.values())]
+    assert len(tum_modeller) == len(dogru_say)
+    for g, kisi in zip(tum_modeller, sorted(dogru_say)):
+        assert len(g) == sum(v for k, v in dogru_say.items() if k != kisi)

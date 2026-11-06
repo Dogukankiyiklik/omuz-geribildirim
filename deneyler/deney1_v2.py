@@ -7,13 +7,15 @@ Koşullar (birikimli; hepsinde 5 omuz ölçütü, yönsüz bant):
   v1b : zaman bandı, pay hariç, ÇOKLU referans (sırayla hepsi, E'lerin ortalaması)
   v2  : AÇI BANDI (kol açısına koşullu), pay hariç, referans yok
 
-Adillik (her koşulda): doğru tekrar birini-dışarıda-bırak; hatalı tekrar, rastgele bir doğru tekrar
-dışarıda bırakılarak aynı sayıda (n−1) doğru tekrarla. Rastgelelik tohumla.
+Adillik (her koşulda): doğru tekrar birini-dışarıda-bırak; hatalı tekrar aynı sayıda (n−1) doğru tekrarla.
+  v1, v1a: dışarıda bırakılan doğru tekrar rastgele (tohum) — Deney 1'e sadık.
+  v1b, v2: her doğru tekrar sırayla dışarıda, n model, E'lerin ortalaması (Güncelleme 03, Karar 7) →
+           E tamamen deterministik.
 "Pay hariç": ölçütler tüm dizide hesaplanır (dinlenme tabanı = ilk 8 kare, pay dahil), sonra
 DTW / bant / E için yalnızca etiketli kareler (first_frame … last_frame) kullanılır (Karar 3).
 
 Kullanım:
-    python -m deneyler.deney1_v2                 # ~3–5 dk (tohum duyarlılığı için ikinci tohum dahil)
+    python -m deneyler.deney1_v2                 # birkaç dk (tohum duyarlılığı için ikinci tohum dahil)
     python -m deneyler.deney1_v2 --sekilsiz      # örnek şekiller üretilmez
 Çıktı: sonuclar/deney1_v2/
 """
@@ -27,6 +29,7 @@ import numpy as np
 import pandas as pd
 
 from cekirdek import veri
+from cekirdek.adil_model import adil_ortalama_hata, birini_disarida_alt_kumeler
 from cekirdek.aci_bandi import aci_bandi_hatasi, aci_bandi_modeli
 from cekirdek.bant import bant_hatasi, bant_modeli, coklu_referans_hatasi
 from cekirdek.degerlendirme import auc, guven_araligi, kisi_bootstrap, psi
@@ -36,6 +39,9 @@ from deneyler.deney1 import GORUS_GRUPLARI, SILKME, maskeler
 
 OLCUTLER = DENEY1_OLCUTLERI
 KOSULLAR = ["v1", "v1a", "v1b", "v2"]
+# Güncelleme 03, Karar 7: bu koşullarda hatalı tekrarın E'si tüm (n−1)'li modellerin ortalaması
+# (rastgele "atla" yok → E tamamen deterministik). v1 ve v1a Deney 1'e sadık kalır (tek rastgele).
+ADIL_ORTALAMA = ("v1b", "v2")
 KOSUL_ACIKLAMA = {
     "v1": "zaman bandı, pay dahil, tek rastgele referans (Deney 1)",
     "v1a": "zaman bandı, pay hariç, tek rastgele referans",
@@ -75,6 +81,10 @@ def degerlendirmeler(tekrarlar, kosul: str, tohum: int = 0, ozl=None):
             continue
         for x in tl:
             t = x["t"]
+            if not t.dogru and kosul in ADIL_ORTALAMA:
+                # Karar 7: her doğru tekrar sırayla dışarıda, n model, E'lerin ortalaması.
+                yield _adil_ortalama_degerlendirme(x, dogrular, kosul)
+                continue
             if t.dogru:
                 digerleri = [u for u in dogrular if u is not x]
             else:
@@ -91,7 +101,38 @@ def degerlendirmeler(tekrarlar, kosul: str, tohum: int = 0, ozl=None):
                 model = aci_bandi_modeli(fl, OLCUTLER)
                 E, ek = aci_bandi_hatasi(model, x["f"], OLCUTLER)
             yield {"t": t, "f": x["f"], "model": model, "digerleri": [u["t"] for u in digerleri],
-                   "digerleri_f": fl, "E": E, "ek": ek}
+                   "digerleri_f": fl, "E": E, "ek": ek, "model_sayisi": 1}
+
+
+def _adil_ortalama_degerlendirme(x, dogrular, kosul):
+    """
+    Hatalı tekrar, v1b / v2 (Karar 7). E = n adet (n−1)'li modelin E ortalaması.
+    v2 ek bilgileri: kapsam = modellerin ortalaması; aralik_disi = modellerin yarısından fazlasında
+    bayrak; tepe_acisi tekrarın kendisinden (modele bağlı değil).
+    Görsel araçlar için "model" ilk alt kümenin (1. doğru tekrar dışarıda) modelidir; gösterilen E
+    yine ortalamadır ("model_sayisi" > 1 bunu belirtir).
+    """
+    def hata(alt):
+        fl = [u["f"] for u in alt]
+        if kosul == "v1b":
+            return coklu_referans_hatasi(fl, x["f"], OLCUTLER), {}
+        m = aci_bandi_modeli(fl, OLCUTLER)
+        E, ek = aci_bandi_hatasi(m, x["f"], OLCUTLER)
+        ek["_model"] = m
+        return E, ek
+
+    E, sonuclar = adil_ortalama_hata(dogrular, hata, OLCUTLER)
+    ekler = [ek for _, ek in sonuclar]
+    ek = {}
+    if kosul == "v2":
+        ek = {"kapsam": float(np.mean([e["kapsam"] for e in ekler])),
+              "aralik_disi": bool(np.mean([e["aralik_disi"] for e in ekler]) > 0.5),
+              "tepe_acisi": ekler[0]["tepe_acisi"]}
+    ilk = birini_disarida_alt_kumeler(dogrular)[0]
+    return {"t": x["t"], "f": x["f"], "model": ekler[0].get("_model"),
+            "digerleri": [u["t"] for u in dogrular], "digerleri_f": [u["f"] for u in dogrular],
+            "model_digerleri_f": [u["f"] for u in ilk],
+            "E": E, "ek": ek, "model_sayisi": len(dogrular)}
 
 
 def skor_tablosu(tekrarlar, kosul, tohum=0, ozl=None) -> pd.DataFrame:
@@ -138,6 +179,10 @@ def ozet_tablosu(df, kisi_tablo) -> pd.DataFrame:
             r = {"koşul": kosul, "ölçüt": k,
                  "AUC silkme/doğru": _auc(g, s, d, c),
                  "AUC silkme/diğer hatalar": _auc(g, s, o, c)}
+            # Karar 6: uygulama senaryosu = önden + çapraz (|görüş| ≤ 60°)
+            oc = g.gorus.abs() <= 60
+            r["AUC silkme/doğru (önden+çapraz)"] = _auc(g, s & oc, d & oc, c)
+            r["AUC silkme/diğer (önden+çapraz)"] = _auc(g, s & oc, o & oc, c)
             for gg in GORUS_GRUPLARI:
                 m = g.gorus_grubu == gg
                 r[f"AUC {gg}"] = _auc(g, s & m, d & m, c)
@@ -153,21 +198,26 @@ def ozet_tablosu(df, kisi_tablo) -> pd.DataFrame:
 
 
 FARKLAR = [("v2", "v1"), ("v1a", "v1"), ("v1b", "v1a"), ("v2", "v1b")]
+# Güncelleme 03: silkme/diğer ayrımı için farklar (açı bandının asıl katkısı burada)
+# (ayrım, ölçüt, x, y)
+FARKLAR_DIGER = [("silkme/diğer", k, x, y) for k in ("YENI", "M33") for x, y in (("v2", "v1b"), ("v2", "v1"))]
+FARKLAR_TUMU = [("silkme/doğru", "YENI", x, y) for x, y in FARKLAR] + FARKLAR_DIGER
 
 
-def bootstrap_tablosu(df, n=2000, tohum=1, olcutler=("YENI",)) -> pd.DataFrame:
-    """Koşullar arası AUC (silkme/doğru) farkı için kişi bazlı bootstrap %95 GA (eşleştirilmiş: aynı kişiler)."""
+def bootstrap_tablosu(df, n=2000, tohum=1, farklar=FARKLAR_TUMU) -> pd.DataFrame:
+    """Koşullar arası AUC farkı için kişi bazlı bootstrap %95 GA (eşleştirilmiş: aynı kişiler)."""
+    olcutler = sorted({k for _, k, _, _ in farklar})
     genis = df.pivot_table(index=["video", "kamera", "yonelim", "satir", "kisi", "hata", "ek_hata"],
                            columns="kosul", values=[f"bant_{k}" for k in olcutler]).reset_index()
     genis.columns = ["_".join(c for c in col if c) if isinstance(col, tuple) else col for col in genis.columns]
 
     def istatistik(b):
-        s, d, _ = maskeler(b)
+        s, d, o = maskeler(b)
+        neg = {"silkme/doğru": d, "silkme/diğer": o}
         cikti = {}
-        for k in olcutler:
-            a = {kz: _auc(b, s, d, f"bant_{k}_{kz}") for kz in KOSULLAR}
-            for x, y in FARKLAR:
-                cikti[f"{k}: {x} − {y}"] = a[x] - a[y]
+        for ayrim, k, x, y in farklar:
+            a = {kz: _auc(b, s, neg[ayrim], f"bant_{k}_{kz}") for kz in (x, y)}
+            cikti[f"{ayrim} · {k}: {x} − {y}"] = a[x] - a[y]
         return cikti
 
     bs = kisi_bootstrap(genis, istatistik, n=n, tohum=tohum)
@@ -252,7 +302,9 @@ def yazdir_ozet(tablolar, df, tohum, bootstrap_n):
     print(f"\nTohum: {tohum} · Tekrar sayıları (3 kamera dahil): silkme={s.sum()}, doğru={d.sum()}, diğer hatalar={o.sum()}")
     ozet = tablolar["ozet"]
     print("\n1) Ablasyon tablosu — AUC (koşul × ölçüt):")
-    sut = ["koşul", "ölçüt", "AUC silkme/doğru", "AUC silkme/diğer hatalar"] + [f"AUC {g}" for g in GORUS_GRUPLARI] + ["Ψ (M39)", "E boş (NaN) tekrar"]
+    sut = (["koşul", "ölçüt", "AUC silkme/doğru", "AUC silkme/diğer hatalar",
+            "AUC silkme/doğru (önden+çapraz)", "AUC silkme/diğer (önden+çapraz)"]
+           + [f"AUC {g}" for g in GORUS_GRUPLARI] + ["Ψ (M39)", "E boş (NaN) tekrar"])
     print(ozet[sut].round(3).to_string(index=False))
     print("\n2) Kişi bazlı AUC silkme/doğru:")
     print(tablolar["kisi_auc"].round(3).to_string(index=False))
@@ -260,9 +312,9 @@ def yazdir_ozet(tablolar, df, tohum, bootstrap_n):
     for _, r in ozet[ozet["ölçüt"] == "YENI"].iterrows():
         print(f"   {r['koşul']:4s} YENI: {r['kişi özeti']}")
     if "bootstrap" in tablolar:
-        print(f"\n3) AUC farkı (YENI, silkme/doğru), kişi bazlı bootstrap ({bootstrap_n} tekrar), %95 GA:")
+        print(f"\n3) AUC farkları, kişi bazlı bootstrap ({bootstrap_n} tekrar), %95 GA:")
         for _, r in tablolar["bootstrap"].iterrows():
-            print(f"   {r['fark']:16s} {r['nokta tahmini']:+.3f}   GA {r['GA %2,5']:+.3f} – {r['GA %97,5']:+.3f}")
+            print(f"   {r['fark']:32s} {r['nokta tahmini']:+.3f}   GA {r['GA %2,5']:+.3f} – {r['GA %97,5']:+.3f}")
     print("\n4) v2 kapsam ve aralık dışı oranı (hata türüne göre):")
     print(tablolar["kapsam"].round(3).to_string(index=False))
     if "tohum" in tablolar:

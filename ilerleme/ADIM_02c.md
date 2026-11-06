@@ -167,3 +167,119 @@ v2'nin parametreleri (5° kutu, en az 3 tekrar, %20 bayrağı, 5° pay, 5 kareli
 - **Tohum duyarlılığı (Karar 1):** Referans rastgeleliği kalktı: doğru tekrarlarda v1b ve v2'de değişim 0. Hatalı tekrarlarda "atla" rastgeleliği sürüyor (|ΔE| > 0,05 oranı v1'de 0.404, v1b'de 0.341, v2'de 0.332). v2'de en büyük değişim 0.890. Muhtemel sebep: 4 kalibrasyon tekrarında "en az 3 tekrar" kuralı sınırda kalıyor; bir tekrarın çıkması bazı kutuları geçersiz yapıp bandın şeklini değiştiriyor (incelenmedi). Uygulamada (Adım 6) kalibrasyon 5 tekrar. Bu, kalibrasyon tekrar sayısının artırılması gerekip gerekmediği sorusunu doğuruyor.
 - **`aralik_disi` bayrağı** kolu öne kaçan tekrarlarda %19.6, doğru tekrarlarda %0.1. Adım 4'te "öne kaçma" için bir girdi olabilir.
 - **Terka'daki kalan hata:** Kolun son inişindeki kareler etiketli tekrarın içinde ve bandın altında kalıyor. Yöntemin bir sınırı mı, yoksa kişinin gerçek bir hareketi mi? Kullanıcının videoda bakması önerilir.
+
+---
+
+# Ek: Güncelleme 03 — "atla" rastgeleliği kaldırıldı (Karar 7)
+
+**Tarih:** 2026-11-06 (gece)
+**Durum:** Tamamlandı. Sayılar Claude Code'un doğrulama çalıştırmasından (`--sekilsiz`, tohum 0, bootstrap 2000) birebir kopyalandı. Kullanıcı da `python -m deneyler.deney1_v2` komutunu çalıştırdı (6 Kasım 22:27; `sonuclar/deney1_v2/` ve şekiller yeniden üretildi). `ozet.csv`, `bootstrap.csv` ve `tohum.csv` doğrulama çalıştırmasıyla birebir aynı.
+
+## Basit anlatım
+**En önemli tek sonuç:** Açı bandı (v2), silkmeli tekrarı **diğer hatalardan** ayırmada zaman bandından (v1b) açıkça daha iyi. Fark +0,108; %95 güven aralığı +0,053 – +0,190, yani sıfırı içermiyor.
+
+**Bu sayı ne demek?** AUC şunu ölçer: Rastgele bir silkmeli tekrar ile rastgele bir "başka hatalı" tekrar alalım. AUC, sistemin silkmeli olana daha yüksek omuz hatası verme olasılığıdır. Örneğin 100 böyle çift düşün:
+- zaman bandı (v1b) yaklaşık 72'sinde silkmeliyi doğru sıralıyor (AUC 0,721);
+- açı bandı (v2) yaklaşık 83'ünde (AUC 0,829).
+
+Bu ayrım önemli, çünkü geri bildirim cümlesinin "omzunu kaldırma" mı yoksa başka bir şey mi diyeceği tam olarak buna bağlı.
+
+**Ne değişti?** Önceden bir hatalı tekrar değerlendirilirken kişinin doğru tekrarlarından **rastgele biri** dışarıda bırakılıyordu. Sonuç, hangisinin seçildiğine göre değişiyordu; zar atmak gibi. Artık her doğru tekrar **sırayla** dışarıda bırakılıyor: 5 doğru tekrar varsa 5 model kuruluyor ve 5 sonucun ortalaması alınıyor. Zar kalktı; aynı veri her seferinde aynı sonucu veriyor.
+
+## Yapılanlar
+- `cekirdek/adil_model.py` (yeni): `birini_disarida_alt_kumeler`, `ortalama_E`, `adil_ortalama_hata`.
+- `deneyler/deney1_v2.py`:
+  - v1b ve v2'de hatalı tekrarlar Karar 7 ile değerlendiriliyor (`ADIL_ORTALAMA = ("v1b", "v2")`). v1 ve v1a değişmedi, ikisi de Deney 1'e sadık.
+  - Ablasyon tablosuna `AUC silkme/doğru (önden+çapraz)` ve `AUC silkme/diğer (önden+çapraz)` sütunları eklendi (|görüş| ≤ 60°, Karar 6).
+  - `bootstrap.csv`'ye silkme/diğer farkları eklendi: v2 − v1b ve v2 − v1, YENI ve M33 için. `fark` sütunu artık ayrımı da yazıyor (ör. `silkme/diğer · YENI: v2 − v1b`).
+- `araclar/gorsel_kontrol.py` ve `deneyler/deney1_v2_sekiller.py`: Hatalı tekrarda gösterilen E, deneydeki ortalama E. Çizilen bant ise ilk (n−1)'li modelden.
+- Eski çıktı `sonuclar/deney1_v2_atla_rastgele/` klasörüne kopyalandı.
+- Testler: `test_adil_ortalama_hata` ve `test_v1b_v2_tohumdan_bagimsiz` eklendi → `40 passed`.
+- `PLAN.md` (Adım 2c eki, Adım 3, 4, 6) ve `KARARLAR.md` (Karar 6–9 ve uygulama ayrıntısı) güncellendi.
+
+## Nasıl çalıştırılır
+```bash
+python -m deneyler.deney1_v2      # ~2–3 dk (önceden ~1 dk; hatalı tekrar başına artık n model kuruluyor)
+```
+
+## Sonuçlar
+
+### Kabul ölçütü: tohum duyarlılığı (`tohum.csv`, YENI)
+| koşul | grup | n | medyan \|ΔE\| | \|ΔE\| > 0,05 oranı | en büyük \|ΔE\| |
+| --- | --- | --- | --- | --- | --- |
+| v1 | hatalı | 834 | 0.0372 | 0.4041 | 0.7083 |
+| v1b | hatalı | 834 | 0.0000 | 0.0000 | 0.0000 |
+| v2 | hatalı | 834 | 0.0000 | 0.0000 | 0.0000 |
+
+5 ölçütün hepsinde v1b ve v2'nin en büyük |ΔE|'si 0.000000. Eskiden bu değer (YENI) v1b'de 0.3557, v2'de 0.8903 idi. ✔
+
+### Yeni ablasyon tablosu (`ozet.csv`; eski → yeni)
+Yalnızca v1b ve v2 değişti; v1 ve v1a'da her hücre eskisiyle aynı. "önden+çapraz" sütunları yeni. (s/d = silkme/doğru.)
+
+| koşul | ölçüt | silkme/doğru | silkme/diğer | **önden+çapraz** s/d | **önden+çapraz** s/diğer | önden | çapraz | profil | kişi özeti |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| v1 | YENI | 0.909 | 0.705 | 0.936 | 0.743 | 0.942 | 0.933 | 0.779 | 0,91 (0,80–0,98) |
+| v1a | YENI | 0.927 | 0.720 | 0.946 | 0.749 | 0.948 | 0.945 | 0.834 | 0,93 (0,82–0,99) |
+| v1b | YENI | 0.941 → 0.940 | 0.713 → 0.721 | 0.955 | 0.752 | 0.949 → 0.949 | 0.961 → 0.958 | 0.862 → 0.863 | 0,94 (0,84–0,99) |
+| v2 | YENI | 0.935 → **0.947** | 0.812 → **0.829** | 0.968 | 0.862 | 0.973 → 0.979 | 0.957 → 0.960 | 0.802 → **0.842** | 0,95 (0,84–0,98) |
+| v1 | M33 | 0.904 | 0.646 | 0.915 | 0.646 | 0.918 | 0.914 | 0.849 | 0,90 (0,74–0,99) |
+| v1b | M33 | 0.924 → 0.925 | 0.650 → 0.649 | 0.934 | 0.652 | 0.936 → 0.938 | 0.930 → 0.932 | 0.889 → 0.877 | 0,92 (0,79–0,99) |
+| v2 | M33 | 0.914 → 0.924 | 0.746 → 0.754 | 0.957 | 0.779 | 0.967 → 0.971 | 0.935 → 0.947 | 0.745 → 0.756 | 0,92 (0,83–0,97) |
+| v1 | M39_F2 | 0.888 | 0.637 | 0.909 | 0.648 | 0.888 | 0.924 | 0.794 | 0,89 (0,73–0,99) |
+| v1b | M39_F2 | 0.905 → 0.914 | 0.643 → 0.645 | 0.924 | 0.655 | 0.901 → 0.910 | 0.925 → 0.934 | 0.850 → 0.859 | 0,91 (0,78–0,99) |
+| v2 | M39_F2 | 0.883 → 0.909 | 0.700 → 0.719 | 0.942 | 0.750 | 0.929 → 0.949 | 0.915 → 0.938 | 0.698 → 0.731 | 0,91 (0,85–0,96) |
+| v1 | M01_tek | 0.866 | 0.662 | 0.892 | 0.697 | 0.898 | 0.889 | 0.743 | 0,86 (0,79–0,96) |
+| v1b | M01_tek | 0.891 → 0.903 | 0.672 → 0.682 | 0.918 | 0.706 | 0.898 → 0.916 | 0.909 → 0.920 | 0.827 → 0.830 | 0,90 (0,83–0,98) |
+| v2 | M01_tek | 0.870 → 0.889 | 0.783 → 0.802 | 0.916 | 0.832 | 0.903 → 0.920 | 0.907 → 0.916 | 0.709 → 0.749 | 0,89 (0,79–0,96) |
+| v1 | M01 | 0.822 | 0.642 | 0.854 | 0.677 | 0.885 | 0.830 | 0.670 | 0,82 (0,75–0,94) |
+| v1b | M01 | 0.839 → 0.850 | 0.638 → 0.649 | 0.872 | 0.673 | 0.875 → 0.884 | 0.852 → 0.864 | 0.717 → 0.736 | 0,85 (0,80–0,94) |
+| v2 | M01 | 0.845 → 0.858 | 0.754 → 0.770 | 0.889 | 0.812 | 0.893 → 0.901 | 0.880 → 0.883 | 0.643 → 0.688 | 0,86 (0,79–0,93) |
+
+(v1a satırlarının tamamı `ozet.csv`'de; değişmedi.)
+
+### Kişi bazlı AUC silkme/doğru, YENI (`kisi_auc.csv`)
+| koşul | Honza | Mima | Petra | Terka | Vasil |
+| --- | --- | --- | --- | --- | --- |
+| v1 | 0.985 | 0.947 | 0.884 | 0.926 | 0.800 |
+| v1a | 0.987 | 0.972 | 0.908 | 0.956 | 0.817 |
+| v1b | 0.991 | 0.971 | 0.929 | 0.971 | 0.844 |
+| v2 | 0.975 | 0.954 | 0.981 | 0.982 | 0.844 |
+
+### AUC farkları, kişi bazlı bootstrap 2000 tekrar (`bootstrap.csv`)
+| ayrım | fark | nokta tahmini | %95 GA |
+| --- | --- | --- | --- |
+| silkme/doğru | YENI: v2 − v1 | +0.037690 | +0.004043 – +0.073960 |
+| silkme/doğru | YENI: v1a − v1 | +0.017913 | +0.006914 – +0.027639 |
+| silkme/doğru | YENI: v1b − v1a | +0.013455 | +0.004164 – +0.023460 |
+| silkme/doğru | YENI: v2 − v1b | +0.006322 | −0.012486 – +0.029191 |
+| **silkme/diğer** | YENI: v2 − v1b | +0.108279 | +0.053085 – +0.189863 |
+| **silkme/diğer** | YENI: v2 − v1 | +0.124396 | +0.060302 – +0.207852 |
+| **silkme/diğer** | M33: v2 − v1b | +0.105556 | +0.051314 – +0.189111 |
+| **silkme/diğer** | M33: v2 − v1 | +0.108734 | +0.060986 – +0.190948 |
+
+### v2 kapsam (`kapsam.csv`)
+Neredeyse aynı. HEPSİ: kapsam ort. 0.923; aralik_disi oranı 0.038 → 0.037. ERR_ARM_FORWARD'da aralik_disi oranı 0.196 → 0.190.
+
+### Eskisine göre ne değişti? (özet)
+1. **Zar kalktı:** v1b ve v2'de hiçbir tekrarın E'si tohuma bağlı değil.
+2. **v2, silkme/doğru ayrımında biraz yükseldi:** YENI 0.935 → 0.947. v2 − v1b farkı −0.006'dan +0.006'ya döndü. GA hâlâ sıfırı içeriyor (−0.012 – +0.029), yani iki bant bu ayrımda **hâlâ aynı düzeyde**. Toplam v2 − v1 = +0.038; GA artık sıfırı içermiyor (+0.004 – +0.074).
+3. **Silkme/diğer kazancı artık güven aralığıyla gösteriliyor:** v2 − v1b, YENI'de +0.108, M33'te +0.106. İkisinin de GA'sı sıfırı içermiyor.
+4. **Profil açığı daraldı:** v2 YENI profilde 0.802 → 0.842 (v1b: 0.863). Açı bandı profilde hâlâ zaman bandının altında, ama fark küçüldü. M39_F2'de açık hâlâ büyük: 0.731'e karşı 0.859.
+5. **Uygulama senaryosunda (önden + çapraz)** v2 YENI: silkme/doğru 0.968, silkme/diğer 0.862.
+6. **Kişiler:** Petra 0.960 → 0.981, Terka 0.967 → 0.982. Honza, Mima ve Vasil'de değişim en fazla 0.023.
+
+## Kararlar ve sapmalar
+- **Kapsam:** Karar 7 yalnızca v1b ve v2'ye uygulandı. v1 ve v1a, temel çizgi olarak Deney 1'e sadık kalıyor (Güncelleme 02); "v1 = Deney 1" testi hâlâ geçiyor. Bu yüzden v1'deki tohum duyarlılığı aynı kaldı (YENI'de en büyük |ΔE| 0.7083).
+- **Açı bandında NaN:** Bir modelde tekrarın geçerli karesi yoksa (E = NaN), o model ortalamaya girmez. Hepsi NaN ise E = NaN olur. Bu çalıştırmada hiçbir tekrarın E'si boş değil.
+- **v2 ek bilgileri:**
+  - `kapsam` = n modelin ortalaması;
+  - `aralik_disi` = modellerin yarısından fazlasında bayrak varsa "doğru";
+  - `tepe_acisi` tekrarın kendisinden.
+- **Görseller:** Hatalı tekrarda çizilen bant ve bant dışı kare renkleri ilk (n−1)'li modelden (1. doğru tekrar dışarıda). Başlıktaki E ve kapsam ise deneydeki ortalama değerler; ikisi biraz farklı olabilir.
+- **Açı bandı videosundaki referans iskelet** (yalnızca görsel): Hatalı tekrarda grubun n doğru tekrarının hepsi arasından seçiliyor.
+
+**Dürüstlük notu (danışmana):** Ortalama almak, hatalı tekrarların E'sindeki "hangi model?" gürültüsünü kaldırıyor. Doğru tekrarlarda bu gürültü zaten yoktu, çünkü onlar için tek bir (n−1)'li model var: kalan bütün doğru tekrarlar. Yani eskiden hatalı tekrarlar fazladan bir gürültü taşıyordu; yeni yöntem bunu kaldırıyor.
+- Ancak n modelin E ortalaması, tek bir modelin E'sinden daha "pürüzsüz" bir sayı. Bunun silkmeli tekrarlar lehine küçük bir etkisi olabilir.
+- v2'nin v1b'den daha çok yükselmesi (YENI'de +0.012'ye karşı −0.001) muhtemelen bundan kaynaklanıyor. Açı bandında tek bir tekrarın çıkması bazı kutuları geçersiz yaptığı için model başına gürültü daha büyüktü (eski en büyük |ΔE| 0.890'a karşı 0.356). Bu açıklama test edilmedi.
+- Karar sonuçlar görülmeden verildi; yine de v2 − v1b farkı yorumlanırken bu not akılda tutulmalı.
+- Uygulamada (Adım 6) bu protokol kullanılmıyor; kalibrasyonun bütün tekrarları tek modele giriyor.

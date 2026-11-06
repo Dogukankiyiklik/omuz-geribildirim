@@ -261,8 +261,14 @@ class AciBandiGorseli(TekrarGorseli):
     def __init__(self, d: dict, esik: dict, olcut: str = "YENI", video_klasoru: Path | None = None):
         self.d, self.esik, self.olcut = d, esik, olcut
         self.t = t = d["t"]
-        self.E, self.ek = aci_bandi_hatasi(d["model"], d["f"], OLCUTLER, ayrinti=True)
-        assert all((np.isnan(self.E[k]) and np.isnan(d["E"][k])) or abs(self.E[k] - d["E"][k]) < 1e-12 for k in OLCUTLER)
+        E0, self.ek = aci_bandi_hatasi(d["model"], d["f"], OLCUTLER, ayrinti=True)
+        if d.get("model_sayisi", 1) == 1:
+            assert all((np.isnan(E0[k]) and np.isnan(d["E"][k])) or abs(E0[k] - d["E"][k]) < 1e-12 for k in OLCUTLER)
+        else:
+            # Hatalı tekrar (Karar 7): E, n adet (n−1)'li modelin ortalaması; çizilen bant ve kare
+            # renkleri bunların ilkinden. Gösterilen E ve kapsam deneydeki (ortalama) değerdir.
+            self.ek["kapsam"] = d["ek"]["kapsam"]
+        self.E = d["E"]
         self.bas = t.etiketli.start
         self.n_etiket = len(d["f"]["kol"])
         self.f_tam = ozellikler(t.dizi, OLCUTLER)

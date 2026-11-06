@@ -109,7 +109,10 @@ def zaman_bandi_ciz(ax, d, olcut=OLCUT):
 def aci_bandi_ciz(ax, d, olcut=OLCUT, isaret_aci=90.0):
     """v2: x = kol açısı, y = ölçüt; faz başına bant ve tekrarın kareleri."""
     model = d["model"]
-    E, ek = ab.aci_bandi_hatasi(model, d["f"], d2.OLCUTLER, ayrinti=True)
+    _, ek = ab.aci_bandi_hatasi(model, d["f"], d2.OLCUTLER, ayrinti=True)
+    # Hatalı tekrarda (Karar 7) E, kapsam ve bayrak n modelin ortalaması; çizilen bant ilk modelden.
+    E = d["E"]
+    ek.update({k: d["ek"][k] for k in ("kapsam", "aralik_disi")})
     kol, y = d["f"]["kol"], d["f"][olcut]
     xm = ab.kutu_merkezleri()
     for p in (ab.KALDIRMA, ab.INDIRME):

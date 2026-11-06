@@ -82,6 +82,17 @@ def coklu_referans_hatasi(dogrular: list[dict], tekrar: dict, olcutler,
     Çoklu referans (Güncelleme 02, Karar 1): modeldeki her doğru tekrar sırayla referans yapılır,
     bant kurulur ve E hesaplanır; E'lerin ortalaması döner. Rastgele referans seçimi ortadan kalkar.
     """
-    Es = [bant_hatasi(bant_modeli_ref(dogrular, r, olcutler), tekrar, olcutler, yon)
-          for r in range(len(dogrular))]
+    return coklu_model_hatasi(coklu_referans_modelleri(dogrular, olcutler), tekrar, olcutler, yon)
+
+
+def coklu_referans_modelleri(dogrular: list[dict], olcutler) -> list[dict]:
+    """Çoklu referansın bantları: her doğru tekrar sırayla referans (n model). Aynı model kümesiyle
+    birçok tekrar değerlendirilecekse (ör. genel bant, Adım 3) bir kez kurulup yeniden kullanılır."""
+    return [bant_modeli_ref(dogrular, r, olcutler) for r in range(len(dogrular))]
+
+
+def coklu_model_hatasi(modeller: list[dict], tekrar: dict, olcutler,
+                       yon: dict[str, int] | None = None) -> dict[str, float]:
+    """Hazır çoklu referans modelleriyle E: her modelde bant hatası, ölçüt başına ortalama."""
+    Es = [bant_hatasi(m, tekrar, olcutler, yon) for m in modeller]
     return {k: float(np.mean([e[k] for e in Es])) for k in olcutler}

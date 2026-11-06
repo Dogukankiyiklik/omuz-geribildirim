@@ -180,6 +180,12 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 
 **Kabul ölçütü:** Ablasyon tablosu, kişi tablosu, tohum duyarlılığı, üç örnek görsel. Kullanıcı Petra örneğini v1 ve v2'de izledi ve yorumunu ADIM dosyasına not etti.
 
+**Ek — Güncelleme 03** (ADIM_02c'nin sonuna "Ek" olarak yazılır, yeni ADIM dosyası açılmaz):
+- **Karar 7:** v1b ve v2'de hatalı tekrar, her doğru tekrar sırayla dışarıda bırakılarak kurulan n modelin E ortalamasıyla değerlendirilir (`cekirdek/adil_model.py`). v1 ve v1a Deney 1'e sadık kalır (tek rastgele "atla").
+- Eski çıktı `sonuclar/deney1_v2_atla_rastgele/` olarak saklanır; yeni çıktı `sonuclar/deney1_v2/`.
+- `bootstrap.csv`'ye silkme/diğer farkları (v2 − v1b, v2 − v1; YENI ve M33); ablasyon tablosuna "önden + çapraz" sütunları.
+- **Kabul ölçütü:** tohum 0 ile 1 arasında |ΔE| hatalı tekrarlarda da 0 (v1b, v2).
+
 ---
 
 ## Adım 3 — Deney 1b: genel bant ile kişiye özel bant 📤
@@ -194,6 +200,8 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 **Çıktı:** Her koşul için AUC (silkme/doğru, silkme/diğer), görüş grubuna göre AUC ve kişi bazlı bootstrap güven aralıkları. Ölçüt olarak en az YENI, M33 ve M39_F2. Sonuçlar `sonuclar/deney1b/` altına.
 
 **Güncelleme 02:** Hem **v1b** (zaman bandı, çoklu referans, pay hariç) hem **v2** (açı bandı) ile çalıştırılır. Açı bandında genel bant doğal olarak tanımlıdır: diğer 4 kişinin doğru tekrarları, aynı kamera ve yönelim. Kişi bazlı AUC tablosu da verilir (Karar 5).
+
+**Güncelleme 03:** Her ana sonuç iki biçimde: "uygulama senaryosu: önden + çapraz (|görüş| ≤ 60°)" ve "tüm görüşler" (Karar 6); profil ayrıca sınırlılık olarak. Hatalı tekrarlar Karar 7 ile (tüm (n−1)'li modellerin ortalaması) değerlendirilir.
 
 **Deney 1c — zamansal yumuşatma** (aynı adımda): Hocanın Problem 2 için önerdiği iyileştirmelerden biri. MediaPipe noktaları kareden kareye titrer (jitter).
 - `cekirdek/yumusatma.py`: One Euro filtresi ve Savitzky–Golay. Parametreler eğitim kişilerinde seçilir.
@@ -240,6 +248,10 @@ Adillik kuralları aynen: doğru tekrar birini-dışarıda-bırak, hatalı tekra
 - **Yetersiz kaldırma:** bant yerine tepe açısı. Sapma = (kalibrasyon tekrarlarının tepe açılarının medyanı − tekrarın tepe açısı); kalibrasyon tepelerinin çeyrekler arası açıklığına (alt sınır 5°) bölünerek z'ye çevrilir.
 - `aralik_disi` bayrağı ("kol normalden yüksek") karar kuralına bir girdi olabilir; eğitim kişilerinde gerekli olup olmadığına bakılır.
 - Adım 2c'de açı bandı zaman bandından belirgin şekilde kötü çıkarsa Adım 4'e geçmeden danışmana sorulur.
+
+**Güncelleme 03 değişiklikleri:**
+- **Karar 6:** Duruş ölçütleri için **yalnızca açı bandı**; görüşe göre yöntem değiştiren karma çözüm yok. Her ana sonuç iki biçimde: "uygulama senaryosu: önden + çapraz (|görüş| ≤ 60°)" ve "tüm görüşler". Profil (70–90°) gerekçesiyle sınırlılık olarak ayrıca raporlanır. **v1b** (zaman bandı, çoklu referans) karşılaştırma temel çizgisi olarak raporlanır, karar kuralına girmez.
+- **Karar 7:** Hatalı tekrarlar tüm (n−1)'li modellerin E ortalamasıyla değerlendirilir (`cekirdek/adil_model.py`).
 
 **Kabul ölçütü:** Tüm tablolar var; T seçiminin her kişide hangi değere düştüğü yazılmış.
 
@@ -301,7 +313,9 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 
 **Akış** (`uygulama/main.py`):
 1. **Egzersiz seçimi:** Şimdilik tek egzersiz: "Kolu yana kaldırma (sağ kol)". Menü yapısı ileride yenisi eklenebilecek şekilde kurulsun.
-2. **Kalibrasyon modu:** Kişi fizyoterapist eşliğinde 5 doğru tekrar yapar. Tekrarlar otomatik ayrılır; kullanıcı her tekrarı onaylar veya reddeder. Ölçüt dizileri `profiller/<isim>.npz` dosyasına kaydedilir.
+2. **Kalibrasyon modu:** Kişi fizyoterapist eşliğinde doğru tekrarlar yapar: **varsayılan 6, en az 5** (Güncelleme 03, Karar 8; açı bandındaki "en az 3 tekrar" kuralı 4 tekrarlık modelde sınırda kalıyordu). Arayüz bunu söyler.
+   - **Kamera açısı kontrolü (Karar 9):** Kalibrasyonun başında dinlenme duruşundaki omuz genişliği / gövde uzunluğu oranından kişinin kameraya ne kadar dönük olduğu kabaca tahmin edilir. Oran, veri setinin önden (0–20°) doğru tekrarlarındaki tipik değerin belirgin altındaysa uyarı: "Kameraya daha önden durun." Eşik ve gerekçesi ADIM_06'ya yazılır.
+   - Tekrar ayırma ve onay: Tekrarlar otomatik ayrılır; kullanıcı her tekrarı onaylar veya reddeder. Ölçüt dizileri `profiller/<isim>.npz` dosyasına kaydedilir.
 3. **Değerlendirme modu:** Canlı kamera **veya** video dosyası (`--video yol.mp4`). Her tekrar bitince:
    - çekirdekteki bant modeli ve Deney 2 kararı uygulanır,
    - panelde tekrar numarası, karar (doğru/hata) ve Deney 3'ün Türkçe cümlesi gösterilir.

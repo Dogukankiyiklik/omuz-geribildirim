@@ -26,8 +26,8 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 | ✅ |
 | 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 | ✅ |
 | 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ✅ |
-| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 |
-| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | 🔄 (altyapı) |
+| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 (çekim bekleniyor) |
+| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | 🔄 (tasarım Karar 36) |
 | 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ |
 | 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⏳ |
 | 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | ⏳ |
@@ -35,7 +35,7 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
 | — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |
 
-Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35). Ana tablodaki Adım 0–4 de tamamlandı.
+Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35. Güncelleme 09: Deney 4 tasarımı, Adım 9 hazırlığı, sunum şekilleri; videoya bağlı değil). Ana tablodaki Adım 0–4 de tamamlandı.
 
 Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 
@@ -480,6 +480,11 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 
 **Kabul ölçütü:** Üç koşulun tablosu ve her koşuldan 5 örnek cümle.
 
+**Güncelleme 09** (Karar 36; ayrıntı: `ilerleme/GUNCELLEME_09.md`, `ilerleme/ADIM_08.md` "Önceden belirlenenler"):
+- Örneklem `sonuclar/deney4/orneklem.csv` (150, sınıf × kişi) onaylandı. Üç koşul da **hasta cümlesi** üslubunda; A = Deney 3 sağlam ölçü cümlesi; B = sapma kodu JSON'u (5°'ye yuvarlanmış sayılar); C = 5 ölçütün ham özeti + bant özeti, karar verilmez. Sıfır atış; istemler `deneyler/istemler/`.
+- Gemini ücretsiz (tercih `gemini-2.5-flash`), temperature 0, düşünme 0, koşul başına tek istek (300 istek). Önce örneklem dışı 5 tekrarlık pilot (yalnızca biçim düzeltmesi), sonra istemler commit'lenir, sonra 150'lik deney (kullanıcı çalıştırır).
+- Ek metrikler: B sadakati (eşit / eklenen / atlanan), sayı uydurma (izinli küme), üslup ihlali, uzunluk; B − A ve C − A kişi bazlı bootstrap. Çıkarıcının bağımsız sınaması: 45 cümleyi kullanıcı körlemesine etiketler; sözlük değiştirilmez.
+
 ---
 
 ## Adım 9 — Sonuçları dondurma 📤
@@ -492,6 +497,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 - Git etiketi: `v-sunum`.
 
 **Kabul ölçütü:** `OZET.md` var ve sayılar ADIM dosyalarındaki sayılarla tutarlı.
+
+**Güncelleme 09** (Karar 37–39): Hazırlık şimdi, dondurma 13 Kas akşamı. `deneyler/hepsi.py` bütün deneyleri sırayla temiz klasörde üretir ve kayıtlı sonuçlarla karşılaştırır (Adım 7 ve 8 yalnızca listelenir; tam çalıştırma kullanıcıda, `--hizli` alt kümesi denenir). Taslak belgeler (`TASLAK` başlıklı): `docs/YENIDEN_KURULUM.md`, `docs/LLM_KULLANIMI.md`, `docs/SURUMLER.md`. Sunum şekil adayları `deneyler/sunum_sekilleri.py` → `sonuclar/sunum/` (kayıtlı sonuçlardan) + veri setinden demo yedeği. 6b ve 10 başlatılmaz (Karar 39).
 
 ---
 

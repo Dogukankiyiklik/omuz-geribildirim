@@ -1,0 +1,452 @@
+﻿orneklem_no,video,kamera,yonelim,satir,kisi,tekrar_no,gorus,gorus_grubu,hata,ek_hata,sistem_hatalari,A_metin,B_girdi,C_girdi
+p1,ex1_Mima,cam2,0,112,Mima,3,45,çapraz (30–60°),DOGRU,,,"Hareketi doğru yaptın. Kolun yaklaşık 135 dereceye çıktı, omzun ve dirseğin yerindeydi.","{
+  ""karar"": ""doğru"",
+  ""tepe_kol_acisi"": 135
+}","{
+  ""olcutler"": {
+    ""kulak_omuz"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.324,
+        ""en_buyuk"": 0.413,
+        ""ortalama"": 0.374
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.296,
+        ""ust_sinir_en_buyuk"": 0.426,
+        ""orta_ortalama"": 0.374
+      }
+    },
+    ""bas_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 10.9,
+        ""en_buyuk"": 16.1,
+        ""ortalama"": 12.5
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 8.6,
+        ""ust_sinir_en_buyuk"": 18.7,
+        ""orta_ortalama"": 13.8
+      }
+    },
+    ""kol_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 12.9,
+        ""en_buyuk"": 153.9,
+        ""ortalama"": 90.9
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 11.3,
+        ""ust_sinir_en_buyuk"": 170.2,
+        ""orta_ortalama"": 92.5
+      }
+    },
+    ""kol_boyu"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.821,
+        ""en_buyuk"": 1.08,
+        ""ortalama"": 0.968
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.598,
+        ""ust_sinir_en_buyuk"": 1.108,
+        ""orta_ortalama"": 0.939
+      }
+    },
+    ""dirsek_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 149.8,
+        ""en_buyuk"": 180.0,
+        ""ortalama"": 163.6
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 94.7,
+        ""ust_sinir_en_buyuk"": 189.1,
+        ""orta_ortalama"": 159.9
+      }
+    }
+  },
+  ""tepe_kol_acisi"": 135.3,
+  ""kalibrasyon_tepe_medyani"": 142.2
+}"
+p2,ex1_Petra,cam3,60,300,Petra,8,30,çapraz (30–60°),ERR_BENT_ARM,,ERR_BENT_ARM|ERR_ARM_FORWARD,"Kolunu kaldırırken dirseğini yaklaşık 60 derece büktün. Kolunu düz tut. Ayrıca kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.","{
+  ""karar"": ""hatalı"",
+  ""hatalar"": [
+    {
+      ""hata"": ""dirsek bükme"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""kaldırırken"",
+      ""yon"": ""dirsek büküldü"",
+      ""sayilar"": {
+        ""olcu_adi"": ""dirsek açısı (180 = düz kol)"",
+        ""olcu"": 115,
+        ""beklenen"": 175,
+        ""fark"": 60,
+        ""birim"": ""derece""
+      }
+    },
+    {
+      ""hata"": ""kolun öne kaçması"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""kaldırırken"",
+      ""yon"": ""kol öne kaçtı""
+    }
+  ]
+}","{
+  ""olcutler"": {
+    ""kulak_omuz"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.348,
+        ""en_buyuk"": 0.514,
+        ""ortalama"": 0.426
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.307,
+        ""ust_sinir_en_buyuk"": 0.521,
+        ""orta_ortalama"": 0.415
+      }
+    },
+    ""bas_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 0.9,
+        ""en_buyuk"": 10.7,
+        ""ortalama"": 5.4
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": -0.5,
+        ""ust_sinir_en_buyuk"": 12.3,
+        ""orta_ortalama"": 4.6
+      }
+    },
+    ""kol_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 12.0,
+        ""en_buyuk"": 179.2,
+        ""ortalama"": 108.0
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 14.1,
+        ""ust_sinir_en_buyuk"": 176.0,
+        ""orta_ortalama"": 94.6
+      }
+    },
+    ""kol_boyu"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.733,
+        ""en_buyuk"": 1.136,
+        ""ortalama"": 0.949
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.885,
+        ""ust_sinir_en_buyuk"": 1.211,
+        ""orta_ortalama"": 1.079
+      }
+    },
+    ""dirsek_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 102.4,
+        ""en_buyuk"": 179.8,
+        ""ortalama"": 138.5
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 161.6,
+        ""ust_sinir_en_buyuk"": 186.1,
+        ""orta_ortalama"": 174.5
+      }
+    }
+  },
+  ""tepe_kol_acisi"": 162.0,
+  ""kalibrasyon_tepe_medyani"": 169.3
+}"
+p3,ex1_Terka,cam2,20,360,Terka,8,25,çapraz (30–60°),ERR_BENT_ARM,,ERR_ARM_FORWARD|ERR_BENT_ARM,"Kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır. Ayrıca kolunu kaldırırken dirseğini yaklaşık 40 derece büktün. Kolunu düz tut.","{
+  ""karar"": ""hatalı"",
+  ""hatalar"": [
+    {
+      ""hata"": ""kolun öne kaçması"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""kaldırırken"",
+      ""yon"": ""kol öne kaçtı""
+    },
+    {
+      ""hata"": ""dirsek bükme"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""kaldırırken"",
+      ""yon"": ""dirsek büküldü"",
+      ""sayilar"": {
+        ""olcu_adi"": ""dirsek açısı (180 = düz kol)"",
+        ""olcu"": 130,
+        ""beklenen"": 170,
+        ""fark"": 40,
+        ""birim"": ""derece""
+      }
+    }
+  ]
+}","{
+  ""olcutler"": {
+    ""kulak_omuz"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.328,
+        ""en_buyuk"": 0.45,
+        ""ortalama"": 0.383
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.323,
+        ""ust_sinir_en_buyuk"": 0.539,
+        ""orta_ortalama"": 0.407
+      }
+    },
+    ""bas_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 2.0,
+        ""en_buyuk"": 8.0,
+        ""ortalama"": 4.0
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": -1.6,
+        ""ust_sinir_en_buyuk"": 11.4,
+        ""orta_ortalama"": 2.4
+      }
+    },
+    ""kol_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 13.5,
+        ""en_buyuk"": 179.7,
+        ""ortalama"": 106.1
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 12.0,
+        ""ust_sinir_en_buyuk"": 180.1,
+        ""orta_ortalama"": 98.2
+      }
+    },
+    ""kol_boyu"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.936,
+        ""en_buyuk"": 1.187,
+        ""ortalama"": 1.041
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 1.014,
+        ""ust_sinir_en_buyuk"": 1.314,
+        ""orta_ortalama"": 1.172
+      }
+    },
+    ""dirsek_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 122.1,
+        ""en_buyuk"": 179.5,
+        ""ortalama"": 146.3
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 151.2,
+        ""ust_sinir_en_buyuk"": 181.5,
+        ""orta_ortalama"": 170.4
+      }
+    }
+  },
+  ""tepe_kol_acisi"": 163.6,
+  ""kalibrasyon_tepe_medyani"": 172.5
+}"
+p4,ex1_Mima,cam1,60,186,Mima,6,-60,çapraz (30–60°),ERR_HEAD_TO_SIDE,ERR_ELEVATED_SHOULDER,ERR_LOW_ABDUCTION|ERR_HEAD_TO_SIDE,"Kolunu 70 dereceye kadar kaldırdın; normalde 145 dereceye çıkıyorsun. Kolunu yaklaşık 75 derece daha yukarı kaldır. Ayrıca kolun yukarıdayken başını yaklaşık 10 derece yana eğdin. Başını dik tut, karşıya bak.","{
+  ""karar"": ""hatalı"",
+  ""hatalar"": [
+    {
+      ""hata"": ""yetersiz kaldırma"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""en üstteyken"",
+      ""yon"": ""kol normalden az kaldırıldı"",
+      ""sayilar"": {
+        ""olcu_adi"": ""kolun çıktığı en yüksek açı"",
+        ""olcu"": 70,
+        ""beklenen"": 145,
+        ""fark"": 75,
+        ""birim"": ""derece""
+      }
+    },
+    {
+      ""hata"": ""baş eğme"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""en üstteyken"",
+      ""yon"": ""baş yana eğildi"",
+      ""sayilar"": {
+        ""olcu_adi"": ""baş ile gövde arasındaki açı"",
+        ""olcu"": 25,
+        ""beklenen"": 15,
+        ""fark"": 10,
+        ""birim"": ""derece""
+      }
+    }
+  ]
+}","{
+  ""olcutler"": {
+    ""kulak_omuz"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.31,
+        ""en_buyuk"": 0.398,
+        ""ortalama"": 0.355
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.289,
+        ""ust_sinir_en_buyuk"": 0.42,
+        ""orta_ortalama"": 0.371
+      }
+    },
+    ""bas_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 13.7,
+        ""en_buyuk"": 29.8,
+        ""ortalama"": 20.1
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 5.0,
+        ""ust_sinir_en_buyuk"": 25.7,
+        ""orta_ortalama"": 14.0
+      }
+    },
+    ""kol_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 2.1,
+        ""en_buyuk"": 92.2,
+        ""ortalama"": 30.8
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 2.1,
+        ""ust_sinir_en_buyuk"": 111.7,
+        ""orta_ortalama"": 34.0
+      }
+    },
+    ""kol_boyu"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.311,
+        ""en_buyuk"": 0.987,
+        ""ortalama"": 0.692
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.204,
+        ""ust_sinir_en_buyuk"": 0.971,
+        ""orta_ortalama"": 0.698
+      }
+    },
+    ""dirsek_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 59.9,
+        ""en_buyuk"": 175.7,
+        ""ortalama"": 147.3
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 68.5,
+        ""ust_sinir_en_buyuk"": 174.6,
+        ""orta_ortalama"": 141.8
+      }
+    }
+  },
+  ""tepe_kol_acisi"": 71.3,
+  ""kalibrasyon_tepe_medyani"": 146.2
+}"
+p5,ex1_Petra,cam3,50,289,Petra,7,40,çapraz (30–60°),ERR_LOW_ABDUCTION,,ERR_LOW_ABDUCTION,Kolunu 110 dereceye kadar kaldırdın; normalde 175 dereceye çıkıyorsun. Kolunu yaklaşık 65 derece daha yukarı kaldır.,"{
+  ""karar"": ""hatalı"",
+  ""hatalar"": [
+    {
+      ""hata"": ""yetersiz kaldırma"",
+      ""taraf"": ""sağ"",
+      ""faz"": ""en üstteyken"",
+      ""yon"": ""kol normalden az kaldırıldı"",
+      ""sayilar"": {
+        ""olcu_adi"": ""kolun çıktığı en yüksek açı"",
+        ""olcu"": 110,
+        ""beklenen"": 175,
+        ""fark"": 65,
+        ""birim"": ""derece""
+      }
+    }
+  ]
+}","{
+  ""olcutler"": {
+    ""kulak_omuz"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.379,
+        ""en_buyuk"": 0.487,
+        ""ortalama"": 0.433
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.342,
+        ""ust_sinir_en_buyuk"": 0.521,
+        ""orta_ortalama"": 0.429
+      }
+    },
+    ""bas_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 4.5,
+        ""en_buyuk"": 12.3,
+        ""ortalama"": 8.7
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 3.4,
+        ""ust_sinir_en_buyuk"": 17.3,
+        ""orta_ortalama"": 10.5
+      }
+    },
+    ""kol_govde_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 12.3,
+        ""en_buyuk"": 128.1,
+        ""ortalama"": 73.4
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 9.6,
+        ""ust_sinir_en_buyuk"": 126.6,
+        ""orta_ortalama"": 71.6
+      }
+    },
+    ""kol_boyu"": {
+      ""birim"": ""gövde boyuna oran"",
+      ""hasta"": {
+        ""en_kucuk"": 0.868,
+        ""en_buyuk"": 1.158,
+        ""ortalama"": 0.972
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 0.875,
+        ""ust_sinir_en_buyuk"": 1.169,
+        ""orta_ortalama"": 1.026
+      }
+    },
+    ""dirsek_acisi"": {
+      ""birim"": ""derece"",
+      ""hasta"": {
+        ""en_kucuk"": 162.6,
+        ""en_buyuk"": 179.5,
+        ""ortalama"": 169.5
+      },
+      ""normal_aralik"": {
+        ""alt_sinir_en_kucuk"": 161.6,
+        ""ust_sinir_en_buyuk"": 186.5,
+        ""orta_ortalama"": 174.1
+      }
+    }
+  },
+  ""tepe_kol_acisi"": 108.3,
+  ""kalibrasyon_tepe_medyani"": 177.0
+}"

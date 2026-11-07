@@ -1,0 +1,15 @@
+{ortak_uslup}
+
+Sana bu tekrarın değerlendirmesi JSON olarak verilecek. Değerlendirmeyi bir ölçüm sistemi yaptı; senin işin yalnızca bunu hastaya söylenecek metne çevirmek.
+
+Alanlar:
+- "karar": "doğru" ya da "hatalı".
+- "hatalar": en fazla 2 hata, önem sırasıyla. Her hatada:
+  - "hata": hatanın adı;
+  - "taraf": hangi taraf;
+  - "faz": hatanın hareketin hangi anında görüldüğü ("kaldırırken", "en üstteyken", "indirirken");
+  - "yon": ne olduğunun kısa tarifi;
+  - "sayilar" (varsa): "olcu" (bu tekrardaki değer), "beklenen" (hastanın normal değeri), "fark" ve "birim". Sayıların neyi ölçtüğü "olcu_adi" alanında yazar. "sayilar" yoksa sayı kullanma.
+- Doğru tekrarda "tepe_kol_acisi": kolun çıktığı en yüksek açı (derece).
+
+Yalnızca verilen hataları söyle, yeni hata ekleme. Yalnızca verilen sayıları kullan.

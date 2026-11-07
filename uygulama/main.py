@@ -8,6 +8,8 @@ Kullanım:
     # Video dosyası (Karar 27, birincil demo yolu)
     python -m uygulama.main --isim dogukan --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
     python -m uygulama.main --profil profiller/dogukan.npz --video test.mp4
+    # Veri setinden bir video (Karar 40): profil aynı videonun etiketi doğru tekrarlarından kurulur
+    python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 
 Kullanım kolaylığı:
   * Panelin altındaki düğmelere fareyle tıklanabilir; klavye kısayolu düğmede parantez içinde yazar
@@ -339,7 +341,10 @@ def main():
     ap.add_argument("--profil", help="kayıtlı profil (.npz); verilirse kalibrasyon atlanır")
     ap.add_argument("--kalibrasyon-video", help="kalibrasyon videosu (tekrarlar otomatik kabul edilir)")
     ap.add_argument("--video", help="değerlendirilecek video; verilmezse canlı kamera")
-    ap.add_argument("--kamera", type=int, default=0)
+    ap.add_argument("--kamera", default="0",
+                    help="canlı kamera numarası (varsayılan 0); --veri-seti ile veri setindeki kamera (cam1/cam2/cam3)")
+    ap.add_argument("--veri-seti", help="veri setinden video, ör. ex1_Honza (Karar 40; --kamera camN --yonelim ile)")
+    ap.add_argument("--yonelim", type=int, default=0, help="--veri-seti ile kişinin yönelimi (derece)")
     ap.add_argument("--cozunurluk", default="1280x720",
                     help="canlı kamera çözünürlüğü, GxY (varsayılan 1280x720; geniş görüş için). Ör. 1920x1080")
     ap.add_argument("--otomatik-onay", action="store_true", help="kalibrasyon tekrarlarını hiç sormadan kabul et")
@@ -351,6 +356,21 @@ def main():
                     help="canlı görüntüyü ayna gibi çevirme (varsayılan: ayna gibi gösterilir; ölçümü etkilemez)")
     ap.add_argument("--elle-onay", action="store_true", help="otomatik kabul yok; her tekrar için Kabul/Reddet bekle")
     args = ap.parse_args()
+    if args.veri_seti:
+        # Karar 40: profil, aynı videonun etiketi doğru ilk tekrarlarından (sağlık kontrolüyle aynı yol);
+        # yeni yöntem kodu yok. Kalibrasyona giren tekrarların kararı adil bir sınama değildir.
+        from uygulama.toplu import veri_seti_profili
+        if args.profil or args.kalibrasyon_video or args.video:
+            ap.error("--veri-seti, --profil / --kalibrasyon-video / --video ile birlikte kullanılmaz")
+        yol, profil, nolar = veri_seti_profili(args.veri_seti, args.kamera, args.yonelim)
+        args.video, args.profil = str(yol), str(profil)
+        print(f"Video: {yol}\nProfil: {profil}\nKalibrasyona giren tekrarlar (etiket numarası): "
+              f"{', '.join(map(str, nolar)) or '?'} — bunların kararı adil bir sınama değildir.")
+    else:
+        try:
+            args.kamera = int(args.kamera)
+        except ValueError:
+            ap.error("--kamera canlıda bir sayı olmalı (cam1/cam2/cam3 yalnızca --veri-seti ile)")
     global CANLI_COZUNURLUK
     CANLI_COZUNURLUK = tuple(int(v) for v in args.cozunurluk.lower().split("x"))
     onay_suresi = None if args.elle_onay else args.onay_suresi

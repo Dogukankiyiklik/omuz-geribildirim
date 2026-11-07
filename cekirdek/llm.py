@@ -47,9 +47,13 @@ class Istek:
     sicaklik: float = 0.0               # PLAN Adım 8: temperature = 0
     en_fazla_token: int | None = None
     tohum: int = 0                      # destekleyen sağlayıcıda (Ollama) üretim tohumu
+    dusunme: str | int | None = None    # Gemini "düşünme": int → thinkingBudget (2.5 modelleri; 0 = kapalı),
+                                        # str → thinkingLevel (ör. "minimal"); None → modelin varsayılanı (Karar 36)
 
     def anahtar(self, saglayici: str) -> str:
         d = {"saglayici": saglayici, **asdict(self)}
+        if d["dusunme"] is None:        # eski anahtarlar değişmesin
+            del d["dusunme"]
         return hashlib.sha256(json.dumps(d, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
@@ -149,7 +153,20 @@ class GeminiSaglayici(Saglayici):
             g["systemInstruction"] = {"parts": [{"text": istek.sistem}]}
         if istek.en_fazla_token:
             g["generationConfig"]["maxOutputTokens"] = istek.en_fazla_token
+        if isinstance(istek.dusunme, bool):
+            raise ValueError("dusunme: int (bütçe) ya da str (düzey) olmalı")
+        if isinstance(istek.dusunme, int):
+            g["generationConfig"]["thinkingConfig"] = {"thinkingBudget": istek.dusunme}
+        elif isinstance(istek.dusunme, str):
+            g["generationConfig"]["thinkingConfig"] = {"thinkingLevel": istek.dusunme}
         return g
+
+    def modeller(self) -> list[dict]:
+        """Anahtarın erişebildiği modeller (GET models; ücretsiz, generateContent kotasını harcamaz)."""
+        req = urllib.request.Request(GEMINI_URL.split("/models/")[0] + "/models?pageSize=1000",
+                                     headers={"x-goog-api-key": self.api_anahtari})
+        with urllib.request.urlopen(req, timeout=self.zaman_asimi) as r:
+            return json.loads(r.read().decode("utf-8")).get("models", [])
 
     @staticmethod
     def coz(ham: dict) -> tuple[str, str]:

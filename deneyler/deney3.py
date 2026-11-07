@@ -116,13 +116,14 @@ def ayrintilar(tekrarlar) -> dict:
                      else list(range(len(dogrular))))
             ayr = [aci_bandi_hatasi(modeller[i], f, OLCUTLER, ayrinti=True)[1] for i in secim]
             ayr_ek = [aci_bandi_hatasi(modeller_ek[i], f, ANLATIM, ayrinti=True)[1] for i in secim]
-            mu, bd = {}, {}
+            mu, bd, tau = {}, {}, {}
             for k in OLCUTLER:
                 mu[k], bd[k] = gb.model_ortalamasi(ayr, k)
+                tau[k] = gb.tau_ortalamasi(ayr, k)       # yalnızca Deney 4 (C koşulu); Deney 3'te kullanılmaz
             mu_ek, _ = gb.model_ortalamasi(ayr_ek, gb.OMUZ_ANLATIM)
             beklenen_tepe = float(np.mean([np.median([tepe_acisi(u["kol"]) for u in altlar[i]]) for i in secim]))
             cikti[(t.video, t.kamera, int(t.yonelim), int(t.satir))] = {
-                "kol": f["kol"], "deger": {k: f[k] for k in OLCUTLER}, "mu": mu, "bd": bd,
+                "kol": f["kol"], "deger": {k: f[k] for k in OLCUTLER}, "mu": mu, "bd": bd, "tau": tau,
                 "gor": {k: gb.olcut_gorunurlugu(t.dizi[t.etiketli], k) for k in OLCUTLER},
                 "ek_deger": f[gb.OMUZ_ANLATIM], "ek_mu": mu_ek,
                 "tepe": tepe_acisi(f["kol"]), "beklenen_tepe": beklenen_tepe}

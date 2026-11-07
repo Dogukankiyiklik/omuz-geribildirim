@@ -131,6 +131,11 @@ def model_ortalamasi(ayrintilar: list[dict], olcut: str) -> tuple[np.ndarray, np
     return mu, bd
 
 
+def tau_ortalamasi(ayrintilar: list[dict], olcut: str) -> np.ndarray:
+    """Karar 7 ile aynı ortalama, τ için (Deney 4 C koşulunun bant özeti; geçersiz karelerde NaN)."""
+    return _nanort([np.where(a["gecerli"], a["tau"][olcut], np.nan) for a in ayrintilar])
+
+
 def fazlalik(bant_disi: np.ndarray, yon: int) -> np.ndarray:
     """Kare başına beklenen yöndeki bant dışı büyüklük, max(yön · bant_disi, 0); NaN → 0."""
     bd = np.asarray(bant_disi, float)

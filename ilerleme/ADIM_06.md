@@ -319,3 +319,24 @@ Kendi dizüstü kamerası, 1280×720, önden. Sayılar `oturumlar/*.csv` dosyala
 - MediaPipe 1.2.2 farkı sınırlılık notu olarak yeterli.
 - 8 saniyelik otomatik kabul uygun.
 - Kalite kontrolünün sağlık kontrolünde kapalı olması doğru.
+
+## Ek: Güncelleme 09 (Karar 40) — pencere modunda veri setinden video denemesi
+
+**Neden?** Video dosyası modu yığın modunda sınandı, ama pencerenin kendisi (görüntü + panel + bindirme) bu ortamda açılamadı. Adım 6'nın son açığı, kullanıcının pencereyi bir kez kendisinin görmesi.
+
+**Yapılan (yeni yöntem kodu yok):**
+- `uygulama/main.py`'ye `--veri-seti`, `--yonelim` seçenekleri eklendi; `--veri-seti` ile `--kamera` veri setindeki kamerayı (cam1/cam2/cam3) alır. Canlıda `--kamera` yine sayı.
+- `uygulama/toplu.py`: sağlık kontrolünün ilk yarısı `veri_seti_kalibrasyonu` fonksiyonuna ayrıldı (davranış aynı). Yeni `veri_seti_profili`, bu kalibrasyonu `profiller/veriseti_<video>_<kamera>_o<yönelim>.npz` dosyasına bir kez kaydeder; sonraki çalıştırmalar dosyayı yükler.
+- Profil, sağlık kontrolüyle aynı yoldan kurulur: videoda MediaPipe yeniden çalıştırılır, tekrarlar ayrılır, `Segmentation.csv` ile eşlenir ve etiketi doğru olan tekrarlar kalibrasyona alınır. Honza cam1 yönelim 0'da bunlar 1, 2, 3, 9 ve 10 numaralı tekrarlar (5 tekrar).
+- **Denetim:** Sağlık kontrolü yeniden çalıştırıldı. `sonuclar/uygulama_saglik/` altındaki CSV'lerde git farkı yok. Profil dosyası kuruldu ve yüklenince 5 kalibrasyon tekrarı verdi.
+
+**Kullanıcının çalıştıracağı komut:**
+```bash
+python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
+```
+- İlk çalıştırmada profil kurulur (~1 dk, terminalde kare sayacı akar). Sonra pencere açılır ve video oynar (~70 s). İkinci çalıştırmada pencere hemen açılır.
+- **Nasıl okunur:** 4–8 numaralı tekrarlar sırasıyla öne kaçma, omuz, baş, az kaldırma ve dirsek etiketli. Yığın modu bunlarda "doğru, omuz, baş, az kaldırma, dirsek" demişti (yukarıdaki sağlık kontrolü tablosu). Pencerede de aynı kararlar ve cümleler beklenir.
+- 1, 2, 3, 9 ve 10 numaralı tekrarlar kalibrasyona girdi. Pencerede onlar da değerlendirilir, ama bu adil bir sınama değildir; o tekrarların kararına bakma.
+- **Bakılacaklar:** Panelde hasta cümlesi okunuyor mu? Tekrar bitince bindirme oynatımı (turkuaz referans, kırmızı uzuvlar) görünüyor mu? Omuz eğrisi grafiği çiziliyor mu? Pencere ekrana sığıyor mu?
+
+**Kullanıcının gözlemi:** (kullanıcı denedikten sonra buraya yazılacak)

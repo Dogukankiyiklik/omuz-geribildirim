@@ -8,6 +8,7 @@ Kullanım:
     python -m uygulama.toplu --profil profiller/dogukan.npz --video test.mp4
     # 3) Sağlık kontrolü: veri setinden bir video, MediaPipe yeniden çalıştırılır (Güncelleme 07, madde 6)
     python -m uygulama.toplu --veri-seti ex1_Honza --kamera cam1 --yonelim 0
+    # Pencere modunda aynı video (Karar 40): python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 
 Kalibrasyon videosunda ayrılan bütün tekrarlar kabul edilir (en fazla 6; videoda yalnızca doğru tekrarlar
 olmalı). Çıktı: oturum CSV'si (varsayılan oturumlar/<tarih>.csv) ve terminalde tablo.
@@ -102,7 +103,12 @@ def degerlendir_video(yol, kalibrasyon: Oturum, lm: np.ndarray | None = None) ->
 
 
 # ---------------------------------------------------------------- sağlık kontrolü (veri setinden)
-def saglik_kontrolu(video_id: str, kamera: str, yonelim: int, kalibrasyon_sayisi: int = HEDEF_KALIBRASYON):
+def veri_seti_kalibrasyonu(video_id: str, kamera: str, yonelim: int, kalibrasyon_sayisi: int = HEDEF_KALIBRASYON):
+    """
+    Veri setinden bir video: MediaPipe yeniden çalıştırılır, tekrarlar ayrılır, Segmentation.csv ile eşlenir ve
+    etiketi doğru olan ilk `kalibrasyon_sayisi` tekrarla kalibrasyon yapılır (sağlık kontrolü ve Karar 40).
+    Dönüş: sözlük (yol, fps, W, H, bas, son, lm, s, o, es, etiket, kal, poz_farki).
+    """
     from deneyler.tekrar_ayirma import eslestir
     seg = veri.segmentasyon_oku()
     s = seg[(seg.video_id == video_id) & (seg.person_orientation == yonelim)].sort_values("first_frame")
@@ -147,6 +153,37 @@ def saglik_kontrolu(video_id: str, kamera: str, yonelim: int, kalibrasyon_sayisi
         o.onayla(k, k in kal)
     o.en_az = len(kal)
     o.kalibrasyonu_bitir()
+    return {"yol": yol, "fps": fps, "W": W, "H": H, "bas": bas, "son": son, "lm": lm, "s": s, "o": o, "es": es,
+            "etiket": etiket, "kal": kal, "poz_farki": poz_farki}
+
+
+def veri_seti_profili(video_id: str, kamera: str, yonelim: int, klasor: Path | None = None):
+    """
+    Karar 40: pencere modunda veri setinden bir videoyu denemek için profil. İlk çalıştırmada
+    veri_seti_kalibrasyonu (MediaPipe, ~1 dk) ve profiller/veriseti_<video>_<kamera>_o<yönelim>.npz kaydı;
+    sonraki çalıştırmalarda bu dosya yüklenir. Dönüş: (video yolu, profil dosyası, kalibrasyon tekrar numaraları).
+    """
+    from uygulama.oturum import PROFIL_KLASORU
+    klasor = Path(klasor or PROFIL_KLASORU)
+    ad = f"veriseti_{video_id}_{kamera}_o{yonelim}"
+    profil = klasor / f"{ad}.npz"
+    bilgi = klasor / f"{ad}.txt"
+    yol = veri.video_cikar(video_id, kamera, GECICI_VIDEO)
+    if yol is None:
+        raise SystemExit("videos.zip bulunamadı")
+    if not profil.exists():
+        print(f"Veri setinden profil kuruluyor ({video_id} {kamera} yönelim {yonelim}); MediaPipe ~1 dk sürer...")
+        d = veri_seti_kalibrasyonu(video_id, kamera, yonelim)
+        d["o"].profil_kaydet(ad, klasor)
+        nolar = [int(d["etiket"][j].repetition_number) for j, k in enumerate(d["o"].tekrarlar) if k in d["kal"]]
+        bilgi.write_text(",".join(map(str, nolar)), encoding="utf-8")
+    nolar = [int(x) for x in bilgi.read_text(encoding="utf-8").split(",") if x] if bilgi.exists() else []
+    return yol, profil, nolar
+
+
+def saglik_kontrolu(video_id: str, kamera: str, yonelim: int, kalibrasyon_sayisi: int = HEDEF_KALIBRASYON):
+    d = veri_seti_kalibrasyonu(video_id, kamera, yonelim, kalibrasyon_sayisi)
+    bas, s, o, es, etiket, kal, poz_farki = (d[k] for k in ("bas", "s", "o", "es", "etiket", "kal", "poz_farki"))
     for k in o.tekrarlar:
         if k.durum == "reddedildi":
             o._degerlendir(k)

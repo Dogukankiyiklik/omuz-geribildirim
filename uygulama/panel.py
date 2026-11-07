@@ -7,6 +7,7 @@ Font: matplotlib ile gelen DejaVu Sans (her kurulumda var).
 from __future__ import annotations
 
 import textwrap
+from dataclasses import dataclass
 
 import cv2
 import numpy as np
@@ -15,9 +16,11 @@ from PIL import Image, ImageDraw, ImageFont
 
 from cekirdek import geribildirim as gb
 from cekirdek import hata_turu as ht
+from cekirdek import tekrar_ayirici as ta
 from cekirdek.bindirme import KEMIKLER, OLCUT_UZUVLARI, Bindirici
 
 PANEL_G = 600
+DUSUK_KALDIRMA = 120.0   # yalnızca kalibrasyonda hatırlatma; karar kuralına girmez
 YESIL, KIRMIZI, REF, BEYAZ = (90, 200, 60), (40, 40, 230), (230, 230, 0), (255, 255, 255)
 P_ARKA, P_METIN, P_IKINCIL, P_DOGRU, P_HATA, P_UYARI = ((248, 247, 244), (20, 20, 20), (95, 95, 90),
                                                        (40, 140, 60), (200, 50, 40), (200, 110, 0))
@@ -71,8 +74,8 @@ def kirmizi_kemikler(sonuc, kural: ht.KararKurali, j: int) -> set:
 class Oynatici:
     """Tekrar sonrası bindirmeli oynatım (P3): kullanıcı iskeleti + yarı saydam referans, banttan çıkan uzuv kırmızı."""
 
-    def __init__(self, kayit, referans, kural, en_boy: float, kareler: dict):
-        self.k, self.kural, self.kareler = kayit, kural, kareler
+    def __init__(self, kayit, referans, kural, en_boy: float, kareler: dict, ayna: bool = False):
+        self.k, self.kural, self.kareler, self.ayna = kayit, kural, kareler, ayna
         self.b = Bindirici(referans.dizi, kayit.dizi, en_boy)
         self.sira = list(range(kayit.pay, len(kayit.dizi)))     # kayıt.dizi indeksleri (etiketli kısım)
         self.i = 0
@@ -101,6 +104,8 @@ class Oynatici:
         kat = img.copy()                                        # referans üstte, yarı saydam
         iskelet_ciz(kat, ref, REF, kalinlik=2)
         img = cv2.addWeighted(kat, 0.6, img, 0.4, 0)
+        if self.ayna:                                           # yalnızca gösterim; ölçüm aynasız karelerden
+            img = cv2.flip(img, 1)
         img = metin_yaz(img, f"Tekrar {self.k.no} · oynatım", (10, 10), 18, BEYAZ, kutu=True)
         img = metin_yaz(img, "turkuaz: senin doğru tekrarın", (10, 40), 15, REF[::-1], kutu=True)
         if self.etiket and self.etiket_kare is not None and abs(j - self.etiket_kare) <= 15:
@@ -138,71 +143,206 @@ def _sar(d, metin, f, genislik):
     return satirlar
 
 
-def panel(Y: int, oturum, uzman_acik: bool, oynatim: bool, mesaj: str = "", egzersiz: str = "") -> np.ndarray:
+@dataclass
+class Dugme:
+    eylem: str
+    etiket: str
+    kutu: tuple = (0, 0, 0, 0)      # panel koordinatı (x0, y0, x1, y1)
+
+    def icinde(self, x: int, y: int) -> bool:
+        x0, y0, x1, y1 = self.kutu
+        return x0 <= x <= x1 and y0 <= y <= y1
+
+
+def dugmeler(oturum, video: bool) -> list[Dugme]:
+    """Duruma göre panelin altındaki düğmeler (fare ile tıklanır; parantezde klavye kısayolu)."""
+    d = []
+    if oturum.mod == "kalibrasyon":
+        if oturum.bekleyen is not None:
+            d += [Dugme("kabul", "✓ Kabul (E)"), Dugme("ret", "✗ Reddet (H)")]
+        if oturum.geri_alinabilir:
+            d.append(Dugme("geri_al", "Son kabulü geri al (Z)"))
+        d += [Dugme("bitir", "Kalibrasyonu bitir (K)"), Dugme("bastan", "Baştan (B)")]
+    else:
+        if oturum.geri_alinabilir:
+            d.append(Dugme("geri_al", "Kalibrasyona geri dön (Z)"))
+        d += [Dugme("oynat", "Son tekrarı oynat (R)"), Dugme("uzman", "Uzman ayrıntısı (U)")]
+    if video:
+        d.append(Dugme("duraklat", "Duraklat (Boşluk)"))
+    d.append(Dugme("cikis", "Çıkış (Q)"))
+    return d
+
+
+def _dugme_yerlesimi(d, liste: list[Dugme], x: int, G: int, Y: int) -> int:
+    """Düğmeleri alttan yukarı satırlara dizer; düğme alanının üst y'sini döndürür."""
+    f, yuk, ara = font(16, True), 38, 8
+    satirlar, satir, gen = [], [], 0
+    for b in liste:
+        w = int(d.textlength(b.etiket, font=f)) + 24
+        if satir and gen + ara + w > G:
+            satirlar.append(satir)
+            satir, gen = [], 0
+        satir.append((b, w))
+        gen += (ara if gen else 0) + w
+    if satir:
+        satirlar.append(satir)
+    ust = Y - 12 - len(satirlar) * (yuk + ara)
+    yy = ust
+    for satir in satirlar:
+        xx = x
+        for b, w in satir:
+            b.kutu = (xx, yy, xx + w, yy + yuk)
+            ana = b.eylem in ("kabul", "ret")
+            dolgu = {"kabul": P_DOGRU, "ret": P_HATA}.get(b.eylem, (232, 231, 226))
+            d.rounded_rectangle(b.kutu, radius=7, fill=dolgu, outline=(180, 180, 175))
+            d.text((xx + 12, yy + 9), b.etiket, font=f, fill=(255, 255, 255) if ana else P_METIN)
+            xx += w + ara
+        yy += yuk + ara
+    return ust
+
+
+def _simdi(oturum) -> tuple[str, str, tuple]:
+    """Kişiye o anda ne yapması gerektiğini söyleyen kısa yönerge (başlık, alt satır, renk)."""
+    ay = oturum.ayirici
+    if not oturum.kisi_var:
+        return "Seni göremiyorum", "Başından kalçana kadar kadrajda ol.", P_HATA
+    if not oturum.kalca_gorunur and ay.durum == "dinlenme":
+        return "Kalçaların görünmüyor", "Biraz geri çekil ya da kamerayı aşağı eğ: kalçaların kadraja girsin.", P_HATA
+    if ay.durum == "hareket":
+        tepe = ay.anlik_tepe
+        if oturum.mod == "kalibrasyon" and np.isfinite(tepe) and tepe < ta.EN_AZ_TEPE:
+            return "Tekrar sürüyor…", f"Sayılması için kol en az {ta.EN_AZ_TEPE:.0f}°'ye çıkmalı.", P_DOGRU
+        return "Tekrar sürüyor…", "Kolunu indirince tekrar biter.", P_DOGRU
+    if ay.durum == "bitis_ara":
+        return "Kolunu indir ve 1–2 saniye bekle", "", P_DOGRU
+    g = ay.son_gecersiz
+    if g is not None and len(ay.y) - g["kare"] < 4 * oturum.fps:
+        if g["tepe"] < ta.EN_AZ_TEPE:
+            neden = f"Kol en fazla {g['tepe']:.0f}°'ye çıktı; en az {ta.EN_AZ_TEPE:.0f}° gerekli."
+        else:
+            sure = f"{g['sure_s']:.1f}".replace(".", ",")
+            neden = f"Çok hızlıydı ({sure} sn); en az 0,8 sn sürmeli."
+        return "Bu hareket tekrar sayılmadı", neden, P_UYARI
+    kol = oturum.kol_anlik
+    if np.isfinite(kol) and kol > ta.BITIS_ESIGI:
+        return "Kolunu tam aşağı indir", "Tekrarlar arasında kol aşağıda dinlensin.", P_UYARI
+    return ("Hazır: kolunu yana kaldır",
+            "Kolunu yandan, rahatça çıkabildiğin en yüksek noktaya kaldır (genelde baş hizasının üstü); "
+            "sonra indir, 1–2 saniye bekle.", P_METIN)
+
+
+def _aci_gostergesi(d, x, y, G, kol, normal: float | None = None) -> int:
+    """Kol açısı çubuğu (0–180°). Çizgi: tekrarın sayılması için en az açı (hedef değil);
+    değerlendirmede ayrıca kişinin kalibrasyondaki tepe açısı (normali)."""
+    d.text((x, y), f"Kol açısı: {kol:.0f}°" if np.isfinite(kol) else "Kol açısı: –", font=font(15), fill=P_IKINCIL)
+    y += 22
+    H = 14
+    d.rectangle((x, y, x + G, y + H), fill=(226, 225, 220))
+    if np.isfinite(kol):
+        d.rectangle((x, y, x + int(G * min(max(kol, 0), 180) / 180), y + H), fill=(42, 120, 214))
+    xx = x + int(G * ta.EN_AZ_TEPE / 180)
+    d.line((xx, y - 3, xx, y + H + 3), fill=P_METIN, width=2)
+    d.text((xx + 3, y + H + 2), f"en az {ta.EN_AZ_TEPE:.0f}° (sayılması için)", font=font(11), fill=P_IKINCIL)
+    if normal is not None and np.isfinite(normal):
+        xx = x + int(G * min(normal, 180) / 180)
+        d.line((xx, y - 3, xx, y + H + 3), fill=P_DOGRU, width=3)
+        d.text((xx - 100, y + H + 2), f"senin normalin {normal:.0f}°", font=font(11, True), fill=P_DOGRU)
+    return y + H + 18
+
+
+def panel(Y: int, oturum, uzman_acik: bool, oynatim: bool, mesaj: str = "", egzersiz: str = "",
+          kabul_kalan: float | None = None, video: bool = False) -> tuple[np.ndarray, list[Dugme]]:
+    """Sağ panel. Dönüş: (görüntü, düğmeler). kabul_kalan: bekleyen tekrarın otomatik kabulüne kalan saniye."""
     pil = Image.new("RGB", (PANEL_G, Y), P_ARKA)
     d = ImageDraw.Draw(pil)
-    x, y, G = 24, 18, PANEL_G - 48
+    x, y, G = 24, 16, PANEL_G - 48
+    liste = dugmeler(oturum, video)
+    alt_sinir = _dugme_yerlesimi(d, liste, x, G, Y)
+    if mesaj:
+        alt_sinir -= 4
+        for sat in reversed(_sar(d, mesaj, font(16, True), G)):
+            alt_sinir -= 22
+            d.text((x, alt_sinir), sat, font=font(16, True), fill=P_UYARI)
+    alt_sinir -= 6
+
+    def yaz(metin, boyut, renk, kalin=False, aralik=None):
+        nonlocal y
+        for sat in _sar(d, metin, font(boyut, kalin), G):
+            if y + boyut > alt_sinir:
+                return
+            d.text((x, y), sat, font=font(boyut, kalin), fill=renk)
+            y += aralik or int(boyut * 1.32)
+
     d.text((x, y), egzersiz, font=font(20, True), fill=P_METIN)
-    y += 32
+    y += 30
     if oturum.mod == "kalibrasyon":
         n = len(oturum.kalibrasyon)
-        d.text((x, y), f"KALİBRASYON  {n}/{oturum.hedef}  (en az {oturum.en_az})", font=font(18, True), fill=P_UYARI)
-        y += 30
-        for s in _sar(d, "Fizyoterapistin gösterdiği gibi kolunu doğru şekilde yana kaldır. Her tekrardan sonra "
-                         "kabul (E) ya da ret (H) et.", font(16), G):
-            d.text((x, y), s, font=font(16), fill=P_IKINCIL)
-            y += 21
+        yaz(f"1. KALİBRASYON — kabul edilen: {n}/{oturum.hedef}  (en az {oturum.en_az})", 18, P_UYARI, True)
+        yaz("Kolunu doğru şekilde, yandan yukarı tam kaldır. Sistem bu tekrarlardan senin normal hareketini "
+            "öğrenir; hatalar sonra buna göre bulunur.", 15, P_IKINCIL)
     else:
-        d.text((x, y), "DEĞERLENDİRME", font=font(18, True), fill=P_DOGRU)
-        y += 30
+        yaz(f"2. DEĞERLENDİRME — kalibrasyon: {len(oturum.kalibrasyon)} tekrar", 18, P_DOGRU, True)
     if oturum.uyari:
-        for s in _sar(d, "⚠ " + oturum.uyari, font(17, True), G):
-            d.text((x, y), s, font=font(17, True), fill=P_UYARI)
-            y += 23
-    y += 8
+        yaz("⚠ " + oturum.uyari, 16, P_UYARI, True)
+    y += 6
+
+    # Şimdi ne yapmalı (canlı yönerge + kol açısı), çerçeveli kutu
+    baslik, alt, renk = _simdi(oturum)
+    kutu_ust = y
+    y += 10
+    x0, G0 = x, G
+    x, G = x + 14, G - 28
+    yaz(baslik, 24 if oturum.mod == "kalibrasyon" else 20, renk, True)
+    if alt:
+        yaz(alt, 15, P_IKINCIL)
+    normal = (float(np.median([k.tepe for k in oturum.kalibrasyon]))
+              if oturum.mod == "degerlendirme" and oturum.kalibrasyon else None)
+    y = _aci_gostergesi(d, x, y + 2, G, oturum.kol_anlik, normal)
+    x, G = x0, G0
+    d.rounded_rectangle((x - 6, kutu_ust, x + G + 6, y + 4), radius=8, outline=(200, 200, 195), width=2)
+    y += 16
+
     b = oturum.bekleyen
     if b is not None:
-        d.text((x, y), f"Tekrar {b.no} bitti (kol {gb.yuvarla5(b.tepe)}°). Kalibrasyona alınsın mı?",
-               font=font(18, True), fill=P_METIN)
-        y += 28
-        d.text((x, y), "E: evet    H: hayır", font=font(18), fill=P_IKINCIL)
-        y += 36
+        yaz(f"Tekrar {b.no} bitti (kol {gb.yuvarla5(b.tepe)}°). Kalibrasyona alınsın mı?", 19, P_METIN, True)
+        if np.isfinite(b.tepe) and b.tepe < DUSUK_KALDIRMA:
+            yaz(f"⚠ Kol yalnızca {gb.yuvarla5(b.tepe)}°'ye çıktı. Bu egzersizde kol genelde ~150°'ye (baş "
+                "hizasının üstüne) kalkar. Tam kaldırmadıysan Reddet.", 16, P_UYARI, True)
+        if kabul_kalan is not None:
+            yaz(f"{max(kabul_kalan, 0):.0f} saniye içinde kendiliğinden KABUL edilecek. "
+                "Tekrar kötü olduysa Reddet'e tıkla ya da H'ye bas.", 16, P_IKINCIL)
+        else:
+            yaz("Kabul'e ya da Reddet'e tıkla (E / H).", 16, P_IKINCIL)
+        y += 8
     son = oturum.degerlendirilenler()
     if son:
         k = son[-1]
         s = k.sonuc
         dogru = s.karar == ht.DOGRU
-        baslik = "DOĞRU" if dogru else "HATA: " + " + ".join(ht.KISA_AD[h] for h in s.soylenen)
-        d.text((x, y), f"Tekrar {k.no}", font=font(18), fill=P_IKINCIL)
-        y += 26
-        d.text((x, y), baslik, font=font(30, True), fill=P_DOGRU if dogru else P_HATA)
-        y += 44
-        for sat in _sar(d, s.hasta_cumlesi, font(25), G):          # hasta cümlesi: büyük
-            d.text((x, y), sat, font=font(25), fill=P_METIN)
-            y += 33
-        y += 6
+        yaz(f"Son tekrar: {k.no}", 16, P_IKINCIL)
+        yaz("DOĞRU" if dogru else "HATA: " + " + ".join(ht.KISA_AD[h] for h in s.soylenen), 30,
+            P_DOGRU if dogru else P_HATA, True, 42)
+        if k.kalite_sorunu:
+            yaz(f"⚠ Bu tekrarda {k.kalite_sorunu}; sonuç güvenilir değil.", 16, P_UYARI, True)
+        yaz(s.hasta_cumlesi, 23, P_METIN)                                # hasta cümlesi: büyük
+        y += 4
         if uzman_acik:
-            for sat in _sar(d, "Uzman: " + s.uzman_ayrintisi, font(14), G):
-                d.text((x, y), sat, font=font(14), fill=P_IKINCIL)
-                y += 18
-        y += 10
-        y = _omuz_grafigi(d, x, y, G, 130, k)
-        y += 12
-        d.text((x, y), "Son tekrarlar", font=font(16, True), fill=P_METIN)
-        y += 24
-        for kk in reversed(son[-5:]):
-            ss = kk.sonuc
-            ad = "doğru" if ss.karar == ht.DOGRU else " + ".join(ht.KISA_AD[h] for h in ss.soylenen)
-            d.text((x, y), f"#{kk.no}  {'✓' if ss.karar == ht.DOGRU else '✗'}  {ad}", font=font(16),
-                   fill=P_DOGRU if ss.karar == ht.DOGRU else P_HATA)
-            y += 22
-    alt = "Q: çıkış · U: uzman ayrıntısı · R: son tekrarı oynat"
-    if oturum.mod == "kalibrasyon":
-        alt += " · K: kalibrasyonu bitir"
-    if mesaj:
-        d.text((x, Y - 52), mesaj, font=font(15, True), fill=P_UYARI)
-    d.text((x, Y - 28), alt + (" · (oynatılıyor)" if oynatim else ""), font=font(13), fill=P_IKINCIL)
-    return cv2.cvtColor(np.asarray(pil), cv2.COLOR_RGB2BGR)
+            yaz("Uzman: " + s.uzman_ayrintisi, 14, P_IKINCIL)
+        y += 8
+        if y + 150 < alt_sinir:
+            y = _omuz_grafigi(d, x, y, G, 100, k) + 8
+        if y + 46 < alt_sinir:
+            yaz("Son tekrarlar", 16, P_METIN, True, 22)
+            for kk in reversed(son[-5:]):
+                ss = kk.sonuc
+                ad = "doğru" if ss.karar == ht.DOGRU else " + ".join(ht.KISA_AD[h] for h in ss.soylenen)
+                yaz(f"#{kk.no}  {'✓' if ss.karar == ht.DOGRU else '✗'}  {ad}", 16,
+                    P_DOGRU if ss.karar == ht.DOGRU else P_HATA, aralik=21)
+    elif oturum.mod == "degerlendirme":
+        yaz("Henüz değerlendirilen tekrar yok. Bir tekrar yap: sonuç burada görünecek.", 17, P_IKINCIL)
+    if oynatim:
+        d.text((PANEL_G - 150, 18), "▶ oynatılıyor", font=font(14, True), fill=P_IKINCIL)
+    return cv2.cvtColor(np.asarray(pil), cv2.COLOR_RGB2BGR), liste
 
 
 def _omuz_grafigi(d, x, y, G, H, k) -> int:

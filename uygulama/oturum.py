@@ -34,7 +34,23 @@ PROFIL_KLASORU = KOK / "profiller"
 OTURUM_KLASORU = KOK / "oturumlar"
 HEDEF_KALIBRASYON = 6
 EN_AZ_KALIBRASYON = 5
+GORUNURLUK_ESIGI = 0.5     # arayüz kalite kontrolü: omuz ve kalçaların MediaPipe görünürlüğü (tekrar medyanı)
 EGZERSIZLER = {"ex1": "Kolu yana kaldırma (sağ kol)"}   # Karar 27: ilk sürüm yalnızca Ex1
+
+
+def kalite_sorunu(dizi: np.ndarray) -> str:
+    """Tekrar boyunca omuz ve kalçalar kadrajda mıydı? Kol açısı omuz–kalça çizgisine göre ölçülür ve
+    ölçütler gövde boyuyla ölçeklenir; kalça görünmezse MediaPipe onu tahmin eder, ölçüler bozulur."""
+    v = np.asarray(dizi)[:, [11, 12, 23, 24], 3]
+    if not np.isfinite(v).any():
+        return "kişi görünmüyordu"
+    with np.errstate(all="ignore"):
+        m = np.nanmedian(v, axis=0)
+    if np.nanmin(m[2:]) < GORUNURLUK_ESIGI:
+        return "kalçaların kadrajda değildi"
+    if np.nanmin(m[:2]) < GORUNURLUK_ESIGI:
+        return "omuzların kadrajda değildi"
+    return ""
 
 
 def kol_acisi(lm: np.ndarray, en_boy: float) -> float:
@@ -52,6 +68,7 @@ class TekrarKaydi:
     durum: str = ""          # onay_bekliyor | kalibrasyon | reddedildi | degerlendirildi
     kamera_orani: float = np.nan
     sonuc: dg.Sonuc | None = field(default=None, repr=False)
+    kalite_sorunu: str = ""  # boş değilse: omuz/kalça kadrajda değildi (yalnızca arayüz uyarısı)
 
     @property
     def etiketli(self) -> slice:
@@ -74,6 +91,10 @@ class Oturum:
         self.profil: dg.Profil | None = None
         self.uyari: str = ""
         self.ilk_kamera_orani: float = np.nan
+        self.kol_anlik: float = np.nan       # son karenin kol açısı (yalnızca arayüz)
+        self.kisi_var: bool = False          # son karede kişi bulundu mu (yalnızca arayüz)
+        self.kalca_gorunur: bool = False     # son karede iki kalça da görünür mü (yalnızca arayüz)
+        self.kalite_kontrol: bool = True     # kalibrasyonda omuz/kalçası görünmeyen tekrarı kendiliğinden reddet
 
     # ------------------------------------------------ durum
     @property
@@ -96,7 +117,11 @@ class Oturum:
             if len(gecerli) >= 8:
                 self.ilk_kamera_orani = ka.omuz_govde_orani(np.stack(gecerli[:8]), self.en_boy)
                 self._kamera_kontrol(self.ilk_kamera_orani)
-        return [self._tekrar(t) for t in self.ayirici.ekle(kol_acisi(lm, self.en_boy))]
+        aci = kol_acisi(lm, self.en_boy)
+        self.kol_anlik = aci
+        self.kisi_var = bool(np.isfinite(lm[[11, 12, 23, 24], :2]).all())
+        self.kalca_gorunur = bool(self.kisi_var and np.nanmin(lm[[23, 24], 3]) >= GORUNURLUK_ESIGI)
+        return [self._tekrar(t) for t in self.ayirici.ekle(aci)]
 
     def bitir(self) -> list[TekrarKaydi]:
         return [self._tekrar(t) for t in self.ayirici.bitir()]
@@ -111,9 +136,13 @@ class Oturum:
         k = TekrarKaydi(len(self.tekrarlar) + 1, t.bas, t.son, pay, dizi, t.tepe)
         k.kamera_orani = ka.omuz_govde_orani(dizi, self.en_boy)
         self.tekrarlar.append(k)
+        k.kalite_sorunu = kalite_sorunu(dizi[pay:])
         if self.mod == "kalibrasyon":
-            k.durum = "onay_bekliyor"
-            self._kamera_kontrol(k.kamera_orani)
+            if self.kalite_kontrol and k.kalite_sorunu:
+                k.durum = "reddedildi"              # bozuk tekrar kalibrasyona hiç girmez
+            else:
+                k.durum = "onay_bekliyor"
+                self._kamera_kontrol(k.kamera_orani)
         else:
             self._degerlendir(k)
         return k
@@ -128,6 +157,33 @@ class Oturum:
             if len(self.kalibrasyon) >= self.hedef:
                 self.kalibrasyonu_bitir()
 
+    @property
+    def geri_alinabilir(self) -> bool:
+        """Son kabul edilen kalibrasyon tekrarı geri alınabilir mi (değerlendirme henüz başlamadıysa)."""
+        return (bool(self.kalibrasyon) and not self.degerlendirilenler()
+                and all(k.no > 0 for k in self.kalibrasyon))        # dosyadan yüklenen profil geri alınmaz
+
+    def son_kabulu_geri_al(self) -> TekrarKaydi | None:
+        if not self.geri_alinabilir:
+            return None
+        k = self.kalibrasyon.pop()
+        k.durum = "reddedildi"
+        if self.profil is not None:                  # kalibrasyon bitmişti: yeniden kalibrasyon moduna dön
+            self.profil = None
+            for t in self.tekrarlar:
+                if t.durum == "kullanilmadi":
+                    t.durum = "reddedildi"
+        return k
+
+    def kalibrasyonu_sifirla(self) -> None:
+        """Kabul edilmiş ve bekleyen kalibrasyon tekrarlarını iptal et (baştan başla)."""
+        if self.mod != "kalibrasyon":
+            return
+        for k in self.tekrarlar:
+            if k.durum in ("kalibrasyon", "onay_bekliyor"):
+                k.durum = "reddedildi"
+        self.kalibrasyon = []
+
     def kalibrasyonu_bitir(self, en_boy: float | None = None) -> bool:
         """en_boy: kalibrasyon görüntüsünün oranı (profil dosyasından yüklerken o dosyanınki)."""
         if len(self.kalibrasyon) < self.en_az:
@@ -135,6 +191,9 @@ class Oturum:
         e = self.en_boy if en_boy is None else en_boy
         f = [dg.tekrar_ozellikleri(k.dizi, k.etiketli, e)[0] for k in self.kalibrasyon]
         self.profil = dg.Profil(f)
+        for k in self.tekrarlar:                 # kalibrasyon bitti: hâlâ onay bekleyen tekrar kullanılmaz
+            if k.durum == "onay_bekliyor":
+                k.durum = "kullanilmadi"
         return True
 
     def referans(self) -> TekrarKaydi | None:
@@ -180,7 +239,8 @@ class Oturum:
         satir = []
         for k in self.tekrarlar:
             r = {"tekrar": k.no, "bas_kare": k.bas, "son_kare": k.son, "sure_s": round((k.son - k.bas + 1) / self.fps, 2),
-                 "durum": k.durum, "kamera_orani": round(k.kamera_orani, 4) if np.isfinite(k.kamera_orani) else ""}
+                 "durum": k.durum, "kamera_orani": round(k.kamera_orani, 4) if np.isfinite(k.kamera_orani) else "",
+                 "tepe_aci": round(float(k.tepe), 1) if np.isfinite(k.tepe) else "", "kalite": k.kalite_sorunu}
             if k.sonuc is not None:
                 r.update(k.sonuc.satir())
             satir.append(r)

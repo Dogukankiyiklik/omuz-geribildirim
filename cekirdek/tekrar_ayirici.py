@@ -68,6 +68,17 @@ class TekrarAyirici:
         self._s = self._e = self._bas = None
         self._tepe = -np.inf
         self._dinlenme = np.nan
+        self.son_gecersiz: dict | None = None    # yalnızca bilgi (arayüz): sayılmayan son aday
+
+    # ------------------------------------------------ yalnızca okuma (arayüz için; kararı etkilemez)
+    @property
+    def durum(self) -> str:
+        """dinlenme | hareket | bitis_ara"""
+        return self._durum
+
+    @property
+    def anlik_tepe(self) -> float:
+        return float(self._tepe) if self._durum != "dinlenme" else np.nan
 
     # ------------------------------------------------ yumuşatma (merkezli 5 kare, kenarda en yakın değer)
     def _yumusak(self, i: int) -> float:
@@ -109,6 +120,7 @@ class TekrarAyirici:
                     self._durum = "bitis_ara"
                     return self._bitis_kontrol(i)
                 self._durum = "dinlenme"            # aday geçersiz
+                self.son_gecersiz = {"kare": i, "tepe": float(self._tepe), "sure_s": (i - self._s) / self.fps}
             return []
         return self._bitis_kontrol(i)               # bitis_ara
 

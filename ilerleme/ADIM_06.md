@@ -1,7 +1,7 @@
 # ADIM 06 — Uygulama
 
 **Tarih:** 2026-11-07
-**Durum:** Kısmen. Uygulama, yığın modu ve sınamalar hazır. Sağlık kontrolü geçti. **Kabul ölçütü bekleniyor:** kullanıcının kendi kamerasıyla kalibrasyon yapıp en az 5 tekrar değerlendirmesi (aşağıdaki demo talimatı).
+**Durum:** Kabul ölçütleri sağlandı. Kullanıcı canlı kamerayla iki oturum yaptı. Açık kalan: pencere modunda video dosyasının (`--video`) kullanıcı tarafından bir kez denenmesi. Canlı denemeden çıkan gözlemler ve öneriler danışmanda (Sonuçlar 6, Açık sorular).
 
 ## Basit anlatım
 - Sunumda gösterilecek uygulama hazır. Solda görüntü ve iskelet var, sağda geri bildirim paneli. Panelin üstünde büyük harflerle **hasta cümlesi** yer alıyor. Uzman ayrıntısı U tuşuyla açılıp kapanıyor. Altta omuz eğrisi (kişinin normal aralığıyla) ve son 5 tekrar görünüyor.
@@ -37,6 +37,7 @@
 | `cekirdek/kural_dosyasi.py` | Kural dosyası yaz/oku (Karar 24) |
 | `cekirdek/kamera_acisi.py` | Kamera açısı oranı ve uyarı (Karar 26) |
 | `araclar/kural_disa_aktar.py` | `modeller/kural_ex1.json` üretir |
+| `araclar/bant_genisligi_tani.py` | Tanı: uygulama profilinin bant genişliği / veri seti (canlı deneme sonrası) |
 | `deneyler/tekrar_ayirma.py` | Ayırıcının veri setinde sınanması |
 | `deneyler/kamera_acisi.py` | Kamera açısı eşiği |
 | `deneyler/deney2.py`, `deneyler/deney3.py` | Taşınan fonksiyonları çekirdekten içe aktarıyor (davranış aynı) |
@@ -144,6 +145,47 @@ Oran = dinlenmede (ilk 8 kare) omuz genişliği / gövde boyu, doğru tekrarlar 
 ### 5. Görsel kontrol
 Panel ve oynatım karesi PNG'ye basılıp kontrol edildi. Tekrar 6 (baş): hasta cümlesi büyük, uzman ayrıntısı küçük; omuz eğrisi bandın altına iniyor; oynatımda turkuaz referansın başı dik, kullanıcının başı eğik ve baş kemikleri kırmızı. İlk denemede hata etiketi başın üstünü örtüyordu ve turkuaz referans yeşil iskeletin altında kalıyordu; ikisi de düzeltildi.
 
+### 6. Kullanıcının canlı denemesi (7 Kas)
+Kendi dizüstü kamerası, 1280×720, önden. Sayılar `oturumlar/*.csv` dosyalarından kopyalandı. **Tekrarların gerçek etiketi yok.** Kullanıcı tekrar başına ne yaptığını yazmadı. Bu yüzden bu bölümdeki sayılar doğruluk ölçümü değildir; doğruluk Adım 7'de etiketli videoyla ölçülecek.
+
+| oturum | kalibrasyon | reddedilen | değerlendirilen | birincil karar |
+| --- | --- | --- | --- | --- |
+| `2026-11-07_123525.csv` | 6 (tepe 143.7–156.9°) | 2 (tepe 110.0, 109.2°) | 41 | omuz 10, baş 10, az kaldırma 9, doğru 5, öne kaçma 4, dirsek 3 |
+| `2026-11-07_123930.csv` | 6 (tepe 146.5–154.8°) | 0 | 15 | omuz 6, öne kaçma 4, doğru 2, dirsek 1, baş 1, az kaldırma 1 |
+
+- Söylenen hatalar (1. + 2.), ilk oturum: baş 22, omuz 13, az kaldırma 12, öne kaçma 10, dirsek 10, doğru 5. İkinci oturum: omuz 10, öne kaçma 6, baş 6, doğru 2, dirsek 1, az kaldırma 1.
+- Kalite sorunu olan tekrar: 0 / 56.
+- `profiller/dogukan.npz` ikinci oturumun kalibrasyonudur; ilkinin profili üzerine yazıldı.
+- Daha önceki iki oturum (`120254`, `121530`) arayüz sorunlarının bulunduğu denemelerdi (bkz. Kararlar ve sapmalar).
+
+**Kullanıcının gözlemleri** (kendi sözleriyle özetlendi):
+1. En çok öne kaçma ve baş hatası veriyor gibi; baş hafif eğilse bile hata algılanıyor.
+2. Tanımlı olmayan "absürt" hareketlerde (örneğin iki kolu birden kaldırmak) sistem tanımlı hatalardan birini söylüyor.
+3. Kameraya farklı açıdan durunca "açı hatası" yerine omuz ya da baş hatası çıkıyor.
+4. Hız kontrolü yok: hareket çok hızlı yapılınca bunu söyleyen bir şey yok.
+5. Dirseği bükmediği halde sık sık "dirsek" diyor. Kullanıcı, kalibrasyonda kendini çok sıkıp "dümdüz" yaptığını ve sistemin "en ufak hatayı affetmediğini" düşünüyor.
+
+6. **Baş (ek yorum):** Başını belirgin eğdiği birkaç tekrarı sistem doğru yakaladı. Ama belirgin eğmediği tekrarlarda da baş hatası çıktı. Kalibrasyonu tam karşıya bakarak, değerlendirmeyi ise bilgisayar ekranına bakarak yaptı. Bakış yönünün değişmesinin baş hatasını tetiklediğini düşünüyor.
+
+**Gözlemlerin verideki karşılığı:**
+- **(5) Dar bant: doğrulandı.** Tanı aracı (`python -m araclar.bant_genisligi_tani --profil profiller/dogukan.npz` → `sonuclar/bant_genisligi/`) kullanıcının profilindeki τ medyanını, veri setinde aynı yöntemle (önden, her grubun ilk 6 doğru tekrarı, 55 grup) kurulan profillerle karşılaştırdı:
+
+| ölçüt | veri seti τ medyanı (en küçük–en büyük) | kullanıcı τ | oran | kullanıcıdan dar grup /55 |
+| --- | --- | --- | --- | --- |
+| omuz (YENI) | 0.0131 (0.0065–0.0247) | 0.0126 | 0.9629 | 24 |
+| baş | 1.1944 (0.5983–3.2745) | 0.9457 | 0.7917 | 10 |
+| öne kaçma | 2.7368 (0.9203–4.3832) | 1.5527 | 0.5673 | 9 |
+| kol boyu | 0.0295 (0.0187–0.0494) | 0.0242 | 0.8217 | 12 |
+| dirsek | 3.4525 (1.3552–8.3441) | 1.7061 | 0.4942 | 2 |
+
+  Kullanıcının dirsek bandı veri setindeki tipik bandın yaklaşık yarısı; 55 grubun yalnızca 2'si daha dar. Baş ve öne kaçma bantları da dar. τ = t·s/√n olduğu için tekdüze kalibrasyon dar bant, dar bant da küçük sapmalarda büyük z demek. Dikkat: kamera düzeni farklı (yatay dizüstü kamerası, yakın mesafe ve MediaPipe 1.2.2; veri seti ise dikey telefon). Fark kısmen buradan da gelebilir.
+- **(3) Kamera açısı:** İlk oturumda tekrar 20 ve 22'nin kamera oranı 0.31 ve 0.23, yani eşiğin (0.3887) altında. Bu tekrarlarda baş, öne kaçma ve omuz z'leri 11–12'ye çıkmış. **Uygulama kamera açısı uyarısını yalnızca kalibrasyonda veriyor, değerlendirmede vermiyor.** Bu bir eksik.
+- **(4) Hız:** 1,5 s'den kısa tekrar ilk oturumda 2, ikincide 1. Hata türleri veri setindeki 5 etiketle sınırlı; "çok hızlı" bir etiket değil, bu yüzden sistemde yok. Tekrar ayırıcı yalnızca 0,8 s'den kısa hareketi saymıyor.
+- **(2) Tanımsız hareket:** Sistem yalnızca 5 hata türünü biliyor; bilinmeyen bir hareketi en yakın türe atıyor. Sınırlılık.
+- **(1, 6) Baş:** İlk oturumda baş, söylenen hatalar arasında en sık olanı (22). Gerçek etiket olmadığı için yanlış alarm mı, gerçek eğme mi sayıyla ayırt edilemez. Kullanıcının açıklaması ölçütün tanımıyla tutarlı: `bas` = (omuz ortası → kulak ortası) ile (kalça ortası → omuz ortası) arasındaki açı (M39 F3). Gözleri kullanmaz, kulakları kullanır. Bakış tek başına etkilemez, ama ekrana bakmak için başı hafifçe çevirmek ya da öne eğmek 2B görüntüde kulak ortasını kaydırır. Kullanıcının baş bandı τ medyanı 0.9457°. Bu yüzden kalibrasyon ile değerlendirme arasında baş duruşunun 1–2° değişmesi bile bant dışına çıkabilir. Sonuç: baş ölçütü, kalibrasyon ve değerlendirme arasında **baş duruşunun (bakılan yerin) değişmesine** duyarlı. Bu, sistematik bir yanlış alarm kaynağı olabilir. Doğrulanmadı; Adım 7 çekiminde sınanabilir.
+
+**Önemli:** Bu gözlemlere bakarak hiçbir eşik veya sabit değiştirilmedi. Kullanıcının verisi test verisidir (CLAUDE.md, deney dürüstlüğü). Öneriler aşağıda, danışmana.
+
 ## Demo talimatı (kullanıcı için, adım adım)
 **Hazırlık (bir kez):**
 1. Sanal ortamı aç: `.venv\Scripts\activate`.
@@ -157,17 +199,19 @@ Panel ve oynatım karesi PNG'ye basılıp kontrol edildi. Tekrar 6 (baş): hasta
 
 **A) Canlı kamera (kabul ölçütü için gereken):**
 1. `python -m uygulama.main --isim dogukan`
-2. İlk 3 saniye "Hazırlanın" yazar; bu sırada yerine geç. Uygulama bu sürede bilgisayarın hızını ölçer.
-3. **Kalibrasyon:** Kolu yana, doğru şekilde, yavaşça kaldırıp indir. Her tekrar arasında kolunu 1–2 saniye aşağıda dinlendir; ayırıcı tekrarın bittiğini kol aşağı inince anlar. Her tekrardan sonra panelde "Kalibrasyona alınsın mı?" çıkar: **E** evet, **H** hayır. 6 tekrar kabul edilince değerlendirme kendiliğinden başlar. 5 tekrardan sonra **K** ile erken bitirebilirsin.
-4. **Değerlendirme:** En az 5 tekrar yap: birkaç doğru, birkaç bilerek hatalı (omuz silkme, başı yana eğme, dirseği bükme, kolu az kaldırma). Her tekrardan sonra panelde karar ve cümle çıkar, solda tekrar bindirmeli olarak oynatılır.
-5. **U** uzman ayrıntısını açar, **R** son tekrarı yeniden oynatır, **Q** çıkar.
-6. Çıkınca terminalde oturum CSV'sinin yolu yazar (`oturumlar/<tarih>.csv`). Profil `profiller/dogukan.npz` olarak kaydedilir.
-7. Kayıtlı profille doğrudan değerlendirmek için: `python -m uygulama.main --profil profiller/dogukan.npz`.
+2. Pencere açılınca **bir kez pencereye tıkla.** Klavye kısayolları yalnızca pencere seçiliyken çalışır. Kısayollar zorunlu da değil: panelin altındaki düğmelere fareyle tıklanabilir.
+3. İlk 10 saniye **HAZIRLIK** ekranıdır: yerine geçmen için bekleme süresi, hiçbir şey kaydedilmez (Boşluk ile atlanır). Ekranda "kalçaların kadrajda" yazısı yeşilse hazırsın. Görüntü ayna gibidir.
+4. **Kalibrasyon:** Kolu yana, doğru şekilde, yavaşça kaldır, indir, 1–2 saniye bekle. Paneldeki **"Şimdi" kutusu** ne yapman gerektiğini ve anlık kol açını gösterir. Bir hareket sayılmazsa sebebini de söyler, örneğin "kol en fazla 45°'ye çıktı; en az 60° gerekli". Biten tekrar **8 saniye içinde reddedilmezse kendiliğinden kabul edilir**; bu yüzden klavyeye gitmen gerekmez. Kötü bir tekrarı **Reddet** düğmesi ya da **H** ile atarsın. 6 tekrar kabul edilince değerlendirme kendiliğinden başlar. 5 tekrardan sonra **Kalibrasyonu bitir (K)**, her şeyi baştan almak için **Baştan (B)**.
+5. **Değerlendirme:** En az 5 tekrar yap: birkaç doğru, birkaç bilerek hatalı (omuz silkme, başı yana eğme, dirseği bükme, kolu az kaldırma). Ne yaptığını bir kağıda not et. Her tekrardan sonra panelde karar ve cümle çıkar; solda tekrar, bindirmeli olarak oynatılır.
+6. Düğmeler / kısayollar: **Uzman ayrıntısı (U)**, **Son tekrarı oynat (R)**, **Çıkış (Q / Esc)**. Büyük/küçük harf fark etmez.
+7. Çıkınca terminalde oturum CSV'sinin yolu yazar (`oturumlar/<tarih>.csv`). Profil `profiller/dogukan.npz` olarak kaydedilir.
+8. Kayıtlı profille doğrudan değerlendirmek için: `python -m uygulama.main --profil profiller/dogukan.npz`.
+9. Her tekrarı elle onaylamak istersen `--elle-onay` ekle; bekleme süresini değiştirmek için `--onay-suresi 6`.
 
 **B) Video dosyası (birincil demo yolu, Karar 27):**
 - `python -m uygulama.main --isim dogukan --kalibrasyon-video kalibrasyon.mp4 --video test.mp4`
   - Kalibrasyon videosundaki tekrarlar otomatik kabul edilir; videoda yalnızca doğru tekrarlar olmalı.
-- Ya da `python -m uygulama.main --profil profiller/dogukan.npz --video test.mp4`. **Boşluk** tuşu duraklatır.
+- Ya da `python -m uygulama.main --profil profiller/dogukan.npz --video test.mp4`. **Duraklat** düğmesi ya da **Boşluk** tuşu duraklatır.
 - Pencere açmadan aynı değerlendirme: `python -m uygulama.toplu --profil profiller/dogukan.npz --video test.mp4`.
 
 **Sunum yedeği (Karar 27):** Adım 7'deki kalibrasyon + test videosu ve onların yığın modu çıktısı (CSV) sunumdan önce hazır tutulacak.
@@ -175,7 +219,7 @@ Panel ve oynatım karesi PNG'ye basılıp kontrol edildi. Tekrar 6 (baş): hasta
 **Bize göndermen gereken:** Canlı denemeden sonra terminalde yazan oturum CSV yolunu ve kısa bir gözlem (ör. "omuz silkmesini yakaladı, baş eğmeyi kaçırdı", "kalibrasyon sırasında uyarı çıktı / çıkmadı"). Bunlar ADIM_06'nın kabul bölümüne yazılacak.
 
 ## Kabul ölçütü kontrolü
-- [ ] Kullanıcı kendi kamerasıyla kalibrasyon yapıp en az 5 tekrar değerlendirdi (**bekleniyor**).
+- [x] Kullanıcı kendi kamerasıyla kalibrasyon yapıp en az 5 tekrar değerlendirdi: iki oturum, 6 + 6 kalibrasyon, 41 + 15 değerlendirme (Sonuçlar 6).
 - [x] Video dosyası modu çalışıyor: yığın modu Honza videosunda uçtan uca çalıştı (sağlık kontrolü). Pencere modu (`--video`) aynı oturum kodunu kullanıyor; panel ve oynatım çizimi PNG'ye basılarak kontrol edildi. Pencerenin kendisi bu ortamda açılamadığı için **kullanıcının bir kez denemesi gerekiyor**.
 - [x] Kopya kod yok: karar ve cümle yalnızca `cekirdek/` içinden (`degerlendirici.degerlendir`). Uygulama = Deney 3 testi geçiyor.
 
@@ -194,6 +238,36 @@ Panel ve oynatım karesi PNG'ye basılıp kontrol edildi. Tekrar 6 (baş): hasta
 - **Bindirme referansı:** Tepe açısı kalibrasyon medyanına en yakın kalibrasyon tekrarı. Zamansal hizalama DTW, geometrik hizalama `cekirdek/bindirme.py` (öteleme + ölçek + döndürme).
 - **Canlı kamerada FPS:** Zaman eşikleri (0,8 s, 1 s, 2 s) ilk 3 saniyede ölçülen gerçek işleme hızına göre kare sayısına çevrilir.
 
+- **Kullanılabilirlik düzeltmesi (kullanıcı geri bildirimi, 7 Kas):** Kullanıcı tuşların "çalışmadığını" bildirdi. Bulunan sebepler: (1) yalnızca küçük harf tanınıyordu (Caps Lock/Shift ile basılan E/H yok sayılıyordu); (2) tuşlar yalnızca pencere seçiliyken gelir, terminal seçiliyse gitmez; (3) E/H yalnızca bir tekrar ayrıldıktan sonra işe yarıyordu ve tekrar sayılmadığında (tepe < 60° ya da < 0,8 s) ekranda hiçbir açıklama yoktu; (4) kamerada 2 m uzaktaki kişinin her tekrarda klavyeye gitmesi pratik değil. Yapılanlar:
+  - büyük/küçük harf fark etmiyor; Esc de çıkış;
+  - panelde tıklanabilir düğmeler (Kabul, Reddet, Kalibrasyonu bitir, Baştan, Son tekrarı oynat, Uzman ayrıntısı, Duraklat, Çıkış);
+  - pencere açılınca öne getiriliyor; terminale kısa kullanım yazısı basılıyor;
+  - panelde **"Şimdi" kutusu**: anlık kol açısı göstergesi (30° ve 60° çizgili) ve yönerge ("Hazır: kolunu yana kaldır", "Tekrar sürüyor…", "Kolunu indir ve 1–2 saniye bekle", "Seni göremiyorum", "Bu hareket tekrar sayılmadı: …");
+  - uygulanamayan bir tuş ya da düğme artık açıklayıcı bir mesaj veriyor (örneğin "Şu an onay bekleyen tekrar yok…");
+  - **kalibrasyonda otomatik kabul:** biten tekrar 4 saniye içinde reddedilmezse kabul ediliyor (`--onay-suresi`, `--elle-onay` ile eski davranış). PLAN "kullanıcı her tekrarı onaylar veya reddeder" diyor. Ret hakkı duruyor, kabul örtük oluyor. Küçük bir arayüz sapması; danışmana not.
+  - **Baştan** düğmesi: kalibrasyonu sıfırlar. Kalibrasyon bittiği anda hâlâ onay bekleyen tekrar `kullanilmadi` olarak işaretleniyor (önceden sonsuza kadar "onay bekliyor" kalıp panelde soruyu göstermeye devam ediyordu).
+  - `cekirdek/tekrar_ayirici.py`'ye yalnızca okunur bilgi eklendi (`durum`, `anlik_tepe`, `son_gecersiz`). Ayırma kararı değişmedi; ayırıcı ve regresyon testleri geçiyor (tam pytest: 134 passed, 1 xfailed).
+  - Panel, veri setindeki Honza dizisi kare kare verilerek dört durumda PNG'ye basılıp kontrol edildi. Bu sırada hasta cümlesi satırındaki bir çizim hatası bulunup düzeltildi.
+
+- **Kamera görüş alanı (kullanıcı geri bildirimi, 7 Kas):** Kullanıcı görüntünün "zoomlu" olduğunu ve gövdenin altının kadraja girmediğini bildirdi. Sebep: OpenCV kamerayı varsayılan 640×480 (4:3) açıyor; 16:9 sensörlü kameralar bu modda görüntüyü kırpıyor. Canlı kamera artık 1280×720 isteniyor (`--cozunurluk`, örneğin `1920x1080`); istenen ve alınan çözünürlük terminale yazılıyor. Video alanı en fazla 1400 piksel genişliğe çıkarıldı (16:9'da 1351×760); pencere ilk açılışta ekrana sığacak şekilde boyutlandırılıyor. En-boy oranı her zaman gerçek kareden alındığı için (W/H) ölçümler etkilenmiyor. Not: kalibrasyon profili ile değerlendirme aynı çözünürlükte olmalı; farklıysa uygulama zaten uyarı veriyor.
+
+- **İlk canlı deneme ve düzeltmeler (kullanıcı geri bildirimi, 7 Kas):** `oturumlar/2026-11-07_121530.csv` ve `profiller/dogukan.npz` incelendi (bu deneme kabul ölçütüne sayılmaz; değerlendirme tekrarı yok). 7 tekrar ayrıldı: 1. tekrar reddedildi, 6 tekrar kabul edildi. Kalibrasyon tekrarlarının tepe açısı 93.3, 89.5, 86.8, 95.3, 94.5 ve 6.'da NaN. Kullanıcı çubuktaki 30°/60° çizgilerini hedef aralık sandığı için kolu ~90°'de bırakmış (veri setinde doğru tekrar ~150°). 6. tekrarda kalçalar kadraj dışındaydı (kalça görünürlüğü medyanı 0.13 ve 0.12, y ≈ 1.23). Bu tekrar 4 s sonra kendiliğinden kabul edildi ve kalibrasyonu bitirdi. Yapılanlar:
+  - **Kalite kontrolü** (`uygulama/oturum.py`, `kalite_sorunu`): tekrar boyunca omuz veya kalça görünürlüğünün medyanı < 0,5 ise tekrar kalibrasyona alınmaz ve sebebi panelde yazılır. Değerlendirmede tekrar yine değerlendirilir ama "sonuç güvenilir değil" uyarısı gösterilir. Sebep: kol açısı omuz–kalça çizgisine göre ölçülüyor ve ölçütler gövde boyuyla ölçekleniyor. Bu kontrol kullanıcının profilindeki 6. tekrarı yakalıyor, diğer 5 tekrarı geçiriyor. Sağlık kontrolünde (`toplu.saglik_kontrolu`) kapalı; raporlanmış sonuçlar değişmesin diye.
+  - **Otomatik kabul süresi 4 s → 8 s.** "Son kabulü geri al (Z)" eklendi; değerlendirme tekrarı yokken kalibrasyon bittikten sonra da çalışır ("Kalibrasyona geri dön").
+  - **Kol açısı çubuğu:** 30° çizgisi kaldırıldı. Yalnızca "en az 60° (sayılması için)" çizgisi var; değerlendirmede ayrıca "senin normalin X°" (kalibrasyon tepe medyanı). Kalibrasyonda tepe < 120° ise "kol genelde ~150°'ye kalkar; tam kaldırmadıysan Reddet" hatırlatması çıkıyor. 120° yalnızca arayüz hatırlatmasıdır; karar kuralına girmez.
+  - **Hazırlık ekranı:** 3 s → 10 s (`--hazirlik`, Boşluk ile atlanır). Ekranda bunun kalibrasyon olmadığı, hiçbir şeyin kaydedilmediği yazıyor. Canlı "kalçaların görünüyor / görünmüyor" kontrolü var. FPS ölçümü bu sürede yapılıyor.
+  - **Ayna görüntü:** canlı kamera varsayılan olarak ayna gibi gösteriliyor (`--aynasiz` ile kapanır). Yalnızca gösterim; MediaPipe ve ölçümler aynasız kareyi kullanıyor (sağ kol = MediaPipe 12/14/16 değişmedi). Video dosyası modunda ayna yok.
+  - Oturum CSV'sine `tepe_aci` ve `kalite` sütunları eklendi.
+  - Tam pytest: 134 passed, 1 xfailed.
+
 ## Açık sorular / danışmana notlar
 - Tüm görüşlerde tekrar ayırma 87.35 (< %90); önden + çapraz 95.01. Karar 25 gereği eşikler değişmedi. Uygulama senaryosu |görüş| ≤ 60° olduğu için sorun görmüyoruz; onay?
 - MediaPipe 1.2.2 farkı (kol açısında medyan 0.92°) sınırlılık notu olarak yeterli mi?
+- **Canlı denemeden çıkan öneriler (karar danışmanın; hiçbiri uygulanmadı):**
+  1. **Bant için en az genişlik.** Örneğin τ ≥ veri setindeki τ dağılımının bir yüzdeliği. Bu bir yöntem değişikliği; Deney 2 üzerinde birini-dışarıda-bırak ile sınanmadan uygulamaya girmemeli (alt sınır 4 kişiden, 5. kişide test).
+  2. **Değerlendirmede kamera açısı uyarısı.** Karar 26 eşiği (0.3887) her değerlendirme tekrarının kamera oranına da uygulanır: "Kameraya göre açın değişti; bu sonuç güvenilir değil." Yeni eşik yok, yalnızca arayüz.
+  3. **Hız (tempo) bilgisi.** Örneğin "çok hızlı yaptın, yavaşla". Veri setinde etiketi yok, ölçülemez. Eşik, veri setindeki doğru tekrarların süre dağılımından (örneğin %5'lik dilim) alınabilir ve yalnızca bilgi olarak gösterilir.
+  4. **Tanınmayan hareket.** Örneğin sol kolun da kalkması ya da birçok ölçütün aynı anda çok yüksek olması: "Hareket tanınmadı" denir. Etiketi yok, ölçülemez.
+  5. **Kalibrasyon yönergesi.** "Doğal, rahat tekrarlar yap; kendini zorlama." Dar bandı biraz azaltabilir ama çözmez.
+  6. **Bakış yönü yönergesi** (eşik değil, yalnızca talimat): "Kalibrasyonda da değerlendirmede de aynı yere bak (ekrana)." Adım 7 çekim protokolüne de eklenebilir: kalibrasyon ve test videosunda kişi aynı noktaya baksın. İstenirse Adım 7'de bilerek "farklı yere bakma" tekrarları çekilir ve etkisi ölçülür.
+- Kalibrasyonda 8 saniyelik otomatik kabul (ret hakkı saklı) PLAN'daki "her tekrarı onaylar" ifadesine uygun sayılır mı?

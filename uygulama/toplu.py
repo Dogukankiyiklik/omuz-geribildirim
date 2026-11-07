@@ -133,6 +133,7 @@ def saglik_kontrolu(video_id: str, kamera: str, yonelim: int, kalibrasyon_sayisi
 
     o = Oturum(W / H, fps)
     o.hedef = 10 ** 6
+    o.kalite_kontrol = False          # raporlanmış sağlık kontrolüyle aynı davranış (ADIM_06)
     oturum_isle(lm, o)
     et = [(int(r.first_frame) - bas, int(r.last_frame) - bas) for _, r in s.iterrows()]
     es = eslestir(et, [(k.bas, k.son) for k in o.tekrarlar])

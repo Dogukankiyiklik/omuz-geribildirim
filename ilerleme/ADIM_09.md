@@ -73,3 +73,68 @@ Tam çalıştırma: kullanıcı yapacak. **Kullanıcının kararı (7 Kas):** he
 
 ## Açık sorular / danışmana notlar
 - Sunum şekillerinin seçimi (13–15 Kasım).
+
+## Ek: Güncelleme 10 — depo denetimi, şekil düzeltmesi, 6b süre tahmini (7 Kas)
+
+### Basit anlatım
+- **Güvenlik denetimi:** Gemini API anahtarının (şifre gibi bir şey) yanlışlıkla git geçmişine girip girmediğine baktık. Girmemiş. Kişisel videolar, profiller ve veri seti de depoda yok.
+- **README:** Depoyu ilk açan birinin okuyacağı kısa tanıtım: proje ne yapıyor, nasıl kurulur, klasörler, veri setinin atfı ve lisansı.
+- **Şekil düzeltmesi:** Sunum şeklinde bir sayı yazısı bir noktayı örtüyordu; yazı çubuğun üstüne taşındı. İki şeklin altyazısına önden + çapraz görüşteki sayılar eklendi.
+- **6b süre tahmini:** "Siluet" fikri için MediaPipe'ın kişinin şeklini piksel piksel çıkaran **segmentasyon maskesi** gerekiyor. Bunun ne kadar süreceğini 3 videoda ölçtük ve bütün veri için tahmin ettik. Henüz hiçbir ölçüt yazılmadı; başlayıp başlamamaya danışman karar verecek.
+
+*Jargon:* **Segmentasyon maskesi:** görüntüdeki her pikselin "kişi mi, arka plan mı" olduğunu söyleyen bir siyah-beyaz resim. **Git geçmişi:** projenin bütün eski kayıtları; bir dosya bir kez commit'lenirse silinse bile geçmişte kalır.
+
+### Karar 43 — depo ve gizli bilgi denetimi
+Komutlar ve bulgular (7 Kas, commit `21ddf9c` üzerinde):
+
+| denetim | komut | bulgu |
+| --- | --- | --- |
+| `.env` git'te mi | `git ls-files`, `git log --all --name-only` | **Hiç commit'lenmemiş.** `.gitignore`'da (`.env`). Dosya yalnızca yerelde var. |
+| Anahtar geçmişte mi | `git log --all -p \| grep -nE "GEMINI_API_KEY *=\|AIza[0-9A-Za-z_-]{10,}"` (29 commit) | Tek eşleşme: ADIM_08'deki örnek satır `#    GEMINI_API_KEY=...` (değer yok). `AIza…` biçiminde dizi **yok**. Ayrıca `api_key/token/secret = <16+ karakter>` araması: eşleşme yok. |
+| Veri | `git ls-files` | `veri/` altında yalnızca `veri/README.md` izleniyor (`.gitignore`: `veri/*`, `kendi_kayit` dahil). Geçmişte de başka `veri/` dosyası yok. |
+| Profiller, oturumlar | `.gitignore` | `profiller/`, `oturumlar/` yok sayılıyor; geçmişte yok. |
+| Videolar | `git ls-files`, `git check-ignore` | Hiçbir `.mp4` izlenmiyor; `sonuclar/**/*.mp4` kuralı `sonuclar/sunum/demo_yedek_veriseti.mp4`'ü kapsıyor. Geçmişte `.mp4` yok. |
+| LLM önbelleği | `.gitignore` | `sonuclar/deney4/onbellek.jsonl` yok sayılıyor (yanıtlar `yanitlar.csv`'de). |
+| Poz modeli | `.gitignore` | `*.task` yok sayılıyor. |
+
+- **Sonuç:** Anahtarı iptal etmeye ya da geçmişi temizlemeye gerek yok.
+- **Not (lisans, gizlilik değil):** Bazı izlenen PNG'ler veri setinin video karelerinden üretildi (ör. `sonuclar/adim0/kare102_ham.png`, `sonuclar/sunum/4_geri_bildirim.png`, `5_bindirme.png`). Veri seti CC BY-NC 4.0; atıfla ve ticari olmayan amaçla paylaşılabilir. README'ye bu not yazıldı.
+- **`README.md`** yeniden yazıldı: bir paragraf, hızlı başlangıç (kurulum, `pytest`, demo komutları), klasör tablosu, `docs/YENIDEN_KURULUM.md` bağlantısı, REHAB26-ViewAngles atfı (DOI 10.5281/zenodo.23018128, CC BY-NC 4.0; veri depoda yok), kişisel kayıtların depoya girmediği notu. **Kod lisansı:** kullanıcıya soruldu, "lisans belirtilmedi" seçildi.
+
+### Karar 44 — sunum şekilleri (yalnızca görsel)
+- `3_kalibrasyon.png`: değer yazısı çubuğun içinden, çubuğun ve en yüksek kişi noktasının **üstüne** taşındı (koyu renk); y ekseninin üst sınırı 1,08 → 1,16. Ortadaki "0,62" artık 0,37'deki noktayı örtmüyor.
+- `1_problem.png` ve `3_kalibrasyon.png` altyazısına `deney1b/ozet.csv`'den (v2, YENI, "AUC silkme/doğru (önden+çapraz)") okunan cümle eklendi: **"Önden + çapraz: ham 0,76 → bant 0,97."** (0,761 ve 0,968). 1_problem'in altyazısı sığmadığı için iki satıra bölündü.
+- 1_problem'deki değer yazısı yeri değişmedi (örtüşme yok). Sayılar, 2, 4, 5 numaralı şekiller ve demo videosu değişmedi (2, 4, 5 PNG'leri yeniden üretimde birebir aynı çıktı).
+- `python -m deneyler.sunum_sekilleri` yeniden çalıştırıldı (~58 s).
+
+### Karar 45 — 6b süre tahmini (ölçüt ya da deney yok)
+- `python -m araclar.siluet_sure --kare 3000` (Claude Code çalıştırdı, ~6 dk) → `sonuclar/siluet_sure/` (`videolar.csv`, `ozet.csv`, `bilgi.csv`). MediaPipe 1.2.2, `pose_landmarker_full`, VIDEO modu, tek kişi; aynı kareler önce maskesiz, sonra `output_segmentation_masks=True` ile işlendi. Maskeler diske yazılmadı; her 30. karede bellekte sıkıştırılıp boyutu ölçüldü.
+- Videolar: Ex1 Honza cam1, Petra cam2, Vasil cam1 (1080×1920); her birinin **ilk 3000 karesi**. İlk deneme bütün kareleri işliyordu (3 video ~49 600 kare × 2 geçiş ≈ 45 dk); kare başına süre videolar arasında sabit çıktığı için durduruldu ve 3000 kareyle yeniden çalıştırıldı.
+
+Sonuçlar (terminal çıktısından):
+
+| | maskesiz | maskeli |
+| --- | --- | --- |
+| ölçülen kare | 9000 | 9000 |
+| model, ms/kare (ağırlıklı ort.) | 13.63 | 21.01 |
+| video çözme dahil, ms/kare | 19.97 | 28.04 |
+| maske bulunan kare | – | 9000 / 9000 |
+| maske boyutu, kB/kare: ham float32 / 8 bit sıkıştırılmış / ikili sıkıştırılmış | – | 8100 / 37.03–45.24 / 2.99–3.21 |
+
+Tahmin: önden + çapraz Ex1 = **1363 tekrar, 162 931 kare** (her tekrar ±10 kare pay dahil), 15 video×kamera.
+
+| | maskesiz | maskeli |
+| --- | --- | --- |
+| tahmini toplam, yalnızca model | 37.03 dk | 57.06 dk |
+| tahmini toplam, video çözme dahil | 54.22 dk | **76.14 dk** |
+| tahmini disk (maskeli) | – | ham float32 1 288 810 MB (~1,2 TB; saklanamaz) · 8 bit sıkıştırılmış 6535 MB · **ikili sıkıştırılmış 499 MB** |
+
+- **Okuma:** Maske, kare başına modele ~7,4 ms ekliyor (13,6 → 21,0). Bütün önden + çapraz tekrarlar için segmentasyon **yaklaşık 1,3 saat** sürer (tek çalıştırma, önbelleğe alınır). Disk için tam maske saklanamaz; ikili (eşik 0,5) sıkıştırılmış maske ~0,5 GB, yalnızca omuz ROI'si saklanırsa çok daha az.
+- **Sınırlar:** (1) Tahmin yalnızca tekrar karelerini sayar; tekrarlara gitmek için videoyu baştan çözmek gerekirse (OpenCV'de kare atlama yavaş/güvenilmez olabilir) aradaki kareler de çözülür; bu durumda ek süre kabaca 15 videonun toplam kare sayısı × ~6 ms (yalnızca çözme). (2) Ölçüm bu dizüstü bilgisayarın CPU'sunda (20 çekirdek), GPU yok; başka işler aynı anda çalışmadı. (3) Uygulamanın kullandığı MediaPipe 1.2.2 ile ölçüldü; veri setinin iskeletleri 0.10.20 ile çıkarılmıştı (Karar 27 notu); siluet ölçütü kendi iskeletiyle değil maskeyle çalışacağından bu fark süreyi etkilemez.
+- Ölçüt yazılmadı. Başlayıp başlamamaya danışman Adım 7 sonuçlarıyla birlikte karar verecek (Güncelleme 11).
+
+### Karar 42 — duyarlılık analizi (durum)
+- Önceden kayıt ve kod commit `21ddf9c`; ayrıntı ADIM_08 "Ek: Güncelleme 10". Etiketleme dosyası **ondan sonra** üretildi: `sonuclar/deney4/elle_kaldirma.xlsx`, **342 cümle** (A 119, B 132, C 91). Kullanıcı etiketleyince: `python -m deneyler.deney4 kaldirma-degerlendir`.
+
+### Karar 45 — Adım 10
+- ⛔ Yapılmaz; `docs/GELECEK_CALISMA.md` madde 11 ("başka bir veri setinde, görülmemiş kişilerde doğrulama"); PLAN'da işaretlendi.

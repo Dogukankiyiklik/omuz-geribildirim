@@ -68,24 +68,37 @@ def _satir(df, **kosul):
     return df[m].iloc[0]
 
 
-def auc_cubuklari(ax, cubuklar: list[tuple[str, float, list[float], str]], baslik: str):
-    """cubuklar: (etiket, AUC, kişi AUC'leri, renk). Kişi değerleri nokta (Karar 5)."""
+def auc_cubuklari(ax, cubuklar: list[tuple[str, float, list[float], str]], baslik: str, deger_ustte: bool = False):
+    """cubuklar: (etiket, AUC, kişi AUC'leri, renk). Kişi değerleri nokta (Karar 5).
+    deger_ustte: değer yazısı çubuğun içi yerine üstüne, kişi noktalarının da üstüne yazılır (Karar 44)."""
     x = np.arange(len(cubuklar))
     for i, (ad, v, kisi, renk) in enumerate(cubuklar):
         ax.bar(i, v, width=0.56, color=renk, zorder=2)
         jit = np.linspace(-0.12, 0.12, len(kisi))
         ax.scatter(i + jit, kisi, s=70, color=ZEMIN, edgecolor=METIN, linewidth=1.4, zorder=3,
                    label="kişi başına AUC" if i == 0 else None)
-        ax.text(i, 0.33, f"{v:.2f}".replace(".", ","), ha="center", va="bottom", fontsize=30,
-                fontweight="bold", color=ZEMIN, zorder=4)
+        if deger_ustte:
+            ax.text(i, max(v, max(kisi)) + 0.02, f"{v:.2f}".replace(".", ","), ha="center", va="bottom",
+                    fontsize=30, fontweight="bold", color=METIN, zorder=4)
+        else:
+            ax.text(i, 0.33, f"{v:.2f}".replace(".", ","), ha="center", va="bottom", fontsize=30,
+                    fontweight="bold", color=ZEMIN, zorder=4)
     ax.axhline(0.5, color=METIN2, lw=1.2, ls=":", zorder=1, label="şans düzeyi (0,5)")
     ax.set_xticks(x, [c[0] for c in cubuklar])
-    ax.set_ylim(0.3, 1.08)
+    ax.set_ylim(0.3, 1.16 if deger_ustte else 1.08)
     ax.set_yticks([0.4, 0.6, 0.8, 1.0], ["0,4", "0,6", "0,8", "1,0"])
     ax.set_ylabel("AUC: silkmeli tekrar ile doğru tekrarı ayırma")
     ax.yaxis.grid(True, color=IZGARA, lw=1, zorder=0)
     ax.set_title(baslik, loc="left", pad=18)
     ax.legend(loc="upper left", frameon=False, fontsize=15)
+
+
+def onden_capraz_notu(oz1b: pd.DataFrame) -> str:
+    """Karar 44: altyazıya önden + çapraz değerleri (deney1b/ozet.csv, v2, YENI)."""
+    def v(kosul):
+        x = float(_satir(oz1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru (önden+çapraz)"])
+        return f"{x:.2f}".replace(".", ",")
+    return f"Önden + çapraz: ham {v('bant_yok')} → bant {v('kisiye_ozel')}."
 
 
 def sekil_problem(klasor: Path) -> Path:
@@ -98,9 +111,10 @@ def sekil_problem(klasor: Path) -> Path:
     _stil()
     fig, ax = plt.subplots(figsize=BOYUT)
     auc_cubuklari(ax, c, "Omuz silkmesi: ham ölçü yetmiyor, kişiye özel bant yetiyor")
-    fig.subplots_adjust(bottom=0.17)
+    fig.subplots_adjust(bottom=0.19)
     fig.text(0.01, 0.015, "Ex1, kulak–omuz dikey mesafesi / gövde boyu, 5 kişi, tüm görüşler. "
-             "Kaynak: sonuclar/deney1b/ozet.csv, kisi_auc.csv (v2).", fontsize=12, color=METIN2)
+             f"{onden_capraz_notu(oz1b)}\nKaynak: sonuclar/deney1b/ozet.csv, kisi_auc.csv (v2).",
+             fontsize=12, color=METIN2)
     return _kaydet(fig, klasor / "1_problem.png")
 
 
@@ -115,10 +129,11 @@ def sekil_kalibrasyon(klasor: Path) -> Path:
         c.append((ad, v, kisi, renk))
     _stil()
     fig, ax = plt.subplots(figsize=BOYUT)
-    auc_cubuklari(ax, c, "Kalibrasyon kişiye özel olmalı")
+    auc_cubuklari(ax, c, "Kalibrasyon kişiye özel olmalı", deger_ustte=True)
     fig.subplots_adjust(bottom=0.2)
     fig.text(0.01, 0.015, "Ex1, açı bandı (v2), kulak–omuz ölçütü, tüm görüşler. "
-             "Kaynak: sonuclar/deney1b/ozet.csv, kisi_auc.csv.", fontsize=12, color=METIN2)
+             f"{onden_capraz_notu(oz1b)} Kaynak: sonuclar/deney1b/ozet.csv, kisi_auc.csv.",
+             fontsize=12, color=METIN2)
     return _kaydet(fig, klasor / "3_kalibrasyon.png")
 
 

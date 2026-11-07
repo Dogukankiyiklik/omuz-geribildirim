@@ -1,39 +1,49 @@
 # Omuz Silkmesi Tespiti ve Türkçe Geri Bildirim
 
-Tek kamerayla kolu yana kaldırma egzersizini izleyen bir sistem. Omuz silkmesi başta olmak üzere hataları bulur ve kişiye Türkçe, ne yapacağını söyleyen bir geri bildirim verir. Bilgisayarlı Görü dersi projesi.
+Tek bir RGB kamerayla **kolu yana kaldırma (omuz abdüksiyonu)** egzersizini izleyen bir sistem. MediaPipe ile çıkarılan iskeletten hatalı tekrarları bulur (odak: omzun kulağa doğru kalkması, "omuz silkmesi"), hatanın türünü belirler (omuz, baş eğme, kolun öne kaçması, dirsek bükme, yetersiz kaldırma) ve kişiye **ne yapacağını söyleyen Türkçe bir cümle** verir. Yöntemin temeli **kişiye özel açı bandı**: kişinin birkaç doğru tekrarından, kolun her açısı için "omzun normal yeri" çıkarılır ve yeni tekrar bu banda göre değerlendirilir. Bütün sonuçlar açık REHAB26-ViewAngles veri setinde, kişi bazlı (birini dışarıda bırak) ölçülür. Bilgisayarlı Görü dersi projesi (sunum: 16 Kasım 2026).
+
+## Hızlı başlangıç
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate             # Git Bash: source .venv/Scripts/activate · macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+pytest -q                          # hepsi geçmeli (Deney 1 regresyonu dahil)
+```
+
+Veri setini `veri/rehab26/` altına koy (`veri/README.md`). Sonra demo:
+
+```bash
+# Veri setinden bir video, veri setinden üretilmiş kalibrasyonla (pencere açılır)
+python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
+
+# Kendi kameranla: önce 6 doğru tekrarla kalibrasyon, sonra değerlendirme
+python -m uygulama.main --isim adin
+```
+
+Sıfırdan kurulum ve deneylerin yeniden üretimi: [`docs/YENIDEN_KURULUM.md`](docs/YENIDEN_KURULUM.md) (bütün deneyler: `python -m deneyler.hepsi`).
 
 ## Klasörler
 
 | Klasör | İçerik |
 | --- | --- |
-| `CLAUDE.md` | Claude Code'un kuralları (her oturumda okunur) |
-| `PLAN.md` | Adım adım yol haritası ve tarihler |
-| `docs/ARKA_PLAN.md` | Problem, yöntem, literatür, Deney 1 sonuçları |
-| `docs/ODEV.md` | Hocanın ödev tanımı ve bizim karşılığımız |
-| `ilerleme/` | Her adımın özeti (`ADIM_XX.md`) ve kararlar günlüğü |
-| `cekirdek/` | Ortak kod: ölçütler, DTW, bant, hata türü, geri bildirim |
-| `deneyler/` | Deney betikleri |
-| `uygulama/` | Demo uygulaması |
-| `araclar/` | Yardımcı betikler (veri küçültme vb.) |
-| `referans/` | Danışmanın yazdığı Deney 1 kodu ve beklenen sonuçlar |
-| `veri/` | Veri dosyaları (git'e girmez) |
-| `sonuclar/` | Deney çıktıları |
-| `testler/` | Otomatik testler |
+| `cekirdek/` | Ortak kod: ölçütler, DTW, açı bandı, hata türü, geri bildirim, LLM istemcisi. Deneyler ve uygulama bunu içe aktarır |
+| `deneyler/` | Deney betikleri (Deney 1–4, Ex7, sunum şekilleri, `hepsi.py`) |
+| `uygulama/` | Demo uygulaması (kalibrasyon, canlı kamera / video, referans iskelet bindirme) |
+| `araclar/` | Yardımcı betikler (veri tanıtma, görsel kontrol, kural dışa aktarma) |
+| `modeller/` | Uygulamanın kullandığı kural ve eşik dosyaları (JSON) |
+| `sonuclar/` | Deney çıktıları (CSV, `ozet.csv`, şekiller) |
+| `testler/` | pytest testleri |
+| `referans/` | Danışmanın Deney 1 kodu ve beklenen sonuçlar (regresyon testi) |
+| `docs/` | Arka plan, ödev tanımı, yeniden kurulum, LLM kullanımı, gelecek çalışma |
+| `ilerleme/` | Her adımın özeti (`ADIM_XX.md`) ve kararlar günlüğü (`KARARLAR.md`) |
+| `veri/` | Veri setleri (git'e **girmez**) |
 
-## İlk kurulum
+`PLAN.md` adım adım yol haritası, `CLAUDE.md` Claude Code ile çalışma kurallarıdır.
 
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-```
+## Veri seti ve lisans
 
-Sonra `veri/README.md` dosyasındaki dosyaları `veri/` klasörüne koy.
-
-## Claude Code ile çalışma
-
-1. Proje klasöründe Claude Code'u başlat.
-2. İlk mesaj: **"CLAUDE.md ve PLAN.md'yi oku, Adım 0'dan başla."**
-3. Her adım bitince Claude Code `ilerleme/ADIM_XX.md` dosyasını yazar.
-4. 📤 işaretli adımlardan sonra o dosyayı ve ilgili `ozet.csv` dosyasını danışman Claude sohbetine gönder.
-5. Danışmanın düzeltmeleri varsa Claude Code'a ilet: "Danışman şunu söyledi: …".
+- **Veri:** REHAB26-ViewAngles, Zenodo, DOI [10.5281/zenodo.23018128](https://doi.org/10.5281/zenodo.23018128), lisans **CC BY-NC 4.0** (ticari olmayan kullanım, atıf zorunlu). Veri bu depoda **yoktur**; Zenodo'dan indirilir. `sonuclar/` altındaki bazı şekiller veri setinin video karelerinden üretilmiştir ve aynı lisansa tabidir.
+- Kişisel kayıtlar (kalibrasyon profilleri `profiller/`, canlı oturumlar `oturumlar/`, kendi videolarımız `veri/kendi_kayit/`) ve bütün `.mp4` dosyaları depoya girmez.
+- **Kod:** lisans belirtilmedi.
+- Projede üretken yapay zekânın nerede kullanıldığı: [`docs/LLM_KULLANIMI.md`](docs/LLM_KULLANIMI.md).

@@ -339,4 +339,28 @@ python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 - 1, 2, 3, 9 ve 10 numaralı tekrarlar kalibrasyona girdi. Pencerede onlar da değerlendirilir, ama bu adil bir sınama değildir; o tekrarların kararına bakma.
 - **Bakılacaklar:** Panelde hasta cümlesi okunuyor mu? Tekrar bitince bindirme oynatımı (turkuaz referans, kırmızı uzuvlar) görünüyor mu? Omuz eğrisi grafiği çiziliyor mu? Pencere ekrana sığıyor mu?
 
-**Kullanıcının gözlemi:** (kullanıcı denedikten sonra buraya yazılacak)
+**Kullanıcının gözlemi (7 Kas, kendi sözlerinden özet):**
+- Pencere modu uçtan uca çalıştı. 1–3 (kalibrasyon tekrarları): iskelet ve turkuaz referans çıktı, uyumlu görünüyorlar, "doğru" dendi.
+- 4: "doğru" dendi. Grafikte mavi eğri bandın **üstünde** kalıyordu; kullanıcı "neye göre doğru dedi?" diye sordu. **Not:** 4. tekrarın veri setindeki etiketi doğru değil, **öne kaçma**; yani sistem burada hatayı kaçırdı (sağlık kontrolüyle aynı sonuç). Grafikteki sapma omuz ölçütüne ait ve **ters yönde**: kulak–omuz mesafesi normalden büyük, yani omuz normalden aşağıda. Ana sistem yönlü (Karar 15): omuzda yalnızca mesafenin küçülmesi (kulağa yaklaşma) hata sayılır.
+- 5: omuz bulundu; ayrıca "öne kaçma" dendi.
+- 6: baş bulundu; ayrıca "omuz" dendi. Kullanıcının sorusu: "Baş yana eğilince kulak–omuz mesafesi zaten azalmaz mı?" (aşağıdaki bulgu 2).
+- 7: az kaldırma bulundu; ayrıca "öne kaçma" dendi.
+- 8: dirsek bulundu; ayrıca "öne kaçma" dendi.
+- Görsel sorun: panel yazıları pikselli görünüyordu (aşağıda düzeltildi).
+- Kullanıcının panel ekran görüntüleri proje dışında (`Desktop/izleme/tekrar_4…8.png`); Claude Code inceledi.
+
+**Kullanıcının gözleminden çıkan iki bulgu** (Deney 3 tablosundan sayıldı, `sonuclar/deney3/cumleler.csv`, önden + çapraz; yöntem değişmez, Karar 18):
+1. **Öne kaçma, dirsek bükmeyle karışıyor.**
+   - Öne kaçma ölçütü `kol_boyu`, omuz–**bilek** mesafesidir. Dirsek bükülünce bu mesafe de kısalır ve kol "öne kaçmış" gibi görünür.
+   - Dirsek etiketli 137 tekrarın 64'ünde öne kaçma da söylendi. Bu tekrarların hiçbirinin ek hatalarında öne kaçma yok.
+   - Öne kaçmanın 2. hata olarak söylendiği 85 tekrarın yalnızca 6'sı gerçekten öne kaçma etiketli; 41'i dirsek, 13'ü az kaldırma, 11'i baş, 10'u omuz, 4'ü doğru.
+   - Öne kaçma toplam 189 kez söylendi (1. ya da 2.); 61'inde gerçek etiket öne kaçmaydı (`olcu.csv`).
+   - `GELECEK_CALISMA.md` madde 9.
+2. **Baş eğmesi omuz ölçütünü etkiliyor.**
+   - YENI, sağ kulak ile sağ omuz arasındaki dikey mesafedir. Baş sağa eğilince sağ kulak aşağı iner ve mesafe omuz hiç kalkmasa da küçülür.
+   - Baş etiketli 138 tekrarın 46'sında omuz da söylendi. Bunlardan bir kısmı gerçek olabilir: baş etiketli tekrarların 30'unun ek hatalarında omuz var. Honza tekrar 6'nın ek hatası yok.
+   - `GELECEK_CALISMA.md` madde 10.
+
+**Görsel düzeltme (yalnızca arayüz):**
+- Ekran 1920×1080, Windows ölçeklemesi %125 (DPI 120). Uygulama "DPI farkında" olmadığı için Windows ona ekranı 1536×864 gösteriyor ve pencereyi %125 büyüterek esnetiyordu; yazıların pikselli görünmesinin sebebi buydu.
+- `uygulama/main.py`'ye `dpi_farkinda()` eklendi (`SetProcessDpiAwareness(2)`, pencere açılmadan önce). Denetim: çağrıdan önce ekran 1536×864, sonra 1920×1080 görünüyor. Ölçüm ve karar etkilenmez.

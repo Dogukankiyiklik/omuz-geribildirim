@@ -210,12 +210,19 @@ python -m deneyler.deney4 elle-degerlendir
 - 3. adımın süresi: istekler arası 6 s ile en az ~25–30 dk (243 ağ isteği; yanıt süresi ekstra). Günlük sınır 300'ün altındaysa betik durur; ertesi gün aynı komut kaldığı yerden devam eder.
 
 ## Sonuçlar
-Pilot ve asıl deneyden sonra doldurulacak. Doldurulacaklar: modelin tam adı, kontrol tarihi, AI Studio'daki dakikalık ve günlük sınırlar, düşünme ayarının kabul edilip edilmediği, pilotta yapılan biçim düzeltmeleri (varsa, önce/sonra).
+### Model ve pilot (7 Kasım 2026, 14:24; Claude Code çalıştırdı)
+- **Model:** `gemini-2.5-flash`. `python -m deneyler.deney4 modeller` listesinde var ve kullanıcının anahtarı ona erişebiliyor. Karar 36'nın ilk tercihi kullanıldı; yedek kurala gerek kalmadı.
+- **Ayarlar:** temperature 0; `thinkingBudget = 0` API tarafından kabul edildi (bitiş nedeni `STOP`, yanıt süresi ~1 s).
+- **Sınırlar:** AI Studio'daki sayılar okunamadı. Kullanıcının bulduğu ikinci el bilgi (eski 1.5/2.0 Flash için 15 istek/dk, 1.500 istek/gün) doğrulanmadı. Deney `--rpm 10` ile (istekler arası 6 s) çalıştırılır; günlük sınıra takılırsa önbellekten devam edilir.
+- **Tekrarlanabilirlik notu:** 2.5 Flash'a gelen istekler 1 Aralık 2026'dan sonra `gemini-3.5-flash-lite`'a yönlendirilecek (Deprecations sayfası). Bu deneyin yanıtları `onbellek.jsonl`'de saklı. Aynı modelle yeniden istek atmak o tarihten sonra mümkün olmayabilir; sınırlılık olarak yazılır.
+- **Pilot:** 5 tekrar × B, C = 10 yanıt, 11 ağ isteği (1 istek geçici hatadan sonra 2. denemede geçti), 101,6 s (`sonuclar/deney4/pilot/bilgi.json`).
+- **Biçim denetimi:** 10 yanıtın hiçbirinde markdown, başlık, madde işareti, tırnak ya da İngilizce yok; hepsi düz Türkçe metin. **İstemlerde değişiklik yapılmadı**; pilottan önceki hâlleri (madde 3) geçerli.
+- İçerik pilotta raporlanmaz (Karar 36). Pilotun yanıtları ve tabloları `sonuclar/deney4/pilot/` altında, yalnızca kayıt için.
 
 ## Kabul ölçütü kontrolü
 - [x] Önceden belirlenenler ilk API isteğinden önce commit'lendi.
 - [x] Testler geçti: tam pytest `179 passed, 1 xfailed in 82.71s`.
-- [ ] Pilot (biçim) ve istemlerin commit'i.
+- [x] Pilot (biçim): düzeltme gerekmedi; istemler değişmeden commit'li.
 - [ ] Üç koşulun tablosu ve her koşuldan 5 örnek cümle.
 - [ ] Çıkarıcının bağımsız sınaması (45 cümle).
 

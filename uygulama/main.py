@@ -86,6 +86,22 @@ class Girdi:
         return e
 
 
+def dpi_farkinda():
+    """
+    Windows'ta ekran ölçeklemesi %100 değilse (ör. %125), DPI farkında olmayan bir pencereyi Windows büyüterek
+    esnetir ve yazılar bulanık/pikselli görünür. Süreç DPI farkında bildirilince pencere ekranın gerçek
+    pikselleriyle çizilir (yalnızca görüntü; ölçümleri etkilemez). Pencere açılmadan önce çağrılmalı.
+    """
+    try:
+        import ctypes
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)      # monitör başına DPI farkında (Windows 8.1+)
+        except (AttributeError, OSError):
+            ctypes.windll.user32.SetProcessDPIAware()           # eski Windows
+    except Exception:
+        pass
+
+
 def ekrana_sigdir(G: int, Y: int):
     """Pencerenin ilk boyutunu ekrana sığdır (pencere elle de büyütülüp küçültülebilir)."""
     try:
@@ -377,6 +393,7 @@ def main():
     if not args.profil:
         print(YARDIM.format(sure=f"{onay_suresi:.0f} sn içinde reddedilmezse" if onay_suresi else "Kabul (E) ile",
                             hedef=6))
+    dpi_farkinda()
     cv2.namedWindow(PENCERE, cv2.WINDOW_NORMAL)
     girdi = Girdi()
     with PozCikarici() as poz:

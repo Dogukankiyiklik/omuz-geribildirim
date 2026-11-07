@@ -1,0 +1,4 @@
+﻿koşul,tekrar,hatalı tekrar,doğru tekrar,katı: ilk söylenen = birincil /100,ilk iki: birincil söylendi /100,hatalılarda olumlu cümle /100,doğrularda gereksiz uyarı /100,sadakat: liste = girdi /100,sadakat: küme = girdi /100,eklenen hata /100,atlanan hata /100,sayı uydurdu /100,sayı içeren /100,"üslup: %, yüzde, gövde boy /100",üslup: 2'den fazla hata /100,ortalama kelime
+A,5,4,1,50.0,100.0,0.0,0.0,100.0,100.0,0.0,0.0,0.0,100.0,0.0,0.0,20.8
+B,5,4,1,50.0,100.0,0.0,0.0,80.0,80.0,20.0,0.0,20.0,80.0,0.0,20.0,19.0
+C,5,4,1,75.0,75.0,0.0,100.0,0.0,0.0,100.0,60.0,0.0,60.0,0.0,0.0,20.2

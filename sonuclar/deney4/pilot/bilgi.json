@@ -1,0 +1,13 @@
+{
+  "islem": "pilot",
+  "saglayici": "gemini",
+  "model": "gemini-2.5-flash",
+  "dusunme": 0,
+  "sicaklik": 0.0,
+  "yanit": 10,
+  "beklenen": 10,
+  "durum": "tamam",
+  "ag_istegi": 11,
+  "sure_s": 101.6,
+  "tarih": "2026-11-07 14:24"
+}

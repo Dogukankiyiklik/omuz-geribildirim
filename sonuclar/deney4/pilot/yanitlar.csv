@@ -1,0 +1,11 @@
+﻿orneklem_no,kosul,metin,bitis_nedeni,onbellekten,deneme,model,dusunme
+p1,B,Harika! Kolunu 135 dereceye kadar kaldırdın.,STOP,False,1,gemini-2.5-flash,0
+p1,C,Kolunu yeterince yukarı kaldırmadın. Kolunu en az 142 dereceye kadar kaldırmaya çalış. Dirseğini çok büktün. Kolunu daha düz tutmaya çalış.,STOP,False,1,gemini-2.5-flash,0
+p2,B,Sağ dirseğini kaldırırken çok büktün. Kolunu kaldırırken dirseğini daha düz tutmaya çalış. Ayrıca sağ kolunu kaldırırken biraz öne kaçırdın. Kolunu tam yandan yukarı kaldırmaya odaklan.,STOP,False,1,gemini-2.5-flash,0
+p2,C,Dirseğini çok büktün. Kolunu kaldırırken dirseğini düz tutmaya çalış. Kolunu yeterince kaldırmadın. Kolunu biraz daha yukarı kaldırmayı dene.,STOP,False,1,gemini-2.5-flash,0
+p3,B,"Sağ kolunu kaldırırken kolun biraz öne kaçtı. Kolunu tam yana doğru kaldırmaya dikkat et. Sağ dirseğini kaldırırken büktün. Dirseğini olabildiğince düz tutmaya çalış, 180 dereceye yakın olsun.",STOP,False,1,gemini-2.5-flash,0
+p3,C,Dirseğini biraz büküyorsun. Kolunu daha düz tutmaya çalış. Kolunu yeterince yukarı kaldırmıyorsun. Kolunu daha yükseğe kaldırmayı dene.,STOP,False,1,gemini-2.5-flash,0
+p4,B,"Sağ kolunu yeterince kaldırmadın. Kolunu en az 145 dereceye kadar kaldırmaya çalış. Ayrıca, başını sağa doğru eğdin. Başını dik tutmaya özen göster.",STOP,False,1,gemini-2.5-flash,0
+p4,C,Kolunu yeterince yukarı kaldırmadın. Kolunu en az 146 dereceye kadar kaldırmalısın. Dirseğini çok büktün. Kolunu daha düz tutmaya çalış.,STOP,False,2,gemini-2.5-flash,0
+p5,B,"Sağ kolunu yeterince kaldırmadın. Kolunu en az 175 dereceye kadar kaldırmalısın, sen 110 derecede kaldırdın.",STOP,False,1,gemini-2.5-flash,0
+p5,C,"Kolunu yeterince yukarı kaldırmadın. Kolunu en az 177 dereceye kadar kaldırmaya çalış. Ayrıca dirseğini biraz büktün. Kolunu daha düz tutmaya çalış, dirsek açın 180 dereceye yakın olsun.",STOP,False,1,gemini-2.5-flash,0

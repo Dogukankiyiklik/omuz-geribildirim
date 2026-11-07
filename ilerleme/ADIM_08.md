@@ -1,7 +1,7 @@
 # ADIM 08 — Deney 4: LLM ile kural tabanlı karşılaştırması
 
 **Tarih:** 2026-11-07 (altyapı; Güncelleme 09 ile tasarım ve kod)
-**Durum:** Tamamlandı (danışmanın değerlendirmesi bekleniyor): deney ve 45 cümlelik elle etiketleme bitti. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Model `gemini-3.5-flash-lite` (2.5 Flash günde 20 istek); pilot biçimden geçti, istemler değişmedi.
+**Durum:** Tamamlandı (Güncelleme 10 ile ✅; Karar 42 duyarlılık analizi de bitti, en sonda): deney ve 45 cümlelik elle etiketleme bitti. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Model `gemini-3.5-flash-lite` (2.5 Flash günde 20 istek); pilot biçimden geçti, istemler değişmedi.
 
 ## Önceden belirlenenler (Karar 36; ilk API isteğinden önce commit'lendi)
 Kaynak: `ilerleme/GUNCELLEME_09.md`, Karar 36. Kod bu tanımlarla yazıldı. Pilottan sonra yalnızca **biçim** düzeltmesi yapılabilir; içerik kuralları, metrikler ve örneklem değişmez.
@@ -437,3 +437,65 @@ Kaynak: `ilerleme/GUNCELLEME_10.md`, Karar 42. Bu bölüm ve kod, **etiketleme d
 - `python -m deneyler.deney4 kaldirma-degerlendir --sahte` (insan etiketi yerine çıkarıcının kendi kararı; çıktı `veri/ara/`): **342 cümle seçildi** (A 119, B 132, C 91); bütün farklar 0,0; düzeltilmiş değerler birincil tabloyla aynı (ilk iki 73 / 74 / 69, doğrularda gereksiz uyarı 8 / 18 / 16).
 
 **Zamanlama:** Adım 7'den sonra; kullanıcı dondurmadan önce istediği zaman etiketler (342 cümle; tahmini 25–35 dk). Dondurmaya kadar yapılmazsa yapılmamış olarak not edilir.
+
+## Ek: Güncelleme 10 — duyarlılık analizi sonuçları (7 Kas)
+
+### Basit anlatım
+Deney 4'te cümleleri bir "çıkarıcı" program okuyup hangi hatayı söylediklerini buluyordu. Bu programın hataları hep "kaldır" kelimesi geçen cümlelerdeydi. Bu yüzden kullanıcı "kaldır, kalk, yüksel, yukarı" geçen 342 cümlenin hepsini, hangi yöntemden geldiklerini bilmeden okudu. Her cümle için "kolun az kalktığını söylüyor mu?" sorusunu cevapladı. Sonra programın bu konudaki kararı kullanıcının kararıyla değiştirildi ve tablolar yeniden hesaplandı.
+
+**Sonuç:** B'nin (LLM yalnızca cümle yazıyor) "doğru tekrarda fazladan uyarı" sorunu tamamen çıkarıcının hatasıymış. Düzeltince B, kural tabanlı A ile birebir aynı çıkıyor. C'nin (LLM hatayı da kendisi buluyor) kötü sonuçları ise çıkarıcıdan gelmiyor; düzeltmeden sonra hiç değişmedi.
+
+### Etiketleme ve gözden geçirme
+- Kullanıcı 342 cümleyi körlemesine etiketledi: 118 "evet". Biçim denetimi: geçersiz değer yok. Üç cümleye not yazdı (sıra 60, 72, 243: "çelişki var gibi"; övgü ile düzeltme aynı cümlede).
+- Kullanıcı "gözden kaçan olabilir" dediği için Claude Code, **analizden önce** ve yalnızca cümle metnine bakarak (koşul, anahtar ve sonuç görülmeden) şüpheli 6 satırı kullanıcıya gösterdi. Kararı kullanıcı verdi:
+  - Boştan 1'e: sıra 8 ("…35 derece daha yukarı kaldır") ve 269 ("Kolunu yeterince yukarı kaldırmadın…").
+  - 1'den boşa: sıra 34 ve 340 ("…kolunu tamamen düz tutarak 175 dereceye ulaş"; 175° dirsek açısı).
+  - Boş kaldı (kullanıcının kararı): sıra 153 ve 258 ("…130/115 derece kaldırdın, gövde boyu daha yukarı kaldırmalısın").
+- Toplam "evet" yine 118 (iki ekleme, iki çıkarma). Kullanıcının ilk etiketleri ayrı commit'te (`Karar 42: kullanıcının ilk etiketleri`), düzeltilmiş hali sonraki commit'te.
+- **Önceden kayıttan sapma:** Önceden kayıtta bir gözden geçirme turu yoktu. Gözden geçirme metne dayandı ve analizden önce yapıldı; yine de ilk etiketlerle sonuç da aşağıda ayrıca verildi.
+
+### Sonuçlar (`python -m deneyler.deney4 kaldirma-degerlendir` çıktısından; `kaldirma_ozet.csv`, `kaldirma_uyum.csv`, `kaldirma_bootstrap.csv`)
+
+Çıkarıcı–insan "az kaldırma" uyumu:
+
+| koşul | seçilen cümle | ç evet / i evet | ç evet / i hayır | ç hayır / i evet | ç hayır / i hayır | insan hayır, çıkarıcı ilk sırada az kaldırma |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | 119 | 35 | 0 | 0 | 84 | 0 |
+| B | 132 | 31 | 11 | 2 | 88 | 6 |
+| C | 91 | 50 | 1 | 0 | 40 | 0 |
+
+Birincil ve düzeltilmiş (yalnızca sıradan bağımsız metrikler; katı yeniden hesaplanmadı):
+
+| metrik | A birincil → düzeltilmiş | B birincil → düzeltilmiş | C birincil → düzeltilmiş |
+| --- | --- | --- | --- |
+| ilk iki: birincil söylendi /100 | 73.00 → 73.00 | 74.00 → 73.00 | 69.00 → 69.00 |
+| hatalılarda olumlu cümle /100 | 15.00 → 15.00 | 14.00 → 15.00 | 22.00 → 22.00 |
+| doğrularda gereksiz uyarı /100 | 8.00 → 8.00 | **18.00 → 8.00** | 16.00 → 16.00 |
+| sadakat: küme = girdi /100 | 100.00 → 100.00 | 91.33 → 98.67 | 62.00 → 62.00 |
+| eklenen hata /100 | 0.00 → 0.00 | 6.67 → 0.00 | 32.67 → 32.67 |
+| atlanan hata /100 | 0.00 → 0.00 | 2.00 → 1.33 | 16.67 → 16.67 |
+
+Kişi bazlı bootstrap (2000, tohum 1), düzeltilmiş listelerle:
+
+| fark | metrik | nokta | GA %2,5 | GA %97,5 |
+| --- | --- | --- | --- | --- |
+| B − A | ilk iki | 0.00 | 0.00 | 0.00 |
+| B − A | hatalılarda olumlu | 0.00 | 0.00 | 0.00 |
+| B − A | doğrularda gereksiz uyarı | 0.00 | 0.00 | 0.00 |
+| B − A | sadakat (küme) | -1.33 | -2.67 | 0.00 |
+| B − A | eklenen hata | 0.00 | 0.00 | 0.00 |
+| B − A | atlanan hata | 1.33 | 0.00 | 2.67 |
+| C − A | ilk iki | -4.00 | -13.00 | 5.00 |
+| C − A | hatalılarda olumlu | 7.00 | 0.00 | 15.00 |
+| C − A | doğrularda gereksiz uyarı | 8.00 | 2.00 | 14.00 |
+| C − A | sadakat (küme) | -38.00 | -42.00 | -34.00 |
+| C − A | eklenen hata | 32.67 | 27.33 | 39.33 |
+| C − A | atlanan hata | 16.67 | 6.65 | 26.00 |
+
+**İlk etiketlerle (gözden geçirme öncesi; ek bilgi):** uyum A 34/1/0/84, B 31/11/4/86, C 49/2/0/40 (sıra yukarıdaki gibi); B doğrularda gereksiz uyarı 18 → 8, B − A 0.00 (GA 0.00 – 0.00); C − A doğrularda gereksiz uyarı 8.00 (GA 2.00 – 14.00), ilk iki −4.00 (GA −15.02 – 6.00). Yorum değişmiyor.
+
+### Yorum (Karar 41'in iddialarıyla)
+- **B:** Birincil tablodaki fazladan uyarı (18 / 100) çıkarıcı hatasıymış: insan etiketiyle 8 / 100, A ile aynı (B − A 0, GA 0 – 0). Uyumsuzlukların hepsi B'de toplanıyor (çıkarıcı evet / insan hayır 11, çıkarıcı hayır / insan evet 2). Bu, ADIM_08'deki tam okumada bulunan 13 çıkarıcı hatasıyla aynı sayı. "B kararı korur ama üstünlük getirmez" iddiası güçleniyor.
+- **C:** Hiçbir metrik değişmedi (C'de tek uyumsuzluk var). C'nin doğrularda fazladan uyarısı (+8, GA 2 – 14) ve yüksek "eklenen hata" çıkarıcıdan gelmiyor; LLM'in kendi kararı. Katı yeniden hesaplanmadı; ama "insan hayır, çıkarıcı ilk sırada az kaldırma" C'de 0, yani C'nin katı değeri (45) bu kalıptan etkilenmiyor. B'de bu sayı 6.
+- **Çıkarıcı:** A ve C cümlelerinde "az kaldırma" için insanla neredeyse tam uyumlu (A 119/119, C 90/91). B'nin serbest anlatımında ("gövde boyu daha yukarı kaldırmalısın" gibi) zayıf. Sözlük değiştirilmedi.
+- **Sınırlılık:** Tek etiketleyici; insan etiketi yalnızca "az kaldırma" için.

@@ -1,0 +1,19 @@
+﻿koşul,metrik,birincil,düzeltilmiş,fark
+A,ilk iki: birincil söylendi /100,73.0,73.0,0.0
+A,hatalılarda olumlu cümle /100,15.0,15.0,0.0
+A,doğrularda gereksiz uyarı /100,8.0,8.0,0.0
+A,sadakat: küme = girdi /100,100.0,100.0,0.0
+A,eklenen hata /100,0.0,0.0,0.0
+A,atlanan hata /100,0.0,0.0,0.0
+B,ilk iki: birincil söylendi /100,74.0,73.0,-1.0
+B,hatalılarda olumlu cümle /100,14.000000000000002,15.0,0.9999999999999982
+B,doğrularda gereksiz uyarı /100,18.0,8.0,-10.0
+B,sadakat: küme = girdi /100,91.33333333333333,98.66666666666667,7.333333333333343
+B,eklenen hata /100,6.666666666666667,0.0,-6.666666666666667
+B,atlanan hata /100,2.0,1.3333333333333335,-0.6666666666666665
+C,ilk iki: birincil söylendi /100,69.0,69.0,0.0
+C,hatalılarda olumlu cümle /100,22.0,22.0,0.0
+C,doğrularda gereksiz uyarı /100,16.0,16.0,0.0
+C,sadakat: küme = girdi /100,62.0,62.0,0.0
+C,eklenen hata /100,32.666666666666664,32.666666666666664,0.0
+C,atlanan hata /100,16.666666666666664,16.666666666666664,0.0

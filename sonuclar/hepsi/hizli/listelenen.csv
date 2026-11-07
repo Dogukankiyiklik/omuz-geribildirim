@@ -1,0 +1,12 @@
+﻿klasör,neden yeniden üretilmedi,var mı,dosya sayısı
+kendi_kayit,Adım 7 (video gerekir),False,0
+deney4,Adım 8 (API gerekir),True,7
+deney2_revize,"Karar 17: başarısız deneme, kayıtlı",True,42
+deney2_ilk,"Karar 13 öncesi ilk sürüm, kayıtlı",True,39
+deney1_v2_atla_rastgele,"Karar 7 öncesi, kayıtlı",True,11
+adim0,Adım 0 veri tanıtımı,True,3
+adim2b,Adım 2b senkron kontrolü,True,1
+gorsel_kontrol,görsel kontrol aracı çıktıları,True,5
+bant_genisligi,Güncelleme 08 tanısı,True,2
+uygulama_saglik,uygulama sağlık kontrolü (MediaPipe),True,3
+sunum,sunum şekil adayları (Karar 38),False,0

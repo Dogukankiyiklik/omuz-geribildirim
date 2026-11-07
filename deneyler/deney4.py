@@ -18,6 +18,9 @@ Kullanım (işlem sırası):
     python -m deneyler.deney4 raporla                   # ağ yok: kayıtlı yanıtlardan tabloları yeniden yazar
     python -m deneyler.deney4 elle-uret                 # 45 cümlelik körlemesine etiketleme dosyası
     python -m deneyler.deney4 elle-degerlendir          # kullanıcının etiketleri ile çıkarıcının uyumu
+    python -m deneyler.deney4 kaldirma-uret             # Karar 42: "kaldır" kalıplı bütün cümleler, körlemesine
+    python -m deneyler.deney4 kaldirma-degerlendir      # Karar 42: duyarlılık tablosu (birincil tablo değişmez)
+    python -m deneyler.deney4 kaldirma-degerlendir --sahte   # etiket yerine çıkarıcının kendisi: farklar 0 olmalı
 Çıktı: sonuclar/deney4/ (pilot: sonuclar/deney4/pilot/)
 """
 from __future__ import annotations
@@ -368,11 +371,14 @@ def tablolar(u: pd.DataFrame, bootstrap_n: int = 2000, tohum: int = TOHUM_BOOTST
     return T
 
 
-def bootstrap_farklari(u: pd.DataFrame, karsi: list[str], n: int, tohum: int) -> pd.DataFrame:
+def bootstrap_farklari(u: pd.DataFrame, karsi: list[str], n: int, tohum: int,
+                       metrikler: list[str] | None = None) -> pd.DataFrame:
     """Kişi bazlı bootstrap: koşul − A eşleştirilmiş farkları (aynı tekrarlar, aynı yeniden örnekleme)."""
+    metrikler = METRIKLER if metrikler is None else metrikler
+
     def ist(b):
         m = {k: metrik_satiri(b[b.kosul == k]) for k in ["A"] + karsi}
-        return {f"{k} − A|{a}": m[k][a] - m["A"][a] for k in karsi for a in METRIKLER}
+        return {f"{k} − A|{a}": m[k][a] - m["A"][a] for k in karsi for a in metrikler}
     nokta = ist(u)
     bs = kisi_bootstrap(u, ist, n=n, tohum=tohum)
     satir = []
@@ -478,6 +484,142 @@ def elle_degerlendir(klasor: Path) -> dict[str, pd.DataFrame]:
     return {"elle_uyum": oz, "elle_uyusmayan": m[~m.uyum][["sira", "kosul", "cumle", "kullanici", "cikarilan", "not"]]}
 
 
+# ---------------------------------------------------------------- duyarlılık analizi: "az kaldırma" (Güncelleme 10, Karar 42)
+# Önceden kayıt: ADIM_08 "Ek: Güncelleme 10". Seçim yalnızca metne dayanır; birincil tablo ve sözlük değişmez.
+KALDIRMA_DESENI = re.compile(r"kald|kalk|yüks|yukarı", re.IGNORECASE)
+KALDIRMA = "ERR_LOW_ABDUCTION"
+TOHUM_KALDIRMA = 3
+KALDIRMA_DOSYA, KALDIRMA_ANAHTAR = "elle_kaldirma.xlsx", "elle_kaldirma_anahtar.csv"
+# sıradan bağımsız metrikler (katı yeniden hesaplanmaz: sıra insan etiketinden çıkmaz)
+KALDIRMA_METRIKLERI = ["ilk iki: birincil söylendi /100", "hatalılarda olumlu cümle /100",
+                       "doğrularda gereksiz uyarı /100", "sadakat: küme = girdi /100", "eklenen hata /100",
+                       "atlanan hata /100"]
+KALDIRMA_TALIMAT = [
+    "Her satırda bir geri bildirim cümlesi var. Hangi tekrara ya da hangi yönteme ait olduğu gizli.",
+    "",
+    "TEK SORU: Bu cümle, kolun YETERİNCE KALDIRILMADIĞINI / DAHA YUKARI KALDIRILMASI GEREKTİĞİNİ bir hata olarak "
+    "söylüyor mu?",
+    "   Evet ise 'az_kaldirma' sütununa 1 yaz. Hayır ise boş bırak.",
+    "",
+    "NOT: Doğru tekrarı öven 'kolunu 145 dereceye kaldırdın' gibi cümleler HAYIR.",
+    "NOT: Başka bir hatanın düzeltmesi içinde geçen 'kolunu yana kaldır' gibi ifadeler de, kolun az kalktığını "
+    "söylemiyorsa HAYIR.",
+    "",
+    "Yalnızca cümleye bak; videoyu ya da başka bir dosyayı açma. İstersen 'not' sütununa kısa bir not yazabilirsin.",
+    "'etiket' sayfasını doldur, dosyayı aynı adla kaydet.",
+]
+
+
+def kaldirma_secimi(u: pd.DataFrame, tohum: int = TOHUM_KALDIRMA) -> pd.DataFrame:
+    """Deseni içeren bütün cümleler (üç koşul), karışık sırayla (tohumlu)."""
+    s = u[u.metin.astype(str).map(lambda m: bool(KALDIRMA_DESENI.search(m)))]
+    s = s.sort_values(["orneklem_no", "kosul"]).reset_index(drop=True)
+    s = s.iloc[np.random.default_rng(tohum).permutation(len(s))].reset_index(drop=True)
+    s.insert(0, "sira", range(1, len(s) + 1))
+    return s
+
+
+def kaldirma_uret(u: pd.DataFrame, klasor: Path) -> tuple[Path, int]:
+    klasor = Path(klasor)
+    yol, anahtar = klasor / KALDIRMA_DOSYA, klasor / KALDIRMA_ANAHTAR
+    for p in (yol, anahtar):
+        if p.exists():
+            raise SystemExit(f"{p} zaten var; üzerine yazılmaz (kullanıcının etiketleri olabilir).")
+    s = kaldirma_secimi(u)
+    form = s[["sira", "metin"]].rename(columns={"metin": "cumle"})
+    form["az_kaldirma"] = ""
+    form["not"] = ""
+    from openpyxl.styles import Alignment, Font
+    with pd.ExcelWriter(yol) as yazici:
+        pd.DataFrame({"talimat": KALDIRMA_TALIMAT}).to_excel(yazici, sheet_name="talimat", index=False)
+        form.to_excel(yazici, sheet_name="etiket", index=False)
+        t = yazici.sheets["talimat"]
+        t.column_dimensions["A"].width = 120
+        for satir in t.iter_rows(min_row=2):
+            satir[0].alignment = Alignment(wrap_text=True, vertical="top")
+            satir[0].font = Font(size=12)
+        sh = yazici.sheets["etiket"]
+        for sutun, gen in zip("ABCD", (6, 95, 12, 30)):
+            sh.column_dimensions[sutun].width = gen
+        for satir in sh.iter_rows(min_row=2):
+            satir[1].alignment = Alignment(wrap_text=True, vertical="top")
+        sh.freeze_panes = "C2"
+    s[["sira", "orneklem_no", "kosul", "cikarilan"]].to_csv(anahtar, index=False, encoding="utf-8-sig")
+    return yol, len(s)
+
+
+def kaldirma_etiketleri(klasor: Path) -> pd.DataFrame:
+    """Kullanıcının dosyası + anahtar → sira, orneklem_no, kosul, cikarilan, insan (bool), not."""
+    f = pd.read_excel(Path(klasor) / KALDIRMA_DOSYA, sheet_name="etiket", dtype=str).fillna("")
+    f["sira"] = f["sira"].astype(str).str.replace(r"\.0$", "", regex=True)
+    deger = f["az_kaldirma"].astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
+    hatali = f[~deger.isin(["", "0", "1"])]
+    if len(hatali):
+        raise SystemExit(f"'az_kaldirma' yalnızca 1 ya da boş olabilir; sorunlu sıralar: {list(hatali.sira)}")
+    f["insan"] = deger == "1"
+    a = pd.read_csv(Path(klasor) / KALDIRMA_ANAHTAR, encoding="utf-8-sig", keep_default_na=False, dtype=str)
+    m = a.merge(f[["sira", "cumle", "insan", "not"]], on="sira", how="left", validate="1:1")
+    if m.insan.isna().any():
+        raise SystemExit("Etiket dosyasında anahtardaki bazı sıralar yok; dosyanın satırları silinmiş olabilir.")
+    m["orneklem_no"] = m.orneklem_no.astype(int)
+    m["insan"] = m.insan.astype(bool)
+    return m
+
+
+def kaldirma_duzelt(u: pd.DataFrame, etiket: pd.DataFrame) -> pd.DataFrame:
+    """Seçilen cümlelerde çıkarıcının 'az kaldırma' varlığı insan etiketiyle değiştirilir; diğer türler aynen kalır.
+    Çıkarıcı da insan da evet diyorsa liste değişmez; yalnızca insan evet diyorsa sona eklenir."""
+    d = u.copy()
+    d["orneklem_no"] = d.orneklem_no.astype(int)
+    insan = {(int(r.orneklem_no), r.kosul): bool(r.insan) for r in etiket.itertuples()}
+    yeni = []
+    for r in d.itertuples():
+        l = _liste(r.cikarilan)
+        e = insan.get((r.orneklem_no, r.kosul))
+        if e is not None:
+            if not e:
+                l = [h for h in l if h != KALDIRMA]
+            elif KALDIRMA not in l:
+                l = l + [KALDIRMA]
+        yeni.append("|".join(l))
+    d["cikarilan"] = yeni
+    return d
+
+
+def kaldirma_degerlendir(u: pd.DataFrame, etiket: pd.DataFrame, bootstrap_n: int = 2000,
+                         tohum: int = TOHUM_BOOTSTRAP) -> dict[str, pd.DataFrame]:
+    d = kaldirma_duzelt(u, etiket)
+    kosullar = [k for k in KOSULLAR if k in set(u.kosul)]
+    satir = []
+    for k in kosullar:
+        b, c = metrik_satiri(u[u.kosul == k]), metrik_satiri(d[d.kosul == k])
+        for a in KALDIRMA_METRIKLERI:
+            satir.append({"koşul": k, "metrik": a, "birincil": b[a], "düzeltilmiş": c[a], "fark": c[a] - b[a]})
+    ozet = pd.DataFrame(satir)
+
+    e = etiket.copy()
+    e["cikarici"] = e.cikarilan.map(lambda x: KALDIRMA in _liste(x))
+    e["cikarici_ilk"] = e.cikarilan.map(lambda x: (_liste(x) or [""])[0] == KALDIRMA)
+    uyum = pd.DataFrame([{
+        "koşul": k, "seçilen cümle": int((e.kosul == k).sum()),
+        "çıkarıcı evet / insan evet": int((g.cikarici & g.insan).sum()),
+        "çıkarıcı evet / insan hayır": int((g.cikarici & ~g.insan).sum()),
+        "çıkarıcı hayır / insan evet": int((~g.cikarici & g.insan).sum()),
+        "çıkarıcı hayır / insan hayır": int((~g.cikarici & ~g.insan).sum()),
+        "insan hayır, çıkarıcı ilk sırada az kaldırma": int((g.cikarici_ilk & ~g.insan).sum()),
+    } for k in kosullar for g in [e[e.kosul == k]]])
+
+    T = {"kaldirma_ozet": ozet, "kaldirma_uyum": uyum}
+    if bootstrap_n and {"A"} < set(kosullar):
+        T["kaldirma_bootstrap"] = bootstrap_farklari(d, [k for k in kosullar if k != "A"], bootstrap_n, tohum,
+                                                     metrikler=KALDIRMA_METRIKLERI)
+    sec = e.merge(d[["orneklem_no", "kosul", "cikarilan"]].rename(columns={"cikarilan": "duzeltilmis"}),
+                  on=["orneklem_no", "kosul"], how="left")
+    T["kaldirma_cumleler"] = sec[["sira", "orneklem_no", "kosul", "cumle", "insan", "cikarici", "cikarilan",
+                                  "duzeltilmis", "not"]]
+    return T
+
+
 # ---------------------------------------------------------------- komutlar
 def _istemci(saglayici: str, onbellek_yolu, rpm: float) -> llm.LLMIstemcisi:
     if saglayici == "sahte":
@@ -507,7 +649,7 @@ def raporla(girdiler: pd.DataFrame, yanitlar: pd.DataFrame, klasor: Path, bootst
 def main():
     ap = argparse.ArgumentParser(description="Deney 4: LLM ile kural tabanlı geri bildirim")
     ap.add_argument("islem", choices=["hazirla", "modeller", "pilot", "calistir", "raporla", "elle-uret",
-                                      "elle-degerlendir"])
+                                      "elle-degerlendir", "kaldirma-uret", "kaldirma-degerlendir"])
     ap.add_argument("--model", default=VARSAYILAN_MODEL)
     ap.add_argument("--dusunme", default="otomatik",
                     help="otomatik (2.5'te bütçe 0, diğerlerinde varsayılan) | varsayilan | sayı (bütçe) | düzey adı")
@@ -515,6 +657,9 @@ def main():
     ap.add_argument("--rpm", type=float, default=10.0, help="dakikadaki en fazla istek (bekleme = 60/rpm s)")
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--cikti", default=str(CIKTI))
+    ap.add_argument("--sahte", action="store_true",
+                    help="kaldirma-degerlendir: insan etiketi yerine çıkarıcının kendi kararı (boru hattı denemesi; "
+                         "sonuclar/'a yazılmaz)")
     args = ap.parse_args()
     utf8_cikti()
     klasor = Path(args.cikti)
@@ -586,6 +731,38 @@ def main():
         print(T["elle_uyum"].to_string(index=False))
         print("\nUyuşmayanlar:")
         print(T["elle_uyusmayan"].to_string(index=False))
+        return
+
+    if args.islem == "kaldirma-uret":
+        u = pd.read_csv(klasor / "cumleler.csv", encoding="utf-8-sig", keep_default_na=False)
+        yol, n = kaldirma_uret(u, klasor)
+        print(f"Etiketleme dosyası: {yol} ({n} cümle). Anahtar: {klasor / KALDIRMA_ANAHTAR} (açma).")
+        return
+
+    if args.islem == "kaldirma-degerlendir":
+        u = pd.read_csv(klasor / "cumleler.csv", encoding="utf-8-sig", keep_default_na=False)
+        if args.sahte:                     # çıkarıcının kendi kararı etiket yerine: düzeltilmiş = birincil olmalı
+            e = kaldirma_secimi(u)[["sira", "orneklem_no", "kosul", "cikarilan", "metin"]].rename(
+                columns={"metin": "cumle"})
+            e["insan"] = e.cikarilan.map(lambda x: KALDIRMA in _liste(x))
+            e["not"] = ""
+            hedef = Path(veri.KOK / "veri" / "ara" / "deney4_kaldirma_sahte")
+        else:
+            e = kaldirma_etiketleri(klasor)
+            hedef = klasor
+        T = kaldirma_degerlendir(u, e, args.bootstrap)
+        sonuclari_yaz(T, hedef, xlsx_adi="kaldirma_sonuclar.xlsx")
+        pd.set_option("display.width", 250)
+        print(f"Seçilen cümle: {len(e)} · insanın 'evet' dediği: {int(e.insan.sum())}"
+              + ("  [SAHTE: etiket = çıkarıcı]" if args.sahte else ""))
+        print("\nUyum (koşul başına):")
+        print(T["kaldirma_uyum"].to_string(index=False))
+        print("\nBirincil ve düzeltilmiş metrikler:")
+        print(T["kaldirma_ozet"].round(2).to_string(index=False))
+        if "kaldirma_bootstrap" in T:
+            print("\nKişi bazlı bootstrap, düzeltilmiş (koşul − A):")
+            print(T["kaldirma_bootstrap"].round(2).to_string(index=False))
+        print(f"\nÇıktı: {hedef}")
 
 
 if __name__ == "__main__":

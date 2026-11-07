@@ -203,3 +203,74 @@ def test_uslup_yuzde_bu_yuzden_sayilmaz():
     for m, beklenen in [("Bu yüzden kolunu düz tut.", False), ("Kolun yüzde 20 kısa.", True), ("%20 kısa", True),
                         ("Yüzdesi düştü.", True), ("Kolunu gövde boyu hizasında tut.", True), ("Böyle devam et.", False)]:
         assert bool(d4._USLUP.search(m)) == beklenen, m
+
+
+# ---------------------------------------------------------------- Karar 42: "az kaldırma" duyarlılık analizi
+def _kaldirma_uzun():
+    u = _uzun()
+    u["sistem_hatalari"] = u.hata.where(u.hata != ht.DOGRU, "")
+    u["sayi_uydurdu"], u["sayi_var"], u["uslup_yuzde"], u["kelime"] = False, False, False, 5
+    kalip = ["Kolunu daha yukarı kaldır.", "Omzun kalktı.", "Kolunu yükselt.", "Dirseğini düz tut.", "Böyle devam."]
+    u["metin"] = [kalip[i % len(kalip)] + f" ({i})" for i in range(len(u))]
+    u["cikarilan"] = [KALDIRMA if i % 5 == 0 else ("" if h == ht.DOGRU else h) for i, h in enumerate(u.hata)]
+    return u
+
+
+def test_kaldirma_secimi_yalniz_metne_dayanir_ve_tohumlu():
+    u = _kaldirma_uzun()
+    s = d4.kaldirma_secimi(u)
+    beklenen = u.metin.str.contains(r"kald|kalk|yüks|yukarı", case=False, regex=True)
+    assert len(s) == int(beklenen.sum()) and set(s.metin) == set(u.metin[beklenen])
+    assert "Dirseğini" not in " ".join(s.metin) and "Böyle devam" not in " ".join(s.metin)
+    assert d4.KALDIRMA_DESENI.search("YUKARI kaldır") and d4.KALDIRMA_DESENI.search("Kalk")
+    assert list(s.sira) == list(range(1, len(s) + 1))
+    assert (d4.kaldirma_secimi(u).metin == s.metin).all()          # tohumlu, tekrarlanabilir
+    assert not (s.orneklem_no.diff().dropna() >= 0).all()           # karışık sıra
+
+
+def test_kaldirma_duzelt_yalniz_az_kaldirmayi_degistirir():
+    u = pd.DataFrame({"orneklem_no": [1, 1, 2, 3], "kosul": ["A", "B", "B", "C"],
+                      "cikarilan": [f"{KALDIRMA}|{OMUZ}", OMUZ, f"{BAS}|{KALDIRMA}", DIRSEK]})
+    e = pd.DataFrame({"orneklem_no": [1, 1, 2], "kosul": ["A", "B", "B"], "insan": [False, True, True]})
+    d = d4.kaldirma_duzelt(u, e)
+    assert list(d.cikarilan) == [OMUZ, f"{OMUZ}|{KALDIRMA}", f"{BAS}|{KALDIRMA}", DIRSEK]
+
+
+def test_kaldirma_uret_degerlendir(tmp_path):
+    u = _kaldirma_uzun()
+    yol, n = d4.kaldirma_uret(u, tmp_path)
+    with pytest.raises(SystemExit):
+        d4.kaldirma_uret(u, tmp_path)                                # üzerine yazmaz
+    f = pd.read_excel(yol, sheet_name="etiket", dtype=str).fillna("")
+    assert list(f.columns) == ["sira", "cumle", "az_kaldirma", "not"] and len(f) == n   # körlemesine
+    assert "talimat" in pd.ExcelFile(yol).sheet_names
+    a = pd.read_csv(tmp_path / d4.KALDIRMA_ANAHTAR, encoding="utf-8-sig", keep_default_na=False, dtype=str)
+
+    # 1) insan = çıkarıcı → düzeltilmiş = birincil, uyum köşegende
+    evet = a.set_index("sira").cikarilan.map(lambda x: KALDIRMA in x.split("|"))
+    f["az_kaldirma"] = f.sira.map(lambda s: "1" if evet[s] else "")
+    f.to_excel(yol, sheet_name="etiket", index=False)
+    T = d4.kaldirma_degerlendir(u, d4.kaldirma_etiketleri(tmp_path), bootstrap_n=50)
+    assert (T["kaldirma_ozet"].fark.abs() < 1e-12).all()
+    U = T["kaldirma_uyum"]
+    assert (U["çıkarıcı evet / insan hayır"] == 0).all() and (U["çıkarıcı hayır / insan evet"] == 0).all()
+    assert U["seçilen cümle"].sum() == n
+    assert set(T["kaldirma_bootstrap"].metrik) == set(d4.KALDIRMA_METRIKLERI)
+
+    # 2) insan hepsine hayır → az kaldırma hiç kalmaz; ilk sıradaki sayılır
+    f["az_kaldirma"] = ""
+    f.to_excel(yol, sheet_name="etiket", index=False)
+    e = d4.kaldirma_etiketleri(tmp_path)
+    T = d4.kaldirma_degerlendir(u, e, bootstrap_n=0)
+    d = d4.kaldirma_duzelt(u, e)
+    secilen = set(zip(e.orneklem_no, e.kosul))
+    assert all(KALDIRMA not in c for c, k in zip(d.cikarilan, zip(d.orneklem_no, d.kosul)) if k in secilen)
+    ilk = sum(1 for r in a.itertuples() if r.cikarilan.split("|")[0] == KALDIRMA)
+    assert T["kaldirma_uyum"]["insan hayır, çıkarıcı ilk sırada az kaldırma"].sum() == ilk > 0
+    assert "kaldirma_bootstrap" not in T
+
+    # 3) geçersiz değer reddedilir
+    f.loc[0, "az_kaldirma"] = "evet"
+    f.to_excel(yol, sheet_name="etiket", index=False)
+    with pytest.raises(SystemExit):
+        d4.kaldirma_etiketleri(tmp_path)

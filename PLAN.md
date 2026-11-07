@@ -26,16 +26,16 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 | ✅ |
 | 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 | ✅ |
 | 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ✅ |
-| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 (çekim bekleniyor) |
-| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | 🔄 (tasarım Karar 36) |
-| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ |
-| 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⏳ |
-| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | ⏳ |
+| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 (çekim bekleniyor; video gelince her şeyden önce, Karar 46) |
+| 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ✅ (Güncelleme 10; Karar 42 duyarlılık etiketlemesi kullanıcıda) |
+| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ (yalnızca süre tahmini, Karar 45; karar Güncelleme 11) |
+| 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⛔ yapılmaz (Karar 45; gelecek çalışma) |
+| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | 🔄 (hazırlık tamam; dondurma 13 Kas) |
 | — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu | ⏳ |
 | — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
 | — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |
 
-Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35. Güncelleme 09: Deney 4 tasarımı, Adım 9 hazırlığı, sunum şekilleri; videoya bağlı değil). Ana tablodaki Adım 0–4 de tamamlandı.
+Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı · ⛔ yapılmayacak (Güncelleme 10: Adım 8 ✅, Adım 7 çekim bekleniyor, Adım 9 hazırlık tamam, Adım 10 ⛔. 7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35. Güncelleme 09: Deney 4 tasarımı, Adım 9 hazırlığı, sunum şekilleri; videoya bağlı değil). Ana tablodaki Adım 0–4 de tamamlandı.
 
 Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 
@@ -450,6 +450,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 
 **Kabul ölçütü:** YENI ile siluet ölçütünün AUC karşılaştırması ve görsel kontrol aracında siluet sınırının çizildiği 3 örnek video. Sonuç olumsuz çıksa da raporlanır.
 
+**Güncelleme 10** (Karar 45): Yalnızca **süre tahmini**: segmentasyon maskesi (`output_segmentation_masks=True`) Ex1'in 3 videosunda ölçülür; önden + çapraz için toplam süre ve disk tahmini ADIM_09'un sonunda. Ölçüt ya da deney yazılmaz; girip girmemeye danışman Adım 7 ile birlikte karar verir.
+
 ---
 
 ## Adım 8 — Deney 4: LLM ile kural tabanlı karşılaştırması 📤 (bildiri katmanı)
@@ -485,6 +487,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 - Gemini ücretsiz (tercih `gemini-2.5-flash`), temperature 0, düşünme 0, koşul başına tek istek (300 istek). Önce örneklem dışı 5 tekrarlık pilot (yalnızca biçim düzeltmesi), sonra istemler commit'lenir, sonra 150'lik deney (kullanıcı çalıştırır).
 - Ek metrikler: B sadakati (eşit / eklenen / atlanan), sayı uydurma (izinli küme), üslup ihlali, uzunluk; B − A ve C − A kişi bazlı bootstrap. Çıkarıcının bağımsız sınaması: 45 cümleyi kullanıcı körlemesine etiketler; sözlük değiştirilmez.
 
+**Güncelleme 10** (Karar 41–42): Adım 8 ✅. Model raporda: "Ücretsiz katmanın günlük sınırı nedeniyle gemini-3.5-flash-lite; düşünme ayarı varsayılan." İddia kapsamı Karar 41'de. Duyarlılık analizi (Karar 42): `kald|kalk|yüks|yukarı` içeren bütün cümleler körlemesine "az kaldırma" için etiketlenir (`sonuclar/deney4/elle_kaldirma.xlsx`); yalnızca sıradan bağımsız metrikler yeniden hesaplanır, birincil tablo ve sözlük değişmez (`python -m deneyler.deney4 kaldirma-uret` / `kaldirma-degerlendir`).
+
 ---
 
 ## Adım 9 — Sonuçları dondurma 📤
@@ -500,14 +504,18 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 
 **Güncelleme 09** (Karar 37–39): Hazırlık şimdi, dondurma 13 Kas akşamı. `deneyler/hepsi.py` bütün deneyleri sırayla temiz klasörde üretir ve kayıtlı sonuçlarla karşılaştırır (Adım 7 ve 8 yalnızca listelenir; tam çalıştırma kullanıcıda, `--hizli` alt kümesi denenir). Taslak belgeler (`TASLAK` başlıklı): `docs/YENIDEN_KURULUM.md`, `docs/LLM_KULLANIMI.md`, `docs/SURUMLER.md`. Sunum şekil adayları `deneyler/sunum_sekilleri.py` → `sonuclar/sunum/` (kayıtlı sonuçlardan) + veri setinden demo yedeği. 6b ve 10 başlatılmaz (Karar 39).
 
+**Güncelleme 10** (Karar 43–46): Depo ve gizli bilgi denetimi, kök `README.md` (bulgular ADIM_09'da); sunum şekillerinde yalnızca görsel düzeltme (3_kalibrasyon yazısı, 1 ve 3'e "önden + çapraz" altyazısı). Sıra: Adım 7 → Karar 42 etiketlemesi → danışmanın 6b kararı → 13 Kas dondurma.
+
 ---
 
-## Adım 10 — (Yetişirse) REHAB24-6 doğrulaması
+## Adım 10 — (Yetişirse) REHAB24-6 doğrulaması ⛔
 
 REHAB24-6 (M34): 10 kişi, Ex1 kol abdüksiyonu, yalnızca doğru/yanlış etiketi var. Adımlar:
 1. Kullanıcı Zenodo'dan MediaPipe çıktılarını veya videoları indirir.
 2. Yanlış Ex1 tekrarlarını izleyip omuz silkmesi olanları **elle etiketler**. Bunun için bir etiketleme betiği yazılır: tekrarı oynatır, kullanıcı tuşla etiket girer.
 3. Deney 1 ve Deney 2 burada, ayar yapılmadan çalıştırılır: "Hiç görmediği 10 kişide de çalışıyor mu?"
+
+**Güncelleme 10** (Karar 45): ⛔ **Yapılmaz.** Veri setinde yalnızca doğru/yanlış etiketi var; omuz silkmesi için saatlerce elle etiket gerekir, takvime sığmaz. `docs/GELECEK_CALISMA.md`'de "başka bir veri setinde, görülmemiş kişilerde doğrulama" maddesi.
 
 ## Adım 11 — Ex7 genellemesi → Adım 4b'ye taşındı
 

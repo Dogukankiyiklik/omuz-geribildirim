@@ -408,3 +408,32 @@ C'de eklenen hata sınıflara göre 35–55/100; en yüksek az kaldırmada (55).
 - ~~İstem metinleri, girdi biçimi ve model~~ → Karar 36 (yukarıda).
 - Ollama için yerel model seçimi ve Türkçe kalitesi henüz denenmedi.
 - Kullanıcı Google AI Studio'dan ücretsiz bir `GEMINI_API_KEY` alacak (Karar 35).
+
+## Ek: Güncelleme 10 — duyarlılık analizi (önceden kayıt)
+Kaynak: `ilerleme/GUNCELLEME_10.md`, Karar 42. Bu bölüm ve kod, **etiketleme dosyası üretilmeden önce** commit'lendi. Etiketler görüldükten sonra seçim, soru ve analiz değişmez.
+
+**Neden:** Çıkarıcının bilinen hatalarının hepsi "kaldır" kalıbında (B'nin tam okumasında 150'de 13). Bu kalıp C'nin düşük katı değerini ve B'nin fazladan uyarısını etkiliyor olabilir. Birincil sonuç (yukarıdaki tablolar) değişmez; yanına bir duyarlılık tablosu konur.
+
+**Seçim (yalnızca metne dayanır):** `sonuclar/deney4/cumleler.csv`'deki 450 cümleden (A, B, C × 150), `kald|kalk|yüks|yukarı` düzenli ifadesine (büyük/küçük harf duyarsız) uyan **bütün** cümleler. Koşula ya da sonuca bakılmaz. Seçim kodu `deneyler/deney4.py`, `kaldirma_secimi`.
+
+**Etiketleme:**
+- Cümleler karışık sırayla (tohum 3), koşul ve gerçek etiket gizli olarak `sonuclar/deney4/elle_kaldirma.xlsx` dosyasına yazılır: `talimat` ve `etiket` sayfaları; sütunlar `sira`, `cumle`, `az_kaldirma`, `not`.
+- Tek soru: "Bu cümle, kolun **yeterince kaldırılmadığını / daha yukarı kaldırılması gerektiğini** bir hata olarak söylüyor mu? (1 = evet, boş = hayır)."
+- Talimattaki not: "Doğru tekrarı öven 'kolunu 145 dereceye kaldırdın' gibi cümleler hayır. Başka bir hatanın düzeltmesi içinde geçen 'kolunu yana kaldır' gibi ifadeler de, kolun az kalktığını söylemiyorsa hayır."
+- Anahtar ayrı dosyada (`elle_kaldirma_anahtar.csv`: sıra, örneklem no, koşul, çıkarıcının listesi); kullanıcı açmaz. 1 ve boş dışındaki değerler reddedilir (0 da "hayır" sayılır).
+
+**Analiz** (`python -m deneyler.deney4 kaldirma-degerlendir`):
+- Seçilen her cümlede çıkarıcının listesindeki "az kaldırma" varlığı insan etiketiyle değiştirilir; diğer hata türleri çıkarıcıdan kalır. İkisi de "evet" ise liste aynen kalır; yalnızca insan "evet" diyorsa "az kaldırma" listenin sonuna eklenir; yalnızca çıkarıcı "evet" diyorsa listeden çıkarılır. Seçilmeyen cümlelerde çıkarıcının listesi aynen kullanılır.
+- Bu düzeltilmiş listelerle **sıradan bağımsız** metrikler koşul başına yeniden hesaplanır: ilk iki, hatalılarda olumlu cümle, doğrularda gereksiz uyarı, sadakat (küme), eklenen hata, atlanan hata. Birincil değer, düzeltilmiş değer ve fark yan yana (`kaldirma_ozet.csv`).
+- **Katı yeniden hesaplanmaz** (sıra insan etiketinden çıkmaz). Yalnızca insanın "hayır" dediği ve çıkarıcının **ilk sırada** "az kaldırma" bulduğu cümlelerin sayısı koşul başına raporlanır.
+- Çıkarıcı–insan "az kaldırma" uyumu koşul başına: evet/evet, evet/hayır, hayır/evet, hayır/hayır (`kaldirma_uyum.csv`).
+- Bootstrap: Deney 4 ile aynı (kişi bazlı, 2000 tekrar, tohum 1), düzeltilmiş listelerle B − A ve C − A, yukarıdaki 6 metrik (`kaldirma_bootstrap.csv`).
+- Çıktılar `sonuclar/deney4/kaldirma_*.csv` ve `kaldirma_sonuclar.xlsx`; birincil dosyalar (`ozet.csv`, `bootstrap.csv`, `cumleler.csv`, `sonuclar.xlsx`) yazılmaz.
+
+**Raporlama:** Birincil tablo değişmez; duyarlılık tablosu yanına konur. Sonuç ne olursa olsun yazılır; çıkarıcının sözlüğü yine **değiştirilmez**.
+
+**Kodun sınaması (etiket görülmeden):**
+- `testler/test_deney4.py`: seçimin yalnızca metne dayanması ve tohumlu olması, düzeltmenin yalnızca "az kaldırma"yı değiştirmesi, dosyanın körlemesine olması ve üzerine yazılmaması, insan = çıkarıcı iken farkların 0 olması, hepsi "hayır" iken ilk sıra sayımı, geçersiz değerin reddi.
+- `python -m deneyler.deney4 kaldirma-degerlendir --sahte` (insan etiketi yerine çıkarıcının kendi kararı; çıktı `veri/ara/`): **342 cümle seçildi** (A 119, B 132, C 91); bütün farklar 0,0; düzeltilmiş değerler birincil tabloyla aynı (ilk iki 73 / 74 / 69, doğrularda gereksiz uyarı 8 / 18 / 16).
+
+**Zamanlama:** Adım 7'den sonra; kullanıcı dondurmadan önce istediği zaman etiketler (342 cümle; tahmini 25–35 dk). Dondurmaya kadar yapılmazsa yapılmamış olarak not edilir.

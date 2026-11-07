@@ -1,7 +1,7 @@
 # ADIM 08 — Deney 4: LLM ile kural tabanlı karşılaştırması
 
 **Tarih:** 2026-11-07 (altyapı; Güncelleme 09 ile tasarım ve kod)
-**Durum:** Kısmen: deney tamam (Sonuçlar), yalnızca 45 cümlelik elle etiketleme bekleniyor. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Kod, istemler ve ağsız testler hazır. **Bekleniyor:** kullanıcının `GEMINI_API_KEY`'i kurması → pilot → (gerekirse yalnızca biçim düzeltmesi) → 150'lik deney (kullanıcı çalıştırır) → 45 cümlelik elle etiketleme (kullanıcı).
+**Durum:** Tamamlandı (danışmanın değerlendirmesi bekleniyor): deney ve 45 cümlelik elle etiketleme bitti. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Kod, istemler ve ağsız testler hazır. **Bekleniyor:** kullanıcının `GEMINI_API_KEY`'i kurması → pilot → (gerekirse yalnızca biçim düzeltmesi) → 150'lik deney (kullanıcı çalıştırır) → 45 cümlelik elle etiketleme (kullanıcı).
 
 ## Önceden belirlenenler (Karar 36; ilk API isteğinden önce commit'lendi)
 Kaynak: `ilerleme/GUNCELLEME_09.md`, Karar 36. Kod bu tanımlarla yazıldı. Pilottan sonra yalnızca **biçim** düzeltmesi yapılabilir; içerik kuralları, metrikler ve örneklem değişmez.
@@ -312,14 +312,31 @@ C'de eklenen hata sınıflara göre 35–55/100; en yüksek az kaldırmada (55).
 - 134'te C, "Harika bir tekrar çıkardın" diyerek başlayıp aynı cümlede kolu yeterince kaldırmadığını söylüyor. Bu, çelişkili bir geri bildirim.
 - 127'de üç koşul da dirsek hatasını kaçırıyor; A'nın kararı zaten "doğru".
 
-**9. Çıkarıcı ile kullanıcının uyumu (45 cümle):** kullanıcının etiketlemesinden sonra doldurulacak (`python -m deneyler.deney4 elle-degerlendir`).
+**9. Çıkarıcı ile kullanıcının uyumu (45 cümle; `elle_uyum.csv`, `elle_uyusmayan.csv`)**
+- Kullanıcı 45 cümleyi koşulu ve gerçek etiketi görmeden işaretledi (7 Kas). Claude Code yalnızca biçimi denetledi: 45 satır dolu, değerler yalnızca "1", 10 cümle hatasız. Etiketler çıkarıcının cevaplarıyla karşılaştırılarak **düzeltilmedi**.
+- **Tam eşleşme: 45/45** (A 15/15, B 15/15, C 15/15). Uyuşmayan cümle yok.
+- **Yorum sınırı:**
+  - Madde 6'da Claude Code'un körlemesine olmayan okumasında B'de 150 cümleden 13 çıkarıcı hatası görülmüştü (10 fazladan, 3 eksik). Bu 13 cümlenin hiçbiri 45'lik örnekleme girmedi.
+  - Yani çıkarıcının LLM cümlelerindeki hata oranı sıfır değil; ama 45 cümlelik örneklem, ~%9'luk bir hata oranını yakalayacak kadar büyük değil. 0/45 için %95 üst sınır kabaca 3/45 ≈ %7 ("üç kuralı").
+  - Raporda iki bulgu birlikte verilir: körlemesine örneklemde 45/45; tam B tablosunun elle okunmasında 150'de 13 hata, hepsi az kaldırma kalıbında ("yukarı kaldır" fazladan, "yükseltmelisin" / "fazla kaldırarak" eksik).
+
+**10. Kullanıcının "hasta gözüyle" notları** (etiketlerken `not` sütununa yazdı; koşulu bilmiyordu, eşleme sonradan anahtardan)
+- **Çelişkili övgü (25, C):** "Harika bir tekrar çıkardın, kolunu yeterince yukarı kaldırmadın…" → "Bu mesajda bir tutarsızlık var. Ne yapacağımı bilemezdim." (Madde 8'deki 134 numaralı örnekle aynı örüntü.)
+- **Derece anlam ifade etmiyor (9, C; 12, B):** "Buradaki derece bana çok bir anlam ifade etmiyor… Ben sadece daha fazla kaldırmaya çalışırdım." 12'deki cümle "dirseğini 165 derece doğrultuda düz tutarak indir" diyor.
+- **"Ne kadar az?" (21, C):** Sayısız "kolunu yeterince kaldırmadın" için: "Kolunu az kaldırmışsın ama ne kadar az? Bunu bilmiyorum." Aynı not, derece vermenin de hastaya anlamsız gelebileceğini söylüyor. Yani sayı hem eksikliği hem fazlalığıyla sorun olabiliyor.
+- **"Gövde boyu" kafa karıştırıcı (30, B):** "gövde boyu mesafesi biraz kafamı karıştırdı. Acaba postürüm mü yamuk?" Karar 28'in bu ifadeyi yasaklama gerekçesini doğruluyor.
+- **Omuz çizgisi eğimi (39, B):** "Sağ omuz çizgisi 20 derece eğildi, bunu 10 dereceye düşürmelisin" → kullanıcı bunu bir duruş (postür) sorunu olarak anladı ("çizgiyi terazi gibi eğmişim"), silkme olarak değil.
+- **Mantıksız yön talimatı (2, B; 44, B):** "dirseğini daha fazla açmalısın", "40 derece daha açık tutmaya çalış". Kullanıcı bunları yine "kolumu düz tutarım" diye anladı.
+- **Baş–omuz karışması (8, C):** Kullanıcı kendiliğinden "başı yana eğdiğimiz zaman omuz ve baş arasındaki mesafe azaldığı için hatayı bu şekilde algılamış olabilir" diye yazdı (ADIM_06'daki bulgu 2, `GELECEK_CALISMA` madde 10).
+- A cümleleri için not edilen bir anlama sorunu yok. A'nın sayıları (ör. 1, 16) kullanıcı tarafından "kolumu daha yukarı kaldırırdım" diye anlaşıldı.
+- Bu notlar betimseldir; metrik değildir. Sunumda "LLM akıcı ama yer yer çelişkili ve anlamsız sayılar veriyor" örnekleri olarak kullanılabilir.
 
 ## Kabul ölçütü kontrolü
 - [x] Önceden belirlenenler ilk API isteğinden önce commit'lendi.
 - [x] Testler geçti: tam pytest `179 passed, 1 xfailed in 82.71s`.
 - [x] Pilot (biçim): düzeltme gerekmedi; istemler değişmeden commit'li.
 - [x] Üç koşulun tablosu ve her koşuldan 5 örnek cümle (Sonuçlar 1–8).
-- [ ] Çıkarıcının bağımsız sınaması (45 cümle).
+- [x] Çıkarıcının bağımsız sınaması: 45/45 tam eşleşme (Sonuçlar 9; yorum sınırıyla).
 
 ## Kararlar ve sapmalar (Güncelleme 09)
 - **Model sorunu:** Karar 36'nın tercih ettiği `gemini-2.5-flash` resmi sayfaya göre kullanımdan kaldırılmış ve yeni kullanıcılara kapalı. Karar 36'nın yedek kuralı ("güncel ücretsiz Flash modeli") uygulanacak; seçim `modeller` komutunun çıktısına göre yapılır ve buraya yazılır. Model kodda sabit değil, `--model` ile verilir.

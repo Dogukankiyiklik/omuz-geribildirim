@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -29,11 +30,14 @@ import numpy as np
 import pandas as pd
 
 KOK = Path(__file__).resolve().parent.parent
-VERI_KLASORU = KOK / "veri" / "rehab26"
+# Veri klasörü (git'e girmez). OMUZ_VERI ortam değişkeni başka bir yeri gösterebilir: deneyler/hepsi.py temiz
+# kopyada deneyleri çalıştırırken asıl veri klasörünü yalnızca okumak için kullanır (Karar 37).
+VERI_KOK = Path(os.environ["OMUZ_VERI"]) if os.environ.get("OMUZ_VERI") else KOK / "veri"
+VERI_KLASORU = VERI_KOK / "rehab26"
 SEGMENTASYON = VERI_KLASORU / "Segmentation.csv"
 ISKELET_ZIP = VERI_KLASORU / "jointSequences-mediapipe.zip"
 VIDEO_ZIP = VERI_KLASORU / "videos.zip"
-KUCUK_NPZ = KOK / "veri" / "rehab26_kucuk.npz"
+KUCUK_NPZ = VERI_KOK / "rehab26_kucuk.npz"
 
 # Videolar 1080 x 1920 (genişlik x yükseklik); normalize x'i yüksekliğe göre ölçeklemek için.
 VIDEO_GENISLIK, VIDEO_YUKSEKLIK = 1080, 1920

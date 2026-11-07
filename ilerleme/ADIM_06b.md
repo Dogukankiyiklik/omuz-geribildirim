@@ -58,8 +58,42 @@ h. **Önbellek (madde 8'den küçük sapma, önceden):** Sınır y'leri tekrarı
 ## Basit anlatım (kullanıcı için)
 *(Sonuçlar gelince yazılacak.)*
 
+## Yapılanlar (önceden kayıttan sonra; commit'ler: önceden kayıt `51a997c`, kod bunun ardından)
+- `cekirdek/siluet.py`: `SILUET` ölçütünün tanımı (sütun seçimi, arama aralığı, sınır bulma, NaN kuralları, g0) ve aynı noktalardan `YENI_mp122`.
+- `cekirdek/aci_bandi.py`: isteğe bağlı `nan_atla` (ayrıntı d). Varsayılan kapalı; eski yol birebir aynı. Uygulama bu seçeneği kullanmaz (Karar 49).
+- `araclar/siluet_segment.py`: segmentasyon çalıştırması ve önbellek (ayrıntı a, h); yarıda kalırsa biten videolar atlanır.
+- `deneyler/siluet.py`: değerlendirme (Deney 1 v2'nin v2 koşulu, ölçüt başına ayrı model, ortak küme, kişi AUC, bootstrap, betimsel tablolar, kare başına sınırların yazılması).
+- `araclar/siluet_gorsel.py`: görsel kontrol aracı eki (açı bandı görünümü + omuz bölgesi: kutu, 5 sütun, siluet sınırı, büyütülmüş bölge) ve önceden kayıtlı örnek seçimi.
+- `testler/test_siluet.py`: 15 test (yapay maskede sınır bulma, > 0,5 eşiği, kutu taşması, sütun seçimi, görünürlük ve en az 3 sütun kuralı, g0 ve NaN, `YENI_mp122` = kayıtlı YENI tanımı, önbellek paketleme, `nan_atla` sonlu veride aynı / NaN'ı yok sayar / en az 3 tekrar).
+
+## Değişen / eklenen dosyalar
+| Dosya | Ne işe yarıyor |
+| --- | --- |
+| `cekirdek/siluet.py` | SILUET ölçütü (tanım) |
+| `cekirdek/aci_bandi.py` | `nan_atla` seçeneği (varsayılan kapalı) |
+| `araclar/siluet_segment.py` | MediaPipe segmentasyon + önbellek (`veri/ara/siluet/`) |
+| `deneyler/siluet.py` | değerlendirme → `sonuclar/siluet/` |
+| `araclar/siluet_gorsel.py` | 3 görsel örnek → `sonuclar/siluet/gorsel/` |
+| `testler/test_siluet.py` | testler |
+
+## Kod sınaması (Güncelleme 11: yalnızca kodun çalıştığını görmek için; AUC hesaplanmadı)
+- `python -m araclar.siluet_segment --sinama 500` → ayrı klasör `veri/ara/siluet_sinama/`. Ex1 Honza cam1'in ilk 500 gereken karesi: 0,2 dk (28,8 ms/kare, video çözme dahil), kişi bulunamayan kare 0, önbellek 356 008 bayt (~0,7 kB/kare).
+- `python -m deneyler.siluet --onbellek veri/ara/siluet_sinama --sinama`: önbellekte tam olan 3 tekrar (hepsi doğru); geçerli kare %100, taşan sütun 0; SILUET medyanları 0,297 / 0,298 / 0,304 (YENI_mp122 0,400 / 0,385 / 0,413).
+- Görsel aracı ve bant hesabının uçtan uca çalıştığını görmek için sınama 2500 kareye uzatıldı (1,2 dk, 28,4 ms/kare; 14 tekrar). Bir doğru tekrarın görsel videosu üretildi (~8 s). Etiketlerle E karşılaştırılmadı.
+- **Gözlem (tanım değişmez):** Kulağa en yakın sütun (aralığın %75'i) bazı karelerde başa/saça değiyor; 5 sütunun medyanı bunu tek ya da iki sütunda tolere ediyor. Kol 90°'nin üstündeyken sütunlar kolun üst kenarına değiyor; bu Karar 48 madde 4'te öngörülen durum (bant bunu kişiye özel içerir).
+- `pytest`: 203 geçti, 1 xfail (önceki 188 + 15 yeni). Deney 1 regresyonu değişmedi.
+
+## Nasıl çalıştırılır
+```powershell
+.venv\Scripts\python -m araclar.siluet_segment          # segmentasyon (kullanıcı; ~1,5 saat)
+.venv\Scripts\python -m araclar.siluet_segment --durum  # kaç video bitti
+.venv\Scripts\python -m deneyler.siluet --gorsel        # değerlendirme + 3 görsel (birkaç dk)
+```
+İşlenecek: 15 video×kamera, **153 081 kare** (tekrarların ±10 pay dahil birleşimi; örtüşen paylar bir kez), çözülecek toplam 213 210 kare.
+
 ## Sonuçlar
 *(Segmentasyon ve değerlendirme sonrası.)*
 
 ## Kararlar ve sapmalar
-*(Sonuçlar gelince.)*
+- Önbellek biçimi (ayrıntı h; madde 8'den küçük sapma, koddan önce kayıtlı): tam maske yerine her karede omuz bölgesi ikili maskesi saklanıyor; sınır y'leri değerlendirmede hesaplanıp `veri/ara/siluet/sinirlar.npz`'ye yazılıyor.
+- `deneyler/hepsi.py`'ye 6b eklenmedi; dondurmada (Adım 9) karar verilir.

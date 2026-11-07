@@ -23,6 +23,12 @@ Tanım (parametreler önceden sabitlendi; test verisine bakarak DEĞİŞTİRİLM
      5°'den fazla üstündeyse.
   7. Kalibrasyon aralığı dışındaki kareler değerlendirilmez (o açıda kişinin normalini bilmiyoruz).
 
+NaN değerli ölçütler (Adım 6b, `SILUET`; ADIM_06b uygulama ayrıntısı d): nan_atla=True verilirse kutu
+ortalaması yalnızca NaN olmayan karelerden alınır, kutu NaN olmayan değer veren en az EN_AZ_TEKRAR tekrar
+varsa geçerlidir ve E geçerli kutulardaki NaN olmayan karelerin ortalamasıdır. Varsayılan (False) eski
+davranıştır; NaN içermeyen ölçütlerde iki yol aynı sonucu verir. Geçerli kutular ölçüte göre değişebileceği
+için nan_atla=True ile her ölçüt kendi modeliyle (tek ölçütlü çağrı) kullanılmalıdır.
+
 Yalnızca duruş ölçütleri içindir (omuz, baş, dirsek, öne kaçma). Kol açısının kendisi için
 anlamsızdır; "yetersiz kaldırma" Adım 4'te tepe açısıyla ayrı ele alınır.
 """
@@ -105,10 +111,10 @@ def _ara_deger(y: np.ndarray, gecerli0: np.ndarray) -> tuple[np.ndarray, np.ndar
     return cikti, aralik
 
 
-def aci_bandi_modeli(dogrular: list[dict], olcutler) -> AciBandi:
+def aci_bandi_modeli(dogrular: list[dict], olcutler, nan_atla: bool = False) -> AciBandi:
     """
     Kalibrasyon (doğru) tekrarlarından açı bandı. dogrular: ölçüt sözlükleri ("kol" + ölçütler),
-    yalnızca etiketli kareler.
+    yalnızca etiketli kareler. nan_atla: modül açıklamasına bakın.
     """
     olcutler = tuple(olcutler)
     n_t = len(dogrular)
@@ -122,9 +128,16 @@ def aci_bandi_modeli(dogrular: list[dict], olcutler) -> AciBandi:
         say = np.bincount(hucre, minlength=2 * KUTU_SAYISI)
         dolu = say > 0
         for k in olcutler:
-            top = np.bincount(hucre, weights=f[k], minlength=2 * KUTU_SAYISI)
             d = np.full(2 * KUTU_SAYISI, np.nan)
-            d[dolu] = top[dolu] / say[dolu]
+            if nan_atla:
+                v = np.asarray(f[k], np.float64)
+                sonlu = np.isfinite(v)
+                say_k = np.bincount(hucre[sonlu], minlength=2 * KUTU_SAYISI)
+                top = np.bincount(hucre[sonlu], weights=v[sonlu], minlength=2 * KUTU_SAYISI)
+                d[say_k > 0] = top[say_k > 0] / say_k[say_k > 0]
+            else:
+                top = np.bincount(hucre, weights=f[k], minlength=2 * KUTU_SAYISI)
+                d[dolu] = top[dolu] / say[dolu]
             degerler[k][i] = d.reshape(2, KUTU_SAYISI)
 
     # Katkı veren tekrar sayısı kol açısından (kare varlığından) sayılır.
@@ -146,7 +159,7 @@ def aci_bandi_modeli(dogrular: list[dict], olcutler) -> AciBandi:
         for p, b in hucreler:
             v = X[:, p, b]
             v = v[~np.isnan(v)]
-            if len(v) >= 2:
+            if len(v) >= (EN_AZ_TEKRAR if nan_atla else 2):
                 m[p, b] = v.mean()
                 t_[p, b] = _tq(len(v)) * v.std(ddof=1) / np.sqrt(len(v))
         ok = ~np.isnan(t_)
@@ -163,7 +176,7 @@ def aci_bandi_modeli(dogrular: list[dict], olcutler) -> AciBandi:
 
 
 def aci_bandi_hatasi(model: AciBandi, tekrar: dict, olcutler, yon: dict[str, int] | None = None,
-                     ayrinti: bool = False):
+                     ayrinti: bool = False, nan_atla: bool = False):
     """
     Tekrarın her ölçüt için açı bandı hatası E (geçerli karelerin ortalaması; geçerli kare yoksa NaN).
     Dönüş: (E, ek) — ek: kapsam, aralik_disi; ayrinti=True ise kare başına faz, kutu, geçerlilik,
@@ -190,7 +203,12 @@ def aci_bandi_hatasi(model: AciBandi, tekrar: dict, olcutler, yon: dict[str, int
         e = np.full(len(kol), np.nan)
         if g.any():
             e[g] = kare_hatasi(tekrar[k][g], mu[g], tau[g], yon.get(k, 0))
-        E[k] = float(e[g].mean()) if g.any() else np.nan
+        if nan_atla:
+            eg = e[g]
+            eg = eg[np.isfinite(eg)]
+            E[k] = float(eg.mean()) if len(eg) else np.nan
+        else:
+            E[k] = float(e[g].mean()) if g.any() else np.nan
         kareler[k], mus[k], taus[k] = e, mu, tau
     if ayrinti:
         fark, disi = {}, {}

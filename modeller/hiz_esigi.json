@@ -1,0 +1,7 @@
+{
+  "esik_s": 1.9,
+  "tanim": "Ex1 önden + çapraz doğru tekrarlarda sürenin %5'i",
+  "sure": "(last_frame − first_frame + 1) / 30 FPS; birim (satır, kamera)",
+  "tekrar": 681,
+  "tarih": "2026-11-07T13:02:01"
+}

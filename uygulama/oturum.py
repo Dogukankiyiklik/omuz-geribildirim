@@ -10,6 +10,8 @@ Akış:
   * Değerlendirme: tam model (kalibrasyondaki bütün tekrarlar, Karar 24) + modeller/kural_ex1.json
     → cekirdek.degerlendirici.degerlendir → karar, hasta cümlesi, uzman ayrıntısı.
   * Yumuşatma yok (Karar 10): ölçütler ham noktalardan.
+  * Bilgi notları (Güncelleme 08, Karar 30–31; cekirdek/bilgi_notlari.py): her değerlendirme tekrarında kamera
+    açısı notu, hız notu ve sol kol notu. Karar kuralına ve cümleye girmez; CSV'de ayrı sütunlar.
 """
 from __future__ import annotations
 
@@ -20,6 +22,7 @@ from pathlib import Path
 
 import numpy as np
 
+from cekirdek import bilgi_notlari as bn
 from cekirdek import degerlendirici as dg
 from cekirdek import geribildirim as gb
 from cekirdek import kamera_acisi as ka
@@ -69,6 +72,7 @@ class TekrarKaydi:
     kamera_orani: float = np.nan
     sonuc: dg.Sonuc | None = field(default=None, repr=False)
     kalite_sorunu: str = ""  # boş değilse: omuz/kalça kadrajda değildi (yalnızca arayüz uyarısı)
+    notlar: bn.BilgiNotlari | None = field(default=None, repr=False)   # Karar 30–31 (yalnızca bilgi)
 
     @property
     def etiketli(self) -> slice:
@@ -77,11 +81,13 @@ class TekrarKaydi:
 
 class Oturum:
     def __init__(self, en_boy: float, fps: float = ta.FPS, kural_yolu=KURAL_YOLU, kamera_esigi_yolu=ka.ESIK_DOSYASI,
+                 hiz_esigi_yolu=bn.HIZ_ESIGI_DOSYASI,
                  hedef: int = HEDEF_KALIBRASYON, en_az: int = EN_AZ_KALIBRASYON,
                  olcu_surumu: str = gb.VARSAYILAN_OLCU, tohum: int = 0):
         self.en_boy, self.fps = float(en_boy), float(fps)
         self.kural, self.siddet, self.kural_bilgi = kural_dosyasi.yukle(kural_yolu)
         self.kamera_esigi = ka.esik_oku(kamera_esigi_yolu) if Path(kamera_esigi_yolu).exists() else None
+        self.hiz_esigi = bn.hiz_esigi_oku(hiz_esigi_yolu) if Path(hiz_esigi_yolu).exists() else None
         self.hedef, self.en_az = hedef, en_az
         self.olcu_surumu, self.tohum = olcu_surumu, tohum
         self.kareler: list[np.ndarray] = []
@@ -137,6 +143,8 @@ class Oturum:
         k.kamera_orani = ka.omuz_govde_orani(dizi, self.en_boy)
         self.tekrarlar.append(k)
         k.kalite_sorunu = kalite_sorunu(dizi[pay:])
+        k.notlar = bn.notlar(dizi[pay:], bn.tekrar_suresi(t.bas, t.son, self.fps), k.kamera_orani, self.en_boy,
+                             self.hiz_esigi, self.kamera_esigi)
         if self.mod == "kalibrasyon":
             if self.kalite_kontrol and k.kalite_sorunu:
                 k.durum = "reddedildi"              # bozuk tekrar kalibrasyona hiç girmez
@@ -238,9 +246,11 @@ class Oturum:
     def oturum_satirlari(self) -> list[dict]:
         satir = []
         for k in self.tekrarlar:
-            r = {"tekrar": k.no, "bas_kare": k.bas, "son_kare": k.son, "sure_s": round((k.son - k.bas + 1) / self.fps, 2),
+            r = {"tekrar": k.no, "bas_kare": k.bas, "son_kare": k.son, "sure_s": round(bn.tekrar_suresi(k.bas, k.son, self.fps), 2),
                  "durum": k.durum, "kamera_orani": round(k.kamera_orani, 4) if np.isfinite(k.kamera_orani) else "",
                  "tepe_aci": round(float(k.tepe), 1) if np.isfinite(k.tepe) else "", "kalite": k.kalite_sorunu}
+            if k.notlar is not None:
+                r.update(k.notlar.satir())
             if k.sonuc is not None:
                 r.update(k.sonuc.satir())
             satir.append(r)

@@ -14,6 +14,7 @@ import numpy as np
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 
+from cekirdek import bilgi_notlari as bn
 from cekirdek import geribildirim as gb
 from cekirdek import hata_turu as ht
 from cekirdek import tekrar_ayirici as ta
@@ -280,6 +281,7 @@ def panel(Y: int, oturum, uzman_acik: bool, oynatim: bool, mesaj: str = "", egze
         yaz(f"1. KALİBRASYON — kabul edilen: {n}/{oturum.hedef}  (en az {oturum.en_az})", 18, P_UYARI, True)
         yaz("Kolunu doğru şekilde, yandan yukarı tam kaldır. Sistem bu tekrarlardan senin normal hareketini "
             "öğrenir; hatalar sonra buna göre bulunur.", 15, P_IKINCIL)
+        yaz(bn.KALIBRASYON_YONERGESI, 16, P_METIN, True)                    # Karar 29 (yönerge)
     else:
         yaz(f"2. DEĞERLENDİRME — kalibrasyon: {len(oturum.kalibrasyon)} tekrar", 18, P_DOGRU, True)
     if oturum.uyari:
@@ -325,6 +327,10 @@ def panel(Y: int, oturum, uzman_acik: bool, oynatim: bool, mesaj: str = "", egze
         if k.kalite_sorunu:
             yaz(f"⚠ Bu tekrarda {k.kalite_sorunu}; sonuç güvenilir değil.", 16, P_UYARI, True)
         yaz(s.hasta_cumlesi, 23, P_METIN)                                # hasta cümlesi: büyük
+        if k.notlar is not None and k.notlar.kamera:                     # Karar 30 (yalnızca arayüz)
+            yaz("⚠ " + bn.KAMERA_NOTU, 15, P_UYARI, True)
+        if k.notlar is not None and k.notlar.metinler:                   # Karar 31: bilgi notu, hata değil
+            yaz("Bilgi: " + " ".join(k.notlar.metinler), 17, (42, 100, 170), True)
         y += 4
         if uzman_acik:
             yaz("Uzman: " + s.uzman_ayrintisi, 14, P_IKINCIL)

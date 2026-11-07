@@ -25,8 +25,8 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 1 | 4 (ek) | **Deney 2 revize** (Karar 13–14): yeni az kaldırma puanı + "ilk iki" metriği; `ADIM_04.md` sonuna "Ek: Güncelleme 05" | 7 Kas | Zorunlu 📤 | ✅ |
 | 2 | 4b | **Ex7'de ayarsız doğrulama**: Deney 1 (silkme/doğru AUC; v1b ve v2) + Deney 2 kuralı Ex7 hata türleriyle. **Hiçbir sabit değiştirilmez** | 7 Kas | Zorunlu 📤 | ✅ |
 | 3 | 5 | Deney 3: **ölçü içeren** kural tabanlı Türkçe geri bildirim; "ilk iki" metriği burada da | 7–8 Kas | Zorunlu 📤 | ✅ |
-| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | 🔄 |
-| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker) | 10–11 Kas | Zorunlu 📤 | ⏳ |
+| 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ✅ |
+| 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 |
 | 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ⏳ |
 | 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ |
 | 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⏳ |
@@ -35,7 +35,7 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
 | — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |
 
-Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026; Adım 5, Güncelleme 07 ile kapandı). Ana tablodaki Adım 0–4 de tamamlandı.
+Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı (7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35). Ana tablodaki Adım 0–4 de tamamlandı.
 
 Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 
@@ -406,6 +406,12 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 - **Karar 26 — kamera açısı uyarısı:** eşik, çapraz (30–60°) doğru tekrarlardaki omuz genişliği / gövde boyu oranının 10. yüzdeliği (yukarıdaki "önden" ifadesinin yerini alır); uyarı kalibrasyonu engellemez.
 - **Karar 27 — demo güvenliği:** video dosyası modu birincil demo yolu, yedek kayıt hazır; mümkünse MediaPipe v0.10.20 + `pose_landmarker_full`; yalnızca Ex1. Panelde hasta cümlesi büyük, uzman ayrıntısı küçük (Karar 28).
 
+**Güncelleme 08** (ayrıntı: `ilerleme/GUNCELLEME_08.md`; Adım 6 kapandı ✅):
+- **Karar 29:** bant genişliğine alt sınır yok, yöntem donduruldu; kalibrasyonda yönerge "Doğal ve rahat tekrarlar yap; kendini zorlama. Her tekrarda aynı yere bak."; tahmin aralığı fikri `GELECEK_CALISMA.md` madde 8.
+- **Karar 30:** kamera açısı uyarısı değerlendirme tekrarlarında da (aynı eşik); CSV'de `kamera_uyarisi`.
+- **Karar 31:** bilgi notları (hata türü değil): hız (< 1,9000 s, `modeller/hiz_esigi.json`) ve sol kol (> 60°); `cekirdek/bilgi_notlari.py`. "Hareket tanınmadı" eklenmez.
+- **Karar 34:** açık sorular kapandı (tekrar ayırma ö+ç 95,0 kabul; MediaPipe 1.2.2 sınırlılık; 8 s otomatik kabul uygun).
+
 ---
 
 ## Adım 7 — Kendi kayıtlarımızla deneme 📤
@@ -420,6 +426,13 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 **Yapılacaklar:** Yığın moduyla değerlendir; etiketlerle karşılaştır. Karışıklık matrisi ve tekrar başına "verilen cümle – gerçek etiket" tablosunu `sonuclar/kendi_kayit/` altına yaz.
 
 **Kabul ölçütü:** Tablo var; sistemin yanıldığı tekrarlar için kısa bir gözlem yazıldı (örneğin "baş eğme omuz olarak algılandı").
+
+**Güncelleme 08** (Karar 32, 33, 35; yukarıdaki protokolün yerini alır):
+- Kalibrasyon **6** doğru tekrar. Test **21** tekrar: 5 doğru, 3 omuz, 2 baş, 2 dirsek, 2 az kaldırma, 2 öne kaçma, 3 doğru-bakış (yere/yana), 2 doğru-hızlı (~1 s). Kişi bütün çekimde kameranın yanındaki sabit bir noktaya bakar.
+- `etiketler.csv`: `tekrar_no, etiket, not` (`not` = `bakis` / `hizli`). Sıra tohumlu betikle önceden üretildi (`python -m deneyler.kendi_kayit --sablon ...`); kontrol listesi `docs/CEKIM_LISTESI.md`.
+- Metrikler önceden sabit (`ilerleme/ADIM_07.md`, çekimden önce commit'lendi): katı, ilk iki, hatalılarda olumlu cümle; doğrularda gereksiz uyarı (normal/bakış/hızlı ayrı); hız notu; karışıklık ve cümle–etiket tablosu; "kaçta kaç", GA yok.
+- Değerlendirme: `python -m deneyler.kendi_kayit --kalibrasyon ... --test ... --etiketler ...` (yığın modu, dondurulmuş yöntem, MediaPipe 1.2.2). Hiçbir eşik bu kayıtlara göre değişmez.
+- Çekim **en geç 9 Kasım akşamı**; yapılmazsa Adım 8 durur, önce Adım 7 biter.
 
 ---
 

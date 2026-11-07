@@ -1,7 +1,7 @@
 # ADIM 06 — Uygulama
 
 **Tarih:** 2026-11-07
-**Durum:** Kabul ölçütleri sağlandı. Kullanıcı canlı kamerayla iki oturum yaptı. Açık kalan: pencere modunda video dosyasının (`--video`) kullanıcı tarafından bir kez denenmesi. Canlı denemeden çıkan gözlemler ve öneriler danışmanda (Sonuçlar 6, Açık sorular).
+**Durum:** Tamamlandı (Güncelleme 08 ile kapandı). Kullanıcı canlı kamerayla iki oturum yaptı. Açık kalan küçük iş: pencere modunda video dosyasının (`--video`) kullanıcı tarafından bir kez denenmesi. Güncelleme 08 arayüz değişiklikleri en sonda ("Ek: Güncelleme 08").
 
 ## Basit anlatım
 - Sunumda gösterilecek uygulama hazır. Solda görüntü ve iskelet var, sağda geri bildirim paneli. Panelin üstünde büyük harflerle **hasta cümlesi** yer alıyor. Uzman ayrıntısı U tuşuyla açılıp kapanıyor. Altta omuz eğrisi (kişinin normal aralığıyla) ve son 5 tekrar görünüyor.
@@ -271,3 +271,51 @@ Kendi dizüstü kamerası, 1280×720, önden. Sayılar `oturumlar/*.csv` dosyala
   5. **Kalibrasyon yönergesi.** "Doğal, rahat tekrarlar yap; kendini zorlama." Dar bandı biraz azaltabilir ama çözmez.
   6. **Bakış yönü yönergesi** (eşik değil, yalnızca talimat): "Kalibrasyonda da değerlendirmede de aynı yere bak (ekrana)." Adım 7 çekim protokolüne de eklenebilir: kalibrasyon ve test videosunda kişi aynı noktaya baksın. İstenirse Adım 7'de bilerek "farklı yere bakma" tekrarları çekilir ve etkisi ölçülür.
 - Kalibrasyonda 8 saniyelik otomatik kabul (ret hakkı saklı) PLAN'daki "her tekrarı onaylar" ifadesine uygun sayılır mı?
+
+## Ek: Güncelleme 08 (7 Kas, danışman kararları 29–31, 34)
+
+**Basit anlatım:** Canlı denemeden çıkan üç öneri uygulamaya eklendi. Bunlar **yalnızca arayüzü** değiştiriyor; sistemin kararı ve cümlesi aynı kaldı.
+1. Kalibrasyonda yeni bir **yönerge** var.
+2. Kameraya yan dönülürse **her değerlendirme tekrarında** uyarı çıkıyor.
+3. İki **bilgi notu** eklendi: "çok hızlı yaptın" ve "sol kolunu da kaldırdın".
+
+**Bilgi notu** hata türü değildir: karar kuralına girmez ve hiçbir başarı sayısına katılmaz. Panelde hasta cümlesinin altında mavi renkte, "Bilgi:" diye ayrı bir satırda görünür.
+
+**Yapılanlar**
+- **Karar 29 (yönerge):** "Doğal ve rahat tekrarlar yap; kendini zorlama. Her tekrarda aynı yere bak." Bu yazı kalibrasyon panelinde, hazırlık ekranında ve terminal yardım metninde görünüyor. Bant genişliğine alt sınır eklenmedi.
+- **Karar 30 (kamera):** Karar 26'daki eşik (0.3887) artık her değerlendirme tekrarının dinlenme oranına da uygulanıyor. Eşiğin altındaysa karar ve cümle yine gösteriliyor. Altına turuncu bir not ekleniyor: "Kameraya göre açın değişti; bu sonuç güvenilir olmayabilir. Kameraya daha önden dur." Oturum CSV'sinde `kamera_orani` sütunu vardı; `kamera_uyarisi` (0/1) eklendi.
+- **Karar 31 (bilgi notları):** Kod `cekirdek/bilgi_notlari.py` içinde. Ortak çekirdekte durduğu için Adım 7 betiği de aynı kodu kullanıyor.
+  - **Hız:** Süre = (son kare − ilk kare + 1) / FPS. Uygulamada tekrar ayırıcının sınırlarından hesaplanıyor. Eşik `python -m deneyler.hiz_esigi` ile üretildi → `modeller/hiz_esigi.json`, `sonuclar/hiz_esigi/`.
+  - **Sol kol:** Sol üst kol (11 → 13) ile aşağı yön arasındaki açı. Sağ kolun tanımıyla aynı (`ozellikler.kol`). Tepe değeri aynı 5 karelik medyanla yumuşatılmış eğriden alınıyor. Not, tepe > 60° ise çıkıyor; 60° tekrar ayırıcının tepe şartıyla aynı sayı.
+  - Genel bir "hareket tanınmadı" notu eklenmedi. Sistemin tanımsız bir hareketi en yakın hata türüne atadığı bir sınırlılık olarak raporlanacak.
+  - CSV'ye yeni sütunlar: `hiz_notu`, `sol_kol_tepe`, `sol_kol_notu`, `bilgi_notu`.
+- `testler/test_bilgi_notlari.py`: süre, eşitlik durumu, sol kolun sağ kolla aynı tanımı, 60° sınırı, tek karelik sıçramanın medyanla bastırılması, oturum CSV sütunları ve hız eşiği dosyasının yeniden üretilmesi.
+- Panel, veri setindeki bir tekrarla PNG'ye basılıp kontrol edildi: kamera notu turuncu, bilgi notu mavi, ikisi de hasta cümlesinin altında. Kalibrasyon panelinde yönerge kalın yazıyla görünüyor.
+
+**Hız eşiği** (`python -m deneyler.hiz_esigi` çıktısından kopyalandı; birim: Segmentation.csv satırı × kamera, yalnızca önden + çapraz):
+
+| grup | tekrar | %5 | Ç1 | medyan | Ç3 | en kısa | en uzun | eşikten kısa /100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| doğru, önden + çapraz | 681 | 1.900 | 2.300 | 2.900 | 3.400 | 1.767 | 6.167 | 3.818 |
+| hatalı, önden + çapraz | 682 | 2.300 | 2.800 | 3.300 | 4.033 | 1.967 | 7.467 | 0.000 |
+| doğru, Honza | 135 | 3.767 | 4.083 | 4.467 | 4.817 | 3.433 | 6.167 | 0.000 |
+| doğru, Mima | 137 | 2.700 | 2.900 | 3.100 | 3.267 | 2.433 | 4.033 | 0.000 |
+| doğru, Petra | 135 | 2.600 | 2.733 | 2.933 | 3.033 | 2.367 | 3.533 | 0.000 |
+| doğru, Terka | 135 | 1.833 | 2.100 | 2.233 | 2.467 | 1.767 | 3.167 | 7.407 |
+| doğru, Vasil | 139 | 1.833 | 1.967 | 2.133 | 2.517 | 1.800 | 4.033 | 11.511 |
+
+**Hız eşiği = 1.9000 s.** Notlar:
+- Eşikten kısa oran %5 değil %3,8, çünkü tam 1,9 s süren tekrarlar var ve not yalnızca **kesin kısa** sürede çıkıyor.
+- Kişiler arasında hız çok farklı. Terka ve Vasil'in doğru tekrarlarının sırasıyla %7,4'ünde ve %11,5'inde bu not çıkardı. Bu, notun bazı kişiler için "doğal hızlarında" da görüneceği anlamına gelir. Sınırlılık olarak yazılacak.
+- Uygulamadaki süre tekrar ayırıcının sınırlarından, veri setindeki süre ise elle etiketlenmiş sınırlardan geliyor. İkisi tam aynı olmayabilir (ayırıcı ile etiketler, önden + çapraz görüşte %95,0 oranında IoU ≥ 0,5 ile eşleşiyordu).
+- Veri setinde hız etiketi olmadığı için notun doğruluğu ölçülemez. Adım 7'deki 2 hızlı ve 5 normal tekrar yalnızca betimsel bir kontrol sağlar.
+
+**Davranış koruma:**
+- Sağlık kontrolü (`python -m uygulama.toplu --veri-seti ex1_Honza --kamera cam1 --yonelim 0`) yeniden çalıştırıldı. `sonuclar/uygulama_saglik/` altındaki iki CSV birebir aynı çıktı (git farkı yok; yalnızca xlsx'in iç zaman damgası değişti ve geri alındı). Yani tablo 4 değişmedi.
+- Tam pytest sonucu Adım 7 hazırlığıyla birlikte `ADIM_07.md` dosyasında.
+
+**Karar 34 (açık soruların cevabı):**
+- Tekrar ayırma önden + çapraz 95,0 ile kabul edildi; tüm görüşler (87,4) ve profil (53,1) sınırlılık.
+- MediaPipe 1.2.2 farkı sınırlılık notu olarak yeterli.
+- 8 saniyelik otomatik kabul uygun.
+- Kalite kontrolünün sağlık kontrolünde kapalı olması doğru.

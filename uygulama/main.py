@@ -12,7 +12,7 @@ Kullanım:
 Kullanım kolaylığı:
   * Panelin altındaki düğmelere fareyle tıklanabilir; klavye kısayolu düğmede parantez içinde yazar
     (büyük/küçük harf fark etmez). Klavye için pencere seçili olmalı (bir kez tıklamak yeter).
-  * Kalibrasyonda biten tekrar, --onay-suresi saniye (varsayılan 4) içinde reddedilmezse kendiliğinden
+  * Kalibrasyonda biten tekrar, --onay-suresi saniye (varsayılan 8) içinde reddedilmezse kendiliğinden
     kabul edilir; böylece kişi kameradan uzaktayken klavyeye gitmesi gerekmez. --elle-onay ile her tekrar
     için Kabul/Reddet beklenir.
 Oturum sonuçları oturumlar/<tarih>.csv dosyasına, kalibrasyon profiller/<isim>.npz dosyasına yazılır.
@@ -155,6 +155,7 @@ def hazirlik(cap, poz, girdi: Girdi, sure: float, ayna: bool) -> float | None:
         satirlar = [(f"HAZIRLIK  {sure - (time.time() - t0):.0f}", 34, beyaz, True),
                     ("Yerine geçmen için bekleme süresi. Henüz hiçbir şey kaydedilmiyor.", 20, beyaz, False),
                     ("Süre bitince KALİBRASYON başlar. Beklemek istemezsen Boşluk'a bas.", 20, beyaz, False),
+                    (pn.bn.KALIBRASYON_YONERGESI, 20, (255, 230, 140), True),
                     (durum, 22, renk, True)]
         y = 16
         for metin, boy, rk, kalin in satirlar:
@@ -323,6 +324,7 @@ Omuz geri bildirim uygulaması açılıyor.
   * Panelin altındaki düğmelere fareyle de tıklayabilirsiniz.
   * Önce HAZIRLIK ekranı gelir: yerine geçmen için bekleme süresi, hiçbir şey kaydedilmez (Boşluk ile atlanır).
   * Kalibrasyon: kolu yandan, rahatça çıkabildiğin en yüksek noktaya kaldır → indir → 1–2 sn bekle.
+    Doğal ve rahat tekrarlar yap; kendini zorlama. Her tekrarda (değerlendirmede de) aynı yere bak.
     Biten tekrar {sure} kendiliğinden kabul edilir; kötü olduysa Reddet (H), yanlışlıkla kabul edildiyse
     "Son kabulü geri al" (Z). {hedef} tekrar kabul edilince değerlendirme kendiliğinden başlar.
   * Başından kalçana kadar kadrajda ol (bacakların görünmesi gerekmez).

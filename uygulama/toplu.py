@@ -77,11 +77,12 @@ def oturum_isle(lm: np.ndarray, oturum: Oturum) -> None:
     oturum.bitir()
 
 
-def kalibre_et(yol, en_boy: float, fps: float, isim: str | None) -> Oturum:
-    """Kalibrasyon videosu: ayrılan tekrarlar sırayla kabul edilir (en fazla HEDEF_KALIBRASYON)."""
+def kalibre_et(yol, en_boy: float, fps: float, isim: str | None, lm: np.ndarray | None = None) -> Oturum:
+    """Kalibrasyon videosu: ayrılan tekrarlar sırayla kabul edilir (en fazla HEDEF_KALIBRASYON).
+    lm: videonun önceden çıkarılmış MediaPipe noktaları (verilirse MediaPipe yeniden çalıştırılmaz)."""
     o = Oturum(en_boy, fps)
     o.hedef = 10 ** 6
-    oturum_isle(pozlar(yol), o)
+    oturum_isle(pozlar(yol) if lm is None else lm, o)
     for k in [t for t in o.tekrarlar if t.durum == "onay_bekliyor"][:HEDEF_KALIBRASYON]:
         o.onayla(k, True)
     if not o.kalibrasyonu_bitir():
@@ -92,11 +93,11 @@ def kalibre_et(yol, en_boy: float, fps: float, isim: str | None) -> Oturum:
     return o
 
 
-def degerlendir_video(yol, kalibrasyon: Oturum) -> Oturum:
+def degerlendir_video(yol, kalibrasyon: Oturum, lm: np.ndarray | None = None) -> Oturum:
     fps, W, H, _ = video_bilgisi(yol)
     o = Oturum(W / H, fps)
     o.kalibrasyon, o.profil = kalibrasyon.kalibrasyon, kalibrasyon.profil   # profil kendi en-boy oranıyla kuruldu
-    oturum_isle(pozlar(yol), o)
+    oturum_isle(pozlar(yol) if lm is None else lm, o)
     return o
 
 

@@ -1,7 +1,7 @@
 # ADIM 08 — Deney 4: LLM ile kural tabanlı karşılaştırması
 
 **Tarih:** 2026-11-07 (altyapı; Güncelleme 09 ile tasarım ve kod)
-**Durum:** Tamamlandı (danışmanın değerlendirmesi bekleniyor): deney ve 45 cümlelik elle etiketleme bitti. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Kod, istemler ve ağsız testler hazır. **Bekleniyor:** kullanıcının `GEMINI_API_KEY`'i kurması → pilot → (gerekirse yalnızca biçim düzeltmesi) → 150'lik deney (kullanıcı çalıştırır) → 45 cümlelik elle etiketleme (kullanıcı).
+**Durum:** Tamamlandı (danışmanın değerlendirmesi bekleniyor): deney ve 45 cümlelik elle etiketleme bitti. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Model `gemini-3.5-flash-lite` (2.5 Flash günde 20 istek); pilot biçimden geçti, istemler değişmedi.
 
 ## Önceden belirlenenler (Karar 36; ilk API isteğinden önce commit'lendi)
 Kaynak: `ilerleme/GUNCELLEME_09.md`, Karar 36. Kod bu tanımlarla yazıldı. Pilottan sonra yalnızca **biçim** düzeltmesi yapılabilir; içerik kuralları, metrikler ve örneklem değişmez.

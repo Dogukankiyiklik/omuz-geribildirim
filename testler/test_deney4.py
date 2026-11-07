@@ -190,6 +190,16 @@ def test_elle_uret_ve_degerlendir(tmp_path):
             f.loc[f.sira == r.sira, ad[h]] = "1"
     f.loc[f.sira == "1", "dirsek"] = "1" if f.loc[f.sira == "1", "dirsek"].iloc[0] == "" else ""
     f.to_csv(tmp_path / "elle_etiket.csv", index=False, encoding="utf-8-sig")
+    (tmp_path / "elle_etiket.xlsx").unlink()                     # önce CSV yolu
     T = d4.elle_degerlendir(tmp_path)
     assert T["elle_uyum"].set_index("koşul").loc["hepsi", "tam eşleşme"] == 44
     assert len(T["elle_uyusmayan"]) == 1
+    f.to_excel(tmp_path / "elle_etiket.xlsx", index=False)       # Excel kopyası varsa o okunur
+    T = d4.elle_degerlendir(tmp_path)
+    assert T["elle_uyum"].set_index("koşul").loc["hepsi", "tam eşleşme"] == 44
+
+
+def test_uslup_yuzde_bu_yuzden_sayilmaz():
+    for m, beklenen in [("Bu yüzden kolunu düz tut.", False), ("Kolun yüzde 20 kısa.", True), ("%20 kısa", True),
+                        ("Yüzdesi düştü.", True), ("Kolunu gövde boyu hizasında tut.", True), ("Böyle devam et.", False)]:
+        assert bool(d4._USLUP.search(m)) == beklenen, m

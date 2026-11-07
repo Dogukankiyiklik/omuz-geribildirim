@@ -55,7 +55,7 @@ python -m deneyler.sunum_sekilleri  # sunum şekilleri, ~75 s
 ## Sonuçlar
 **`--hizli` denemesi** (Claude Code; `sonuclar/hepsi/hizli/ozet.md`'den kopyalandı; commit `0c013a5`): Deney 1 (16.8 s), kamera açısı (3.1 s), hız eşiği (2.1 s), hepsi çıkış kodu 0. **Karşılaştırılan dosya: 11 · aynı: 11.** Temiz kopya kaldırıldı; `veri/` yerinde.
 
-Tam çalıştırma: kullanıcı yapacak.
+Tam çalıştırma: kullanıcı yapacak. **Kullanıcının kararı (7 Kas):** her şey bittikten sonra, dondurmadan hemen önce yapılacak; şimdi erken, çünkü düzeltmeler gelebilir.
 
 ## Kabul ölçütü kontrolü
 - [ ] `OZET.md` var ve sayılar ADIM dosyalarıyla tutarlı (dondurmada).

@@ -15,6 +15,7 @@ Kullanım (işlem sırası):
     python -m deneyler.deney4 modeller                  # anahtarın erişebildiği Gemini modelleri (kota harcamaz)
     python -m deneyler.deney4 pilot --model gemini-2.5-flash      # 5 tekrar × B, C = 10 istek (raporlanmaz)
     python -m deneyler.deney4 calistir --model gemini-2.5-flash   # 150 × B, C = 300 istek; kesilirse aynı komut
+    python -m deneyler.deney4 raporla                   # ağ yok: kayıtlı yanıtlardan tabloları yeniden yazar
     python -m deneyler.deney4 elle-uret                 # 45 cümlelik körlemesine etiketleme dosyası
     python -m deneyler.deney4 elle-degerlendir          # kullanıcının etiketleri ile çıkarıcının uyumu
 Çıktı: sonuclar/deney4/ (pilot: sonuclar/deney4/pilot/)
@@ -290,7 +291,8 @@ def sayi_uydurdu(metin: str, izinli: set[float], tolerans: float) -> bool:
 
 
 SAYI_TOLERANSI = {"A": 0.0, "B": 0.0, "C": 1.0}
-_USLUP = re.compile(r"%|yüzde|gövde boy", re.IGNORECASE)
+# "yüzde" kelimesi (yüzde 20, yüzdesi); "bu yüzden" sayılmaz (ilk sürümdeki kod hatası, ADIM_08)
+_USLUP = re.compile(r"%|\byüzde(?!n\b)|gövde boy", re.IGNORECASE)
 
 
 def _liste(s) -> list[str]:
@@ -442,13 +444,30 @@ def elle_uret(u: pd.DataFrame, klasor: Path) -> Path:
     if yol.exists():
         raise SystemExit(f"{yol} zaten var; üzerine yazılmaz (kullanıcının etiketleri olabilir).")
     form.to_csv(yol, index=False, encoding="utf-8-sig")
+    try:                                   # kullanıcının dolduracağı Excel kopyası (Türkçe Excel CSV'yi bölmeyebilir)
+        with pd.ExcelWriter(Path(klasor) / "elle_etiket.xlsx") as yazici:
+            form.to_excel(yazici, sheet_name="etiket", index=False)
+            sh = yazici.sheets["etiket"]
+            from openpyxl.styles import Alignment
+            for sutun, gen in zip("ABCDEFGH", (6, 90, 8, 8, 11, 9, 13, 30)):
+                sh.column_dimensions[sutun].width = gen
+            for satir in sh.iter_rows(min_row=2):
+                satir[1].alignment = Alignment(wrap_text=True, vertical="top")
+            sh.freeze_panes = "C2"
+    except ImportError:
+        pass
     s[["sira", "orneklem_no", "kosul", "cikarilan"]].to_csv(Path(klasor) / "elle_etiket_anahtar.csv", index=False,
                                                             encoding="utf-8-sig")
     return yol
 
 
 def elle_degerlendir(klasor: Path) -> dict[str, pd.DataFrame]:
-    f = pd.read_csv(Path(klasor) / "elle_etiket.csv", encoding="utf-8-sig", keep_default_na=False, dtype=str)
+    xlsx = Path(klasor) / "elle_etiket.xlsx"
+    if xlsx.exists():                      # kullanıcı Excel kopyasını doldurur
+        f = pd.read_excel(xlsx, dtype=str).fillna("")
+    else:
+        f = pd.read_csv(Path(klasor) / "elle_etiket.csv", encoding="utf-8-sig", keep_default_na=False, dtype=str)
+    f["sira"] = f["sira"].astype(str).str.replace(r"\.0$", "", regex=True)
     a = pd.read_csv(Path(klasor) / "elle_etiket_anahtar.csv", encoding="utf-8-sig", keep_default_na=False, dtype=str)
     m = f.merge(a, on="sira")
     m["kullanici"] = ["|".join(h for ad, h in ELLE_HATALAR if str(r[ad]).strip() not in ("", "0"))
@@ -487,7 +506,8 @@ def raporla(girdiler: pd.DataFrame, yanitlar: pd.DataFrame, klasor: Path, bootst
 
 def main():
     ap = argparse.ArgumentParser(description="Deney 4: LLM ile kural tabanlı geri bildirim")
-    ap.add_argument("islem", choices=["hazirla", "modeller", "pilot", "calistir", "elle-uret", "elle-degerlendir"])
+    ap.add_argument("islem", choices=["hazirla", "modeller", "pilot", "calistir", "raporla", "elle-uret",
+                                      "elle-degerlendir"])
     ap.add_argument("--model", default=VARSAYILAN_MODEL)
     ap.add_argument("--dusunme", default="otomatik",
                     help="otomatik (2.5'te bütçe 0, diğerlerinde varsayılan) | varsayilan | sayı (bütçe) | düzey adı")
@@ -548,6 +568,11 @@ def main():
             for r in y.itertuples():
                 print(f"\n[{r.orneklem_no} · {r.kosul}] {r.metin}")
         print(f"\nÇıktı: {hedef}")
+        return
+
+    if args.islem == "raporla":            # ağ yok: kayıtlı girdiler + yanıtlardan tabloları yeniden yazar
+        y = pd.read_csv(klasor / "yanitlar.csv", encoding="utf-8-sig", keep_default_na=False)
+        raporla(girdileri_oku(klasor), y, klasor, args.bootstrap)
         return
 
     if args.islem == "elle-uret":

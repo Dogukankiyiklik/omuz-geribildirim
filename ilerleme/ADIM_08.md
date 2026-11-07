@@ -1,7 +1,7 @@
 # ADIM 08 — Deney 4: LLM ile kural tabanlı karşılaştırması
 
 **Tarih:** 2026-11-07 (altyapı; Güncelleme 09 ile tasarım ve kod)
-**Durum:** Kısmen. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Kod, istemler ve ağsız testler hazır. **Bekleniyor:** kullanıcının `GEMINI_API_KEY`'i kurması → pilot → (gerekirse yalnızca biçim düzeltmesi) → 150'lik deney (kullanıcı çalıştırır) → 45 cümlelik elle etiketleme (kullanıcı).
+**Durum:** Kısmen: deney tamam (Sonuçlar), yalnızca 45 cümlelik elle etiketleme bekleniyor. Tasarım "Önceden belirlenenler" bölümünde ve **ilk API isteğinden önce** commit'lendi. Kod, istemler ve ağsız testler hazır. **Bekleniyor:** kullanıcının `GEMINI_API_KEY`'i kurması → pilot → (gerekirse yalnızca biçim düzeltmesi) → 150'lik deney (kullanıcı çalıştırır) → 45 cümlelik elle etiketleme (kullanıcı).
 
 ## Önceden belirlenenler (Karar 36; ilk API isteğinden önce commit'lendi)
 Kaynak: `ilerleme/GUNCELLEME_09.md`, Karar 36. Kod bu tanımlarla yazıldı. Pilottan sonra yalnızca **biçim** düzeltmesi yapılabilir; içerik kuralları, metrikler ve örneklem değişmez.
@@ -226,11 +226,99 @@ python -m deneyler.deney4 elle-degerlendir
 - **Altyapı düzeltmesi:** İstemci, sağlayıcının önerdiği bekleme 120 s'yi aşınca (günlük kota) artık beklemeden duruyor; önceden 6 deneme × 120 s boşuna bekliyordu (`cekirdek/llm.py`, test `test_gunluk_kotada_beklemeden_durur`).
 - İçerik pilotta raporlanmaz (Karar 36). Pilotun yanıtları ve tabloları `sonuclar/deney4/pilot/` altında, yalnızca kayıt için.
 
+### Asıl deney (`gemini-3.5-flash-lite`; kullanıcı çalıştırdı, 7 Kas 15:05–15:29)
+`sonuclar/deney4/bilgi.json`: 300/300 yanıt, **242 ağ isteği** (58 yanıt, girdisi aynı olan tekrarlardan önbellekle geldi), 1447,3 s, durum "tamam". Yanıtların hepsinin bitiş nedeni `STOP`, hepsi ilk denemede geldi. Sayılar `python -m deneyler.deney4 raporla` çıktısından ve `ozet.csv` / `bootstrap.csv`'den kopyalandı (üslup kod hatası düzeltildikten sonra; aşağıdaki "Kararlar ve sapmalar").
+
+**1. Özet** (`ozet.csv`; 150 tekrar: 100 hatalı, 50 doğru; hepsi önden + çapraz)
+
+| metrik | A (kural) | B (LLM + sapma kodu) | C (LLM + ham özet) |
+| --- | --- | --- | --- |
+| katı /100 | 61.00 | 61.00 | 45.00 |
+| ilk iki /100 | 73.00 | 74.00 | 69.00 |
+| hatalılarda olumlu cümle /100 | 15.00 | 14.00 | 22.00 |
+| doğrularda gereksiz uyarı /100 | 8.00 | 18.00 | 16.00 |
+| sadakat: liste = girdi /100 | 100.00 | 89.33 | 52.67 (betimsel) |
+| sadakat: küme = girdi /100 | 100.00 | 91.33 | 62.00 (betimsel) |
+| eklenen hata /100 | 0.00 | 6.67 | 32.67 |
+| atlanan hata /100 | 0.00 | 2.00 | 16.67 |
+| sayı uydurdu /100 | 0.00 | 0.67 | 0.00 |
+| sayı içeren /100 | 94.00 | 87.33 | 11.33 |
+| üslup: %, yüzde, gövde boy /100 | 0.00 | 11.33 | 0.67 |
+| üslup: 2'den fazla hata /100 | 0.00 | 2.00 | 1.33 |
+| ortalama kelime | 17.37 | 18.91 | 17.85 |
+
+**2. Kişi bazlı bootstrap %95 GA** (`bootstrap.csv`, 2000 tekrar, tohum 1; eşleştirilmiş fark, puan /100)
+
+| fark | metrik | nokta | GA |
+| --- | --- | --- | --- |
+| B − A | katı | 0.0 | 0.0 – 0.0 |
+| B − A | ilk iki | 1.0 | 0.0 – 3.0 |
+| B − A | doğrularda gereksiz uyarı | 10.0 | 0.0 – 26.0 |
+| C − A | katı | −16.0 | −26.0 – −5.0 |
+| C − A | ilk iki | −4.0 | −13.0 – 5.0 |
+| C − A | doğrularda gereksiz uyarı | 8.0 | 2.0 – 14.0 |
+
+**3. Kişi bazlı** (`kisi.csv`; katı / ilk iki / gereksiz uyarı)
+
+| kişi | A | B | C |
+| --- | --- | --- | --- |
+| Honza | 75 / 85 / 10 | 75 / 85 / 50 | 55 / 75 / 20 |
+| Mima | 55 / 65 / 0 | 55 / 70 / 0 | 35 / 75 / 0 |
+| Petra | 65 / 85 / 0 | 65 / 85 / 0 | 65 / 90 / 20 |
+| Terka | 85 / 85 / 20 | 85 / 85 / 20 | 50 / 65 / 30 |
+| Vasil | 25 / 45 / 10 | 25 / 45 / 20 | 20 / 40 / 10 |
+
+**4. Gerçek sınıfa göre** (`sinif.csv`; katı / ilk iki, hatalılarda; doğrularda gereksiz uyarı)
+
+| sınıf | A | B | C |
+| --- | --- | --- | --- |
+| omuz | 55 / 85 | 60 / 85 | 70 / 70 |
+| baş | 60 / 60 | 60 / 60 | 45 / 55 |
+| öne kaçma | 45 / 50 | 40 / 50 | 15 / 40 |
+| dirsek | 55 / 75 | 60 / 75 | 60 / 85 |
+| az kaldırma | 90 / 95 | 85 / 100 | 35 / 95 |
+| doğru (gereksiz uyarı) | 8 | 18 | 16 |
+
+C'de eklenen hata sınıflara göre 35–55/100; en yüksek az kaldırmada (55).
+
+**5. Önceden belirlenen beklentiler**
+1. **B ≈ A (katı, ilk iki): tuttu.** Katı 61,00 / 61,00 (GA 0 – 0), ilk iki 74,00 / 73,00. Doğrularda gereksiz uyarı ise B'de 10 puan yüksek (GA 0 – 26). Bunun büyük kısmı çıkarıcıdan geliyor (madde 6).
+2. **C, A'dan düşük katı ve yüksek gereksiz uyarı: tuttu.** Katı −16 (GA −26 – −5), gereksiz uyarı +8 (GA 2 – 14); ikisinde de GA sıfırı içermiyor. İlk iki farkı (−4, GA −13 – 5) belirsiz. C'nin girdisinde karar yokken model en az bir hatayı kural tabanlı sisteme yakın bir oranda bulabiliyor, ama sıralaması ve "doğru" kararı daha kötü. Sistemin listesiyle yalnızca 52,67/100 aynı.
+3. **Sayı uydurma C > B: tutmadı.** C 0,00, B 0,67 (150 cümlenin 1'i). Sebep: C sayıları çok az kullanıyor (sayı içeren 11,33/100). C'nin izinli kümesi de geniş (girdi sayıları, farklar, ±1). Sonuç olduğu gibi raporlanır.
+
+**6. Çıkarıcının ilk bağımsız sınavı: Claude Code'un ön okuması** (körlemesine değil; asıl ölçü kullanıcının 45 cümlelik etiketlemesi)
+- B'de "eklenen hata" olarak sayılan 10 tekrarın 10'u ve "atlanan hata" olarak sayılan 3 tekrarın 3'ü, okununca **çıkarıcı hatası** görünüyor; modelin hata eklemesi ya da atlaması değil:
+  - **6 tekrar** (no 5, 6, 9, 10, 45, 91): girdisi aynı olduğu için hepsi aynı olumlu cümleyi aldı: "Harika bir tekrar çıkardın, kolunu 145 derece yukarı kaldırarak hareketi kusursuz tamamladın." Çıkarıcı "yukarı kaldır"ı **az kaldırma** saydı. B'nin doğrulardaki fazladan "gereksiz uyarısı" (18 − 8 = 10 puan) **tamamen** bu cümleden geliyor. Gerçek etiketi doğru olan 50 tekrarın 5'i (no 5, 6, 9, 10, 45) bu cümleyi aldı; 5/50 = 10 puan. No 91 hatalı etiketli, sistemin "doğru" dediği bir tekrar. Diğer 4 uyarı (no 8, 33, 36, 42) A'da da var, yani sistemin kendi kararı.
+  - **4 tekrar** (36, 54, 119, 137): öne kaçma ya da dirsek düzeltmesindeki "kolunu … yukarı kaldır" ifadesi az kaldırma sayıldı.
+  - **3 tekrar** (62, 75, 111): az kaldırma söylenmiş ama çıkarıcı kaçırmış. Örnekler: "170 dereceye kadar yükseltmelisin", "yetersiz kaldın, 35 derece daha fazla kaldırarak", "… 130 derece kaldırdın, gövde boyu daha yukarı kaldırmalısın" (virgül parçalamasıyla "kol" kökü ayrı parçada kaldı).
+- Yani B'nin çıkarıcıyla ölçülen sadakati (89,33) gerçek sadakatin **alt sınırı** gibi görünüyor. Karar 23'teki "zayıf kanıt" uyarısı doğrulandı: çıkarıcı kendi şablonlarında %100, LLM cümlelerinde yanılıyor. Sözlük Karar 36 gereği **değiştirilmedi**.
+- Bu okuma sonuç görüldükten sonra yapıldı ve körlemesine değil; yalnızca betimseldir.
+
+**7. Üslup**
+- B'nin 17/150 cümlesinde "gövde boyu" geçiyor, ör. "kolunu tam gövde boyu hizasında tutmaya özen göster". Bu ifade B'nin girdisinde yok; istem "gövde boyu ifadesini kullanma" diyor. Modelin yasakladığımız ifadeyi kullanması ilginç bir yan bulgu.
+- B'de 3/150 cümle 2'den fazla hata söylüyor (çıkarıcıya göre; madde 6'daki hatalar dahil).
+- C'de 1/150 cümlede "gövde boyu" var.
+
+**8. Örnek cümleler** (`ornek_cumleler.md`, aynı 5 tekrar, tohum 0)
+
+| # | gerçek | A | B | C |
+| --- | --- | --- | --- | --- |
+| 12 | doğru | Bu tekrar doğru. Kolunu yaklaşık 135 dereceye kadar kaldırdın, omzun yerindeydi. Aynı şekilde devam et. | Harika bir tekrar, kolunu 135 derece kaldırdın, bu şekilde devam et. | Harika bir tekrar çıkardın, hareket formun gayet düzgündü. |
+| 100 | öne kaçma | Kolunu indirirken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır. | Sağ kolunu indirirken kolun öne doğru kaçtı. İndirirken sağ kolunu vücudunla aynı hizada tutmaya dikkat et. | Hareketi yaparken kolun dirsekten büküldü, bu yüzden dirseğini daha düz tutmaya çalış. Ayrıca kolun biraz öne doğru kaçtı, o yüzden kolunu tam vücudun yanından kaldır. |
+| 134 | az kaldırma | Kolunu 130 dereceye kadar kaldırdın; normalde 150 dereceye çıkıyorsun. Kolunu yaklaşık 20 derece daha yukarı kaldır. | Sağ kolunu kaldırırken en üstteyken kol normalden az kaldırıldı. Sağ kolunu 20 derece daha yukarı kaldır. | Harika bir tekrar çıkardın, kolunu daha yükseğe kaldırabilirsin. |
+| 127 | dirsek | Doğru tekrar. Kolun yaklaşık 150 dereceye çıktı ve duruşun düzgündü. Böyle devam et. | 150 derece ile harika bir tekrar çıkardın, aynen devam et! | Harika bir tekrar çıkardın, hareketin formunu çok iyi korudun. |
+| 63 | omuz | Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 15 derece kaldırdın. Omzunu aşağıda ve gevşek tut. Ayrıca kolun yukarıdayken dirseğini yaklaşık 20 derece büktün. Kolunu düz tut. | Sağ kolunu kaldırırken sağ omuzun kulağına doğru kalktı, omuzunu aşağıda tutmaya çalış. Hareketin en üst noktasındayken dirseğin 25 derece büküldü, kolunu tamamen düz tutarak 175 dereceye ulaşmaya özen göster. | Kaldırma sırasında sağ omzun kulağına doğru fazla yaklaştı, omzunu aşağıda tutmaya çalış. Ayrıca kolunu yeterince yukarı kaldırmadın, kolunu hedef seviyeye kadar tam kaldır. |
+
+- 134'te C, "Harika bir tekrar çıkardın" diyerek başlayıp aynı cümlede kolu yeterince kaldırmadığını söylüyor. Bu, çelişkili bir geri bildirim.
+- 127'de üç koşul da dirsek hatasını kaçırıyor; A'nın kararı zaten "doğru".
+
+**9. Çıkarıcı ile kullanıcının uyumu (45 cümle):** kullanıcının etiketlemesinden sonra doldurulacak (`python -m deneyler.deney4 elle-degerlendir`).
+
 ## Kabul ölçütü kontrolü
 - [x] Önceden belirlenenler ilk API isteğinden önce commit'lendi.
 - [x] Testler geçti: tam pytest `179 passed, 1 xfailed in 82.71s`.
 - [x] Pilot (biçim): düzeltme gerekmedi; istemler değişmeden commit'li.
-- [ ] Üç koşulun tablosu ve her koşuldan 5 örnek cümle.
+- [x] Üç koşulun tablosu ve her koşuldan 5 örnek cümle (Sonuçlar 1–8).
 - [ ] Çıkarıcının bağımsız sınaması (45 cümle).
 
 ## Kararlar ve sapmalar (Güncelleme 09)
@@ -240,6 +328,9 @@ python -m deneyler.deney4 elle-degerlendir
 - **B'de az kaldırmanın fazı** "en üstteyken" (Deney 3'teki gibi).
 - **C'deki sadakat sütunları** yalnızca betimsel ("kural sistemiyle uyum"); C'nin girdisinde hata listesi yok.
 - **A için de sayı uydurma ve sadakat hesaplandı.** Bu bir denetimdir: B'nin izinli kümesinin A'nın gerçekten kullandığı sayıları kapsadığını gösterir (0,00 ve 100,00).
+
+- **Üslup metriğinde kod hatası (sonuç görüldükten sonra bulundu ve düzeltildi):** İlk sürümde "yüzde" deseni "bu **yüzde**n"i de yakalıyordu. "%/yüzde/gövde boy" diye sayılan cümlelerin C'de 12'sinin 11'inde, B'de 19'unun 2'sinde yalnızca "bu yüzden" geçiyordu (ilk değerler: B 12,67, C 8,00; düzeltilmiş: B 11,33, C 0,67). Desen `\byüzde(?!n\b)` oldu ("yüzde 20", "yüzdesi" sayılır, "yüzden" sayılmaz). Tanım ("yüzde" kelimesi) değişmedi; yalnızca kod hatası düzeltildi, test eklendi (`test_uslup_yuzde_bu_yuzden_sayilmaz`). Tablolar ağa gitmeden yeniden yazıldı (`python -m deneyler.deney4 raporla`); diğer metrikler değişmedi.
+- **Elle etiketleme dosyasının Excel kopyası:** `elle_etiket.xlsx` eklendi. Türkçe Excel virgüllü CSV'yi tek sütunda açabiliyor. Seçim ve sıra aynı (tohum 2); `elle-degerlendir` önce xlsx'i okur.
 
 ## Açık sorular / danışmana notlar (Güncelleme 09)
 - Yeni bir Flash modeli (ör. 3.x) "düşünme"yi tamamen kapatmaya izin vermeyebilir. Bu durumda en düşük düzey mi, yoksa varsayılan mı kullanılsın? Karar 36 "varsayılan bırakılır ve not edilir" diyor; ben varsayılanı bırakacağım.

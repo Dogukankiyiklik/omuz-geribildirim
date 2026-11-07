@@ -28,7 +28,7 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ✅ |
 | 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 (çekim bekleniyor; video gelince her şeyden önce, Karar 46) |
 | 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ✅ (Güncelleme 10; Karar 42 duyarlılık analizi bitti) |
-| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ⏳ (yalnızca süre tahmini, Karar 45; karar Güncelleme 11) |
+| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | 🔄 (Güncelleme 11, Karar 48: yapılır; sert sınır 10 Kas akşamı, Adım 7 önce) |
 | 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⛔ yapılmaz (Karar 45; gelecek çalışma) |
 | 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | 🔄 (hazırlık tamam; dondurma 13 Kas) |
 | — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu | ⏳ |
@@ -451,6 +451,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 **Kabul ölçütü:** YENI ile siluet ölçütünün AUC karşılaştırması ve görsel kontrol aracında siluet sınırının çizildiği 3 örnek video. Sonuç olumsuz çıksa da raporlanır.
 
 **Güncelleme 10** (Karar 45): Yalnızca **süre tahmini**: segmentasyon maskesi (`output_segmentation_masks=True`) Ex1'in 3 videosunda ölçülür; önden + çapraz için toplam süre ve disk tahmini ADIM_09'un sonunda. Ölçüt ya da deney yazılmaz; girip girmemeye danışman Adım 7 ile birlikte karar verir.
+
+**Güncelleme 11** (Karar 47–50): 6b **yapılır** (🔄), önceden kayıtlı (`ilerleme/ADIM_06b.md` "Önceden belirlenenler", koddan önce commit). MediaPipe 1.2.2 segmentasyon + noktalar tek çalıştırmada; `SILUET` (kulak–omuz arasında 5 sütunda siluet sınırı / gövde) ile `YENI_mp122` Deney 1 v2 biçiminde (açı bandı, yönsüz, Karar 7) aynı tekrarlarda karşılaştırılır; birleşik ölçüt yok; 3 görsel örnek. Uzun segmentasyonu kullanıcı başlatır. Sonuç ne olursa olsun raporlanır; uygulama ve karar kuralı değişmez (Karar 49). Sert sınır 10 Kas akşamı; Adım 7 her zaman önce (Karar 50).
 
 ---
 

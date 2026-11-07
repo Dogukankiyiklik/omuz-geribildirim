@@ -1,0 +1,4 @@
+﻿ölçüt,küme,silkme,doğru,diğer hatalar,AUC silkme/doğru,AUC silkme/diğer,AUC silkme/doğru önden (0–20°),AUC silkme/doğru çapraz (30–60°),kişi AUC ort.,kişi AUC en düşük,kişi AUC en yüksek,kişi özeti,E boş (NaN) tekrar (bütün değerlendirilen),değerlendirilen tekrar
+SILUET,ortak (iki ölçütün de E'si var),135.0,681.0,501.0,0.7160602599662805,0.6248983514452576,0.9376716808371485,0.5486352357320099,0.7165938324405808,0.5255474452554745,0.7934985345057287,"0,72 (0,53–0,79)",0.0,1363.0
+YENI_mp122,ortak (iki ölçütün de E'si var),135.0,681.0,501.0,0.9686300103333877,0.8622754491017964,0.986592544146501,0.9569478908188586,0.9681176821181605,0.9094058086863842,0.9994513031550069,"0,97 (0,91–1,00)",0.0,1363.0
+"YENI (Deney 1 v2, kayıtlı; 0.10.20 noktaları)",Deney 1 v2'nin bütün önden+çapraz tekrarları,,,,0.9676293033121227,0.8624233015450581,0.9789404839764552,0.9602667493796526,,,,,,

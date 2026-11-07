@@ -28,7 +28,7 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ✅ |
 | 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | 🔄 (çekim bekleniyor; video gelince her şeyden önce, Karar 46) |
 | 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ✅ (Güncelleme 10; Karar 42 duyarlılık analizi bitti) |
-| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | 🔄 (Güncelleme 11, Karar 48: yapılır; sert sınır 10 Kas akşamı, Adım 7 önce) |
+| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ✅ (7 Kas; sonuç olumsuz: SILUET 0,72 / YENI_mp122 0,97, çaprazda tanım başa takılıyor; ADIM_06b) |
 | 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⛔ yapılmaz (Karar 45; gelecek çalışma) |
 | 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | 🔄 (hazırlık tamam; dondurma 13 Kas) |
 | — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu | ⏳ |

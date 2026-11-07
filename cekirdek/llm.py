@@ -302,6 +302,9 @@ class LLMIstemcisi:
             except GeciciHata as e:
                 if deneme == self.en_fazla_deneme:
                     raise LLMHatasi(f"{self.en_fazla_deneme} denemede başarısız: {e}") from e
+                if e.bekle_s is not None and e.bekle_s > self.en_uzun_bekleme_s:
+                    # Sağlayıcı çok uzun bekleme istiyor (ör. günlük kota bitti, "retry in 20h"): beklemek boşuna.
+                    raise LLMHatasi(f"kota: sağlayıcı {e.bekle_s / 3600:.1f} sa beklemeyi öneriyor; durduruldu. {e}") from e
                 bekle = e.bekle_s if e.bekle_s is not None else self.taban_bekleme_s * 2 ** (deneme - 1)
                 self._uyku(min(bekle, self.en_uzun_bekleme_s))
                 continue

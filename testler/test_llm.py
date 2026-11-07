@@ -134,3 +134,12 @@ def test_orneklem_tabakali_ve_tekrarlanabilir():
     assert (a.groupby(["hata", "kisi"]).size() == [10 if h == ht.DOGRU else 4
                                                   for h, _ in a.groupby(["hata", "kisi"]).size().index]).all()
     assert not orneklem_sec(c, 50, 20, 1).satir.equals(a.satir)
+
+
+def test_gunluk_kotada_beklemeden_durur():
+    """Sağlayıcı en uzun beklemeden fazlasını isterse (ör. günlük kota, 20 sa) beklemeden durulur."""
+    s = llm.SahteSaglayici(hatalar=[llm.GeciciHata("429 per day", bekle_s=72214.0)])
+    ist, saat = _istemci(s, en_uzun_bekleme_s=120.0)
+    with pytest.raises(llm.LLMHatasi, match="kota"):
+        ist.sor(llm.Istek("x", model="m"))
+    assert s.cagri == 1 and saat.uykular == [] and len(ist.onbellek) == 0

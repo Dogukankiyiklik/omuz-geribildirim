@@ -1,7 +1,7 @@
 # ADIM 09 — Sonuçları dondurma
 
 **Tarih:** 2026-11-07 (hazırlık; Güncelleme 09, Karar 37–39), 2026-11-09 (Güncelleme 12, Karar 51–56)
-**Durum:** Kısmen. Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Bekleyen: kullanıcının `python -m deneyler.hepsi` tam çalıştırması, ardından `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
+**Durum:** Kısmen. Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Tam yeniden üretim 119/120 aynı (ex7/d2_esikler.csv'de fazladan bir sütun; sayılar aynı); Karar 55 gereği durdu, danışman kararı bekleniyor. Sonra `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
 
 ## Basit anlatım
 - **Yeniden üretim:** `deneyler/hepsi.py` projenin son kaydedilmiş (commit'lenmiş) hâlinin temiz bir kopyasını açıyor. Bu kopyada eski sonuç dosyaları yok. Bütün deneyleri sırayla baştan çalıştırıp çıkan her tabloyu bizim kayıtlı tablolarımızla karşılaştırıyor. Hepsi aynı çıkarsa "bu sonuçlar bu koddan, bu veriden çıkıyor" diyebiliriz. Hocanın istediği "yeniden kurulabilirlik" budur.
@@ -190,6 +190,20 @@ python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 
 
 **`hepsi` üzerinden deneme (temiz worktree):** `python -m deneyler.hepsi --adimlar deney1_v2 deney2 deney3 deney3_saglam kamera_acisi hiz_esigi kural_disa_aktar siluet deney4_orneklem deney4 deney4_kaldirma kendi_kayit` (Claude Code; commit `20f15b7`; çıktı geçici klasörde). 12 adımın hepsi çıkış kodu 0; süreler deney1_v2 99.8 s, deney2 98.9 s, deney3 35.1 s, deney3_saglam 36.2 s, siluet 31.5 s, deney4 21.7 s, deney4_kaldirma 8.2 s, kendi_kayit 3.1 s; toplam 5.7 dk. **Karşılaştırılan dosya: 74 · aynı: 74** ("Yeniden üretim: 74/74 aynı"). Ağ isteği yok. Temiz kopya kaldırıldı. Bu bir deneme; tam çalıştırma (Deney 1, 1b, 1c, Ex7, tekrar ayırma dahil) kullanıcıda.
 
+### Tam yeniden üretim (9 Kas 16:28–17:01; Claude Code çalıştırdı, kullanıcının isteğiyle)
+`python -m deneyler.hepsi`, commit `ecc6762`. Kaynak: `sonuclar/hepsi/ozet.md`, `adimlar.csv`, `regresyon.csv`.
+- 17 adımın hepsi çıkış kodu 0; toplam süre **32.1 dk** (deney1c 1100.4 s, ex7 207.7 s, deney2 150.6 s, deney1b 114.2 s, deney1_v2 112.0 s; diğerleri < 1 dk). Ağ isteği yok.
+- **Karşılaştırılan dosya: 120 · aynı: 119 · farklı: 1** ("Yeniden üretim: 119/120 aynı").
+- Farklı olan: `ex7/d2_esikler.csv`, "boyut/sütun: (20, 22) / (20, 21)".
+
+**Fark ne? (tanı; hiçbir dosya düzeltilmedi)**
+- Yeniden üretilen dosyada fazladan bir sütun var: `kaldırma sürümü`; 20 satırın hepsinde değeri `ilk`.
+- Bu sütun çıkarılınca dosya kayıtlı dosyayla **aynı** (`csv_karsilastir`: "aynı", en büyük fark 0.0). Yani hiçbir eşik, ölçek ya da sayı değişmedi.
+- Sebep: Ex7 eşik tablosunu `deneyler/deney2.py`'deki ortak fonksiyonla yazıyor. Bu sütun o fonksiyona Güncelleme 06'da (Karar 17, commit `5752559`) eklendi. Kayıtlı `ex7/d2_esikler.csv` ise ondan önce, Adım 4b'de (commit `890fd15`) üretildi ve sonra yeniden üretilmedi. Ex7'de "az kaldırma" sınıfı yok; sütun yalnızca bir etiket ve `ilk`, Karar 17'deki varsayılan.
+- Kanıt dosyası: `sonuclar/hepsi/ex7_d2_esikler_yeniden.csv` (yeniden üretilen hali).
+
+**Karar 55 madde 4 gereği:** durdum. `OZET.md`'ye yeniden üretim satırı yazılmadı, `v-sunum` etiketi atılmadı, push yapılmadı. Kayıtlı sonuç dosyası elle düzeltilmedi. Danışmana soru: kayıtlı `ex7/d2_esikler.csv` yeniden üretilen haliyle değiştirilsin mi (yalnızca sütun eklenir, sayılar aynı), yoksa karşılaştırmada bu sütun mu yok sayılsın? İkisinden sonra da `v-sunum` atılabilir.
+
 **Kişi 1 demo (`--kendi-kayit`):** kalibrasyon 6 tekrar, profil `profiller/kisi1.npz`; `demo_kisi1.mp4` 1350 kare, **45.0 s**. Seçilen dört tekrarın hasta cümlesi Adım 7 sonuç dosyasıyla (`kendi_kayit/kisi1/tekrarlar.csv`) **4/4 aynı**:
 - 4 (doğru): "Hareketi doğru yaptın. Kolun yaklaşık 140 dereceye çıktı, omzun ve dirseğin yerindeydi."
 - 7 (omuz): "Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut."
@@ -203,7 +217,7 @@ python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 
 - [x] Karar 53 eklemeleri ve testleri; önbellekli adımlar kayıtlı sonuçlarla aynı.
 - [x] `YENIDEN_KURULUM.md`, `LLM_KULLANIMI.md`, `SURUMLER.md` son hali; `ARKA_PLAN.md` notu; README.
 - [x] Sunum girdileri (Karar 56).
-- [ ] Tam yeniden üretim (kullanıcı) → `OZET.md`'ye commit ve "N/N aynı".
+- [ ] Tam yeniden üretim: çalıştırıldı, 119/120 aynı; 1 dosyada biçim farkı (yukarıda), danışman kararı bekleniyor.
 - [ ] `v-sunum` etiketi ve push.
 
 ### Kararlar ve sapmalar

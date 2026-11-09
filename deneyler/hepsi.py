@@ -9,10 +9,11 @@ Ne yapar?
      <hedef>/hepsi_gunluk/ altına yazılır.
   4. Üretilen her CSV'yi ve modeller/*.json'u, bu klasördeki (proje) kayıtlı dosyayla karşılaştırır.
      Regresyon özeti: sonuclar/hepsi/regresyon.csv, adimlar.csv, ozet.md.
-Adım 7 (kendi kayıtlar) ve Adım 8 (Deney 4) video ve API gerektirdiği için çalıştırılmaz; kayıtlı çıktıları listelenir.
+Karar 53: 6b (siluet), Deney 4 ve Adım 7 (kendi kayıt) kayıtlı ara çıktılardan (önbellekten) üretilir; segmentasyon,
+LLM isteği ve video üzerinde MediaPipe yeniden çalıştırılmaz. Önbellek yoksa adım başarısız olur ("üretilmedi").
 
 Kullanım:
-    python -m deneyler.hepsi                 # tam çalıştırma, ~45–60 dk (kullanıcı çalıştırır)
+    python -m deneyler.hepsi                 # tam çalıştırma, ~1–1,5 sa (kullanıcı çalıştırır)
     python -m deneyler.hepsi --hizli         # küçük alt küme (deney 1, kamera açısı, hız eşiği), ~1 dk
     python -m deneyler.hepsi --adimlar deney2 deney3   # yalnızca seçilen adımlar (bağımlılıklar kullanıcının işi)
     python -m deneyler.hepsi --temizle       # temiz kopyayı (git worktree) kaldırır
@@ -30,6 +31,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -41,30 +43,73 @@ KOK = veri.KOK
 CIKTI = KOK / "sonuclar" / "hepsi"
 VARSAYILAN_HEDEF = Path(tempfile.gettempdir()) / "omuz_hepsi_temiz"
 
-# (ad, modül + argümanlar, karşılaştırılacak sonuç klasörleri, üretilen model dosyaları)
+class Adim(NamedTuple):
+    """Bir yeniden üretim adımı.
+    komut: modül + argümanlar; {VERI}, {PROJE}, {HEDEF} yer tutucuları çalıştırmada doldurulur.
+    klasorler: karşılaştırılacak sonuç klasörleri; modeller: üretilen modeller/*.json.
+    girdiler: adımdan önce projeden temiz kopyaya kopyalanan insan girdisi dosyalar (ör. kullanıcı etiketleri);
+      bunlar yeniden üretilmez ve karşılaştırılmaz.
+    dosyalar: {klasör: [dosya, ...]} yalnızca bu CSV'ler karşılaştırılır (None: klasördeki bütün CSV'ler).
+    yok_sutun: {"klasör/dosya": [sütun, ...]} karşılaştırmada yok sayılan sütunlar (gerekçe ADIM_09'da).
+    kaynak: "" (baştan) ya da önbellekten üretimin açıklaması (Karar 53)."""
+    ad: str
+    komut: list
+    klasorler: list
+    modeller: list
+    girdiler: tuple = ()
+    dosyalar: dict | None = None
+    yok_sutun: dict | None = None
+    kaynak: str = ""
+
+
+DENEY4_MODEL = "gemini-3.5-flash-lite"   # Karar 41: Deney 4'ün raporlanan modeli
 ADIMLAR = [
-    ("deney1", ["deneyler.deney1", "--galeri-yok"], ["deney1"], []),
-    ("deney1_v2", ["deneyler.deney1_v2", "--sekilsiz"], ["deney1_v2"], []),
-    ("deney1b", ["deneyler.deney1b"], ["deney1b"], []),
-    ("deney1c", ["deneyler.deney1c"], ["deney1c"], []),
-    ("deney2", ["deneyler.deney2"], ["deney2"], []),
-    ("ex7", ["deneyler.ex7"], ["ex7"], []),
-    ("deney3", ["deneyler.deney3"], ["deney3"], []),
-    ("deney3_saglam", ["deneyler.deney3", "--olcu-surumu", "saglam"], ["deney3"], []),
-    ("tekrar_ayirma", ["deneyler.tekrar_ayirma"], ["tekrar_ayirma"], []),
-    ("kamera_acisi", ["deneyler.kamera_acisi"], ["kamera_acisi"], ["kamera_esigi.json"]),
-    ("hiz_esigi", ["deneyler.hiz_esigi"], ["hiz_esigi"], ["hiz_esigi.json"]),
-    ("kural_disa_aktar", ["araclar.kural_disa_aktar"], ["kural_disa_aktar"], ["kural_ex1.json"]),
+    Adim("deney1", ["deneyler.deney1", "--galeri-yok"], ["deney1"], []),
+    Adim("deney1_v2", ["deneyler.deney1_v2", "--sekilsiz"], ["deney1_v2"], []),
+    Adim("deney1b", ["deneyler.deney1b"], ["deney1b"], []),
+    Adim("deney1c", ["deneyler.deney1c"], ["deney1c"], []),
+    Adim("deney2", ["deneyler.deney2"], ["deney2"], []),
+    Adim("ex7", ["deneyler.ex7"], ["ex7"], []),
+    Adim("deney3", ["deneyler.deney3"], ["deney3"], []),
+    Adim("deney3_saglam", ["deneyler.deney3", "--olcu-surumu", "saglam"], ["deney3"], []),
+    Adim("tekrar_ayirma", ["deneyler.tekrar_ayirma"], ["tekrar_ayirma"], []),
+    Adim("kamera_acisi", ["deneyler.kamera_acisi"], ["kamera_acisi"], ["kamera_esigi.json"]),
+    Adim("hiz_esigi", ["deneyler.hiz_esigi"], ["hiz_esigi"], ["hiz_esigi.json"]),
+    Adim("kural_disa_aktar", ["araclar.kural_disa_aktar"], ["kural_disa_aktar"], ["kural_ex1.json"]),
+    # ---- Karar 53: önbellekten (ağ, video ya da segmentasyon yeniden çalıştırılmaz)
+    Adim("siluet", ["deneyler.siluet", "--sinirlar", "{HEDEF}/hepsi_ara/siluet_sinirlar.npz"], ["siluet"], [],
+         kaynak="önbellekten: veri/ara/siluet/ (segmentasyon yeniden çalıştırılmadı)"),
+    Adim("deney4_orneklem", ["deneyler.deney4_orneklem"], ["deney4"], [],
+         dosyalar={"deney4": ["orneklem.csv", "orneklem_ozet.csv"]}),
+    Adim("deney4", ["deneyler.deney4", "onbellekten", "--model", DENEY4_MODEL,
+                    "--onbellek", "{PROJE}/sonuclar/deney4/onbellek.jsonl"], ["deney4"], [],
+         dosyalar={"deney4": ["girdiler.csv", "yanitlar.csv", "cumleler.csv", "ozet.csv", "sinif.csv", "kisi.csv",
+                              "bootstrap.csv"]},
+         yok_sutun={"deney4/yanitlar.csv": ["onbellekten"]},
+         kaynak="önbellekten: sonuclar/deney4/onbellek.jsonl (LLM'e istek gitmez)"),
+    Adim("deney4_kaldirma", ["deneyler.deney4", "kaldirma-degerlendir"], ["deney4"], [],
+         girdiler=("sonuclar/deney4/elle_kaldirma.xlsx", "sonuclar/deney4/elle_kaldirma_anahtar.csv"),
+         dosyalar={"deney4": ["kaldirma_ozet.csv", "kaldirma_uyum.csv", "kaldirma_bootstrap.csv",
+                              "kaldirma_cumleler.csv"]},
+         kaynak="kayıtlı yanıtlar + kullanıcı etiketleri (elle_kaldirma.xlsx girdi olarak kopyalanır)"),
+    Adim("kendi_kayit", ["deneyler.kendi_kayit", "--kisi", "kisi1",
+                         "--kalibrasyon", "{VERI}/kendi_kayit/kisi1/kalibrasyon.MOV",
+                         "--test", "{VERI}/kendi_kayit/kisi1/test.MOV",
+                         "--etiketler", "{VERI}/kendi_kayit/kisi1/etiketler.csv", "--yalniz-onbellek"],
+         ["kendi_kayit"], [], kaynak="önbellekten: veri/ara/kendi_kayit/ (MediaPipe noktaları)"),
 ]
 HIZLI = ["deney1", "kamera_acisi", "hiz_esigi"]
-URETILEN_MODELLER = sorted({m for *_, ms in ADIMLAR for m in ms})
+URETILEN_MODELLER = sorted({m for a in ADIMLAR for m in a.modeller})
 # Yeniden üretilmeyen, yalnızca listelenen kayıtlı çıktılar
-LISTELENEN = {"kendi_kayit": "Adım 7 (video gerekir)", "deney4": "Adım 8 (API gerekir)",
+LISTELENEN = {"deney4": "Adım 8: pilot, API çalıştırması (onbellek.jsonl), elle_etiket/elle_uyum ve "
+                        "kullanıcı etiket dosyaları yeniden üretilmez (tablolar önbellekten üretilir)",
+              "siluet": "6b: segmentasyon (veri/ara/siluet/, ~1,5 sa) ve görsel örnekler yeniden üretilmez",
+              "siluet_sure": "Karar 45: süre ölçümü (makineye bağlı)",
               "deney2_revize": "Karar 17: başarısız deneme, kayıtlı", "deney2_ilk": "Karar 13 öncesi ilk sürüm, kayıtlı",
               "deney1_v2_atla_rastgele": "Karar 7 öncesi, kayıtlı", "adim0": "Adım 0 veri tanıtımı",
               "adim2b": "Adım 2b senkron kontrolü", "gorsel_kontrol": "görsel kontrol aracı çıktıları",
               "bant_genisligi": "Güncelleme 08 tanısı", "uygulama_saglik": "uygulama sağlık kontrolü (MediaPipe)",
-              "sunum": "sunum şekil adayları (Karar 38)"}
+              "sunum": "sunum şekil adayları (Karar 38, 56)"}
 YOK_SAYILAN_ANAHTARLAR = {"bilgi", "tarih"}   # JSON'larda sürüm/tarih bilgisi
 
 
@@ -101,8 +146,31 @@ def temizle(hedef: Path) -> None:
 
 
 # ---------------------------------------------------------------- çalıştırma
+def komutu_doldur(komut: list[str], hedef: Path, proje: Path = KOK, veri_kok: Path | None = None) -> list[str]:
+    yer = {"{VERI}": Path(veri_kok or veri.VERI_KOK).as_posix(), "{PROJE}": Path(proje).as_posix(),
+           "{HEDEF}": Path(hedef).as_posix()}
+    cikti = []
+    for k in komut:
+        for a, b in yer.items():
+            k = k.replace(a, b)
+        cikti.append(k)
+    return cikti
+
+
+def girdileri_kopyala(adim: Adim, hedef: Path, proje: Path = KOK) -> None:
+    """İnsan girdisi dosyaları (yeniden üretilemez) projeden temiz kopyaya; eksikse adım çalışmaz."""
+    for g in adim.girdiler:
+        kaynak, varis = Path(proje) / g, Path(hedef) / g
+        if not kaynak.exists():
+            raise FileNotFoundError(f"girdi yok: {kaynak}")
+        varis.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(kaynak, varis)
+
+
 def adim_calistir(ad: str, komut: list[str], hedef: Path, gunluk: Path) -> dict:
     ortam = {**os.environ, "OMUZ_VERI": str(veri.VERI_KOK), "PYTHONIOENCODING": "utf-8", "MPLBACKEND": "Agg"}
+    komut = komutu_doldur(komut, hedef)
+    (Path(hedef) / "hepsi_ara").mkdir(exist_ok=True)
     t0 = time.time()
     with open(gunluk / f"{ad}.log", "w", encoding="utf-8") as f:
         r = subprocess.run([sys.executable, "-m", *komut], cwd=hedef, env=ortam, stdout=f, stderr=subprocess.STDOUT)
@@ -111,9 +179,24 @@ def adim_calistir(ad: str, komut: list[str], hedef: Path, gunluk: Path) -> dict:
 
 
 # ---------------------------------------------------------------- karşılaştırma
-def csv_karsilastir(yeni: Path, eski: Path, tolerans: float) -> dict:
-    a = pd.read_csv(yeni, encoding="utf-8-sig", keep_default_na=False, low_memory=False)
-    b = pd.read_csv(eski, encoding="utf-8-sig", keep_default_na=False, low_memory=False)
+def _csv_oku(p: Path) -> pd.DataFrame | None:
+    """Boş (sütunsuz) CSV için None (ör. sonuclar/siluet/nan_nedenleri.csv)."""
+    try:
+        return pd.read_csv(p, encoding="utf-8-sig", keep_default_na=False, low_memory=False)
+    except pd.errors.EmptyDataError:
+        return None
+
+
+def csv_karsilastir(yeni: Path, eski: Path, tolerans: float, yok_sutun=()) -> dict:
+    a, b = _csv_oku(yeni), _csv_oku(eski)
+    if a is None or b is None:
+        ayni = a is None and b is None
+        return {"durum": "aynı" if ayni else "farklı", "ayrıntı": "boş dosya" if ayni else "biri boş",
+                "en büyük fark": 0.0 if ayni else np.nan}
+    yok_sutun = list(yok_sutun or ())
+    if yok_sutun:
+        a = a.drop(columns=[c for c in yok_sutun if c in a.columns])
+        b = b.drop(columns=[c for c in yok_sutun if c in b.columns])
     if list(a.columns) != list(b.columns) or a.shape != b.shape:
         return {"durum": "farklı", "ayrıntı": f"boyut/sütun: {a.shape} / {b.shape}", "en büyük fark": np.nan}
     en, metin_farki = 0.0, []
@@ -132,7 +215,8 @@ def csv_karsilastir(yeni: Path, eski: Path, tolerans: float) -> dict:
             metin_farki.append(c)
     if metin_farki:
         return {"durum": "farklı", "ayrıntı": "metin sütunları: " + ", ".join(metin_farki[:5]), "en büyük fark": en}
-    return {"durum": "aynı" if en <= tolerans else "farklı", "ayrıntı": "", "en büyük fark": en}
+    ayr = f"yok sayılan sütun: {', '.join(yok_sutun)}" if yok_sutun else ""
+    return {"durum": "aynı" if en <= tolerans else "farklı", "ayrıntı": ayr, "en büyük fark": en}
 
 
 def _json_duzle(d, on="") -> dict:
@@ -159,13 +243,33 @@ def json_karsilastir(yeni: Path, eski: Path, tolerans: float) -> dict:
     return {"durum": "aynı" if en <= tolerans else "farklı", "ayrıntı": "", "en büyük fark": en}
 
 
-def karsilastir(hedef: Path, adimlar: list[tuple], tolerans: float, kayitli_kok: Path = KOK) -> pd.DataFrame:
+def _adim(a) -> Adim:
+    return a if isinstance(a, Adim) else Adim(*a)
+
+
+def karsilastirma_plani(adimlar: list) -> tuple[dict, dict]:
+    """{klasör: None (bütün CSV'ler) ya da dosya kümesi}, {"klasör/dosya": yok sayılan sütunlar}."""
+    plan, yok = {}, {}
+    for a in map(_adim, adimlar):
+        for k in a.klasorler:
+            d = (a.dosyalar or {}).get(k)
+            if d is None:
+                plan[k] = None
+            elif k not in plan or plan[k] is not None:
+                plan[k] = set(plan.get(k) or ()) | set(d)
+        yok.update(a.yok_sutun or {})
+    return plan, yok
+
+
+def karsilastir(hedef: Path, adimlar: list, tolerans: float, kayitli_kok: Path = KOK) -> pd.DataFrame:
     satir = []
-    klasorler = sorted({k for _, _, ks, _ in adimlar for k in ks})
-    for k in klasorler:
+    plan, yok = karsilastirma_plani(adimlar)
+    for k in sorted(plan):
         yeni_k, eski_k = Path(hedef) / "sonuclar" / k, Path(kayitli_kok) / "sonuclar" / k
         yeni = {p.relative_to(yeni_k).as_posix() for p in yeni_k.rglob("*.csv")} if yeni_k.exists() else set()
         eski = {p.relative_to(eski_k).as_posix() for p in eski_k.rglob("*.csv")} if eski_k.exists() else set()
+        if plan[k] is not None:
+            yeni, eski = yeni & plan[k], eski & plan[k]
         for f in sorted(yeni | eski):
             r = {"klasör": k, "dosya": f}
             if f not in yeni:
@@ -173,9 +277,9 @@ def karsilastir(hedef: Path, adimlar: list[tuple], tolerans: float, kayitli_kok:
             elif f not in eski:
                 r.update({"durum": "yeni", "ayrıntı": "kayıtlıda yok", "en büyük fark": np.nan})
             else:
-                r.update(csv_karsilastir(yeni_k / f, eski_k / f, tolerans))
+                r.update(csv_karsilastir(yeni_k / f, eski_k / f, tolerans, yok.get(f"{k}/{f}")))
             satir.append(r)
-    for m in sorted({m for *_, ms in adimlar for m in ms}):
+    for m in sorted({m for a in map(_adim, adimlar) for m in a.modeller}):
         yeni, eski = Path(hedef) / "modeller" / m, Path(kayitli_kok) / "modeller" / m
         r = {"klasör": "modeller", "dosya": m}
         if not yeni.exists():
@@ -210,7 +314,8 @@ def ozet_md(adim_t: pd.DataFrame, reg: pd.DataFrame, liste: pd.DataFrame, commit
           f"- Tarih: {dt.datetime.now():%Y-%m-%d %H:%M} · commit: `{commit}` · Python {sys.version.split()[0]}",
           f"- Adım: {len(adim_t)} · başarısız: {int((adim_t['çıkış kodu'] != 0).sum())} · "
           f"toplam süre: {adim_t['süre (s)'].sum() / 60:.1f} dk",
-          f"- Karşılaştırılan dosya: {len(reg)} · " + " · ".join(f"{k}: {v}" for k, v in say.items()), "",
+          f"- Karşılaştırılan dosya: {len(reg)} · " + " · ".join(f"{k}: {v}" for k, v in say.items()),
+          f"- Yeniden üretim: {say.get('aynı', 0)}/{len(reg)} aynı", "",
           "## Adımlar", "", md_tablo(adim_t), "",
           "## Aynı olmayan dosyalar", ""]
     farkli = reg[reg.durum != "aynı"]
@@ -223,7 +328,7 @@ def main():
     ap = argparse.ArgumentParser(description="Bütün deneyleri temiz kopyada yeniden üret ve karşılaştır")
     ap.add_argument("--hedef", default=str(VARSAYILAN_HEDEF), help="temiz kopyanın klasörü (git worktree)")
     ap.add_argument("--hizli", action="store_true", help=f"yalnızca {', '.join(HIZLI)}")
-    ap.add_argument("--adimlar", nargs="+", choices=[a[0] for a in ADIMLAR])
+    ap.add_argument("--adimlar", nargs="+", choices=[a.ad for a in ADIMLAR])
     ap.add_argument("--tolerans", type=float, default=1e-9)
     ap.add_argument("--temizle", action="store_true", help="temiz kopyayı kaldır ve çık")
     ap.add_argument("--cikti", default=str(CIKTI))
@@ -233,8 +338,8 @@ def main():
     if args.temizle:
         temizle(hedef)
         return
-    secim = args.adimlar or (HIZLI if args.hizli else [a[0] for a in ADIMLAR])
-    adimlar = [a for a in ADIMLAR if a[0] in secim]
+    secim = args.adimlar or (HIZLI if args.hizli else [a.ad for a in ADIMLAR])
+    adimlar = [a for a in ADIMLAR if a.ad in secim]
     kirli = [s for s in kirli_dosyalar() if not s[3:].startswith("sonuclar/hepsi")]
     if kirli:
         print(f"UYARI: {len(kirli)} commit'lenmemiş değişiklik var; temiz kopya yalnızca HEAD'i içerir.")
@@ -243,9 +348,18 @@ def main():
     gunluk.mkdir()
     print(f"Temiz kopya: {hedef} (commit {commit}); veri: {veri.VERI_KOK} (yalnızca okunur)")
     adim_k = []
-    for i, (ad, komut, _, _) in enumerate(adimlar, 1):
-        print(f"[{i}/{len(adimlar)}] {ad}: python -m {' '.join(komut)} ...", flush=True)
+    for i, a in enumerate(adimlar, 1):
+        ad, komut = a.ad, a.komut
+        print(f"[{i}/{len(adimlar)}] {ad}: python -m {' '.join(komutu_doldur(komut, hedef))} ...", flush=True)
+        try:
+            girdileri_kopyala(a, hedef)
+        except FileNotFoundError as e:
+            print(f"      {e} → adım çalıştırılmadı", flush=True)
+            adim_k.append({"adım": ad, "komut": "python -m " + " ".join(komut), "çıkış kodu": -1, "süre (s)": 0.0,
+                           "kaynak": a.kaynak or "baştan"})
+            continue
         r = adim_calistir(ad, komut, hedef, gunluk)
+        r["kaynak"] = a.kaynak or "baştan"
         adim_k.append(r)
         print(f"      çıkış {r['çıkış kodu']} · {r['süre (s)']} s" +
               (f"  ← HATA, günlük: {gunluk / (ad + '.log')}" if r["çıkış kodu"] else ""), flush=True)

@@ -219,6 +219,19 @@ class SahteSaglayici(Saglayici):
         return self.yanitla(istek), "STOP", {}
 
 
+class YalnizOnbellekSaglayici(Saglayici):
+    """Yeniden üretim için (Karar 53): ağa hiç gitmez. Önbellek anahtarı gerçek sağlayıcının adıyla kurulsun diye
+    `ad` verilir; önbellekte olmayan her istek kalıcı hata (LLMHatasi) verir."""
+
+    def __init__(self, ad: str = "gemini"):
+        self.ad = ad
+        self.cagri = 0
+
+    def gonder(self, istek: Istek) -> tuple[str, str, dict]:
+        self.cagri += 1
+        raise LLMHatasi("önbellekte yok (yalnızca önbellek kipi; istek gönderilmedi)")
+
+
 def saglayici_olustur(ad: str, **kw) -> Saglayici:
     tur = {"gemini": GeminiSaglayici, "ollama": OllamaSaglayici, "sahte": SahteSaglayici}
     if ad not in tur:

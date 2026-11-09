@@ -21,6 +21,14 @@ Bu yüzden sabit eşikli kurallar başarısız olur. M01 (Sensors 2026) bunu aç
 
 ## Deney 1 sonuçları (referans kod, tohum 0, en-boy 9/16)
 
+> **Not (dondurma, 9 Kas 2026):** Bu tablo ilk sürüme (**v1**, M39'a sadık referans kod) aittir; güncel sonuçlar [`sonuclar/OZET.md`](../sonuclar/OZET.md)'de. Eski tablo karşılaştırma için korunuyor.
+>
+> **Güncel ana satır (v2 = kişiye özel açı bandı, YENI)** [`sonuclar/deney1_v2/ozet.csv`]:
+>
+> | Ölçüt | silkme/doğru, tüm görüşler | silkme/doğru, önden + çapraz | silkme/diğer, tüm görüşler | silkme/diğer, önden + çapraz |
+> | --- | --- | --- | --- | --- |
+> | YENI (v2) | 0,947 | 0,968 | 0,829 | 0,862 |
+
 AUC = rastgele bir silkme tekrarının rastgele bir doğru tekrardan yüksek skor alma olasılığı.
 
 | Ölçüt | Bantsız | Bantlı | Bantlı, %95 GA (kişi bootstrap) | Önden | Çapraz | Profil | Silkme / diğer hatalar |

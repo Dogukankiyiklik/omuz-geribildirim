@@ -245,7 +245,8 @@ def sinirlari_yaz(tekrarlar, ozl, yol: Path):
 
 
 # ---------------------------------------------------------------- çalıştır
-def calistir(onbellek: Path = ONBELLEK, cikti: Path = CIKTI, bootstrap_n: int = BOOTSTRAP_N, yazdir=True):
+def calistir(onbellek: Path = ONBELLEK, cikti: Path = CIKTI, bootstrap_n: int = BOOTSTRAP_N, yazdir=True,
+             sinirlar_yolu: Path | None = None):
     t0 = time.time()
     tekrarlar, ozl, _ = tekrarlar_ve_ozellikler(onbellek)
     if yazdir:
@@ -257,7 +258,8 @@ def calistir(onbellek: Path = ONBELLEK, cikti: Path = CIKTI, bootstrap_n: int = 
     if bootstrap_n:
         tablolar["bootstrap"] = bootstrap_tablosu(df, n=bootstrap_n)
     sonuclari_yaz(tablolar, Path(cikti))
-    sinirlari_yaz(tekrarlar, ozl, Path(onbellek) / "sinirlar.npz")
+    # Kare başına sınırlar (görsel/tanı için). Yeniden üretimde (deneyler/hepsi.py) veri/ dışına yazılır.
+    sinirlari_yaz(tekrarlar, ozl, Path(sinirlar_yolu) if sinirlar_yolu else Path(onbellek) / "sinirlar.npz")
     if yazdir:
         yazdir_ozet(tablolar)
         print(f"\nSüre: {time.time() - t0:.1f} s · Çıktı: {cikti}")
@@ -302,13 +304,15 @@ def main():
     ap.add_argument("--bootstrap", type=int, default=BOOTSTRAP_N)
     ap.add_argument("--gorsel", action="store_true", help="3 görsel örnek video da üret")
     ap.add_argument("--sinama", action="store_true", help="kod sınaması: AUC yok")
+    ap.add_argument("--sinirlar", help="kare başına sınırların yazılacağı .npz (varsayılan: <onbellek>/sinirlar.npz)")
     args = ap.parse_args()
     utf8_cikti()
     if args.sinama:
         sinama(Path(args.onbellek))
         return
     print("Adım 6b — SILUET değerlendirmesi...")
-    tablolar, tekrarlar, ozl = calistir(Path(args.onbellek), Path(args.cikti), args.bootstrap)
+    tablolar, tekrarlar, ozl = calistir(Path(args.onbellek), Path(args.cikti), args.bootstrap,
+                                       sinirlar_yolu=args.sinirlar)
     if args.gorsel:
         from araclar.siluet_gorsel import ornekler_uret
         ornekler_uret(tablolar["tekrarlar"], tekrarlar, ozl, Path(args.cikti) / "gorsel")

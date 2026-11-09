@@ -1,0 +1,413 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Çekim Suflörü</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Düzen: kurulum ekranı (ayarlar · sıra · yerleşim) → tam ekran suflör (dev hareket adı, faz kelimesi, zaman şeridi, sıradaki). Bilerek tek koyu tema: odanın karşısından okunacak. */
+:root{
+  --bg:#0f1416; --panel:#172024; --line:#2b373b; --fg:#eef3f1; --muted:#93a3a6;
+  --up:#ffb547; --down:#6db9ff; --ok:#86d9a6; --err:#ff8d76; --wait:#7d8c90;
+  --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+h1,h2{font-family:var(--f-display);font-weight:800;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.4rem,6vw,3.6rem);line-height:1}
+h2{font-size:1.5rem;line-height:1.1}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--up);outline-offset:2px}
+
+/* Kurulum */
+.kurulum{max-width:1180px;margin:0 auto;padding-block:28px 48px;display:flex;flex-direction:column;gap:24px}
+.ust{font-family:var(--f-mono);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.giris{max-width:64ch;color:var(--muted);margin:10px 0 0}
+.giris b{color:var(--fg)}
+.izgara{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+.sag{display:flex;flex-direction:column;gap:20px;min-width:0}
+@media (max-width:860px){.izgara{grid-template-columns:minmax(0,1fr)}}
+.kart{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+legend{font-weight:600;margin-bottom:8px;padding:0}
+.secim{display:flex;flex-wrap:wrap;gap:8px}
+.secim label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.secim label:has(input:checked){border-color:var(--up);background:color-mix(in srgb,var(--up) 12%,transparent)}
+.sureler{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sureler label{display:flex;flex-direction:column;gap:4px;font-size:.88rem;color:var(--muted)}
+.sureler input{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-family:var(--f-mono);font-variant-numeric:tabular-nums;width:100%}
+.kutu{display:flex;align-items:center;gap:10px}
+.kutu input{width:18px;height:18px;accent-color:var(--up)}
+.durum{font-size:.85rem;color:var(--muted);margin:0}
+.dugmeler{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 14px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn-ana{background:var(--up);border-color:var(--up);color:#1b1206;font-weight:600;font-size:1.15rem;padding:12px 26px}
+.btn-ana:hover{filter:brightness(1.06);border-color:var(--up)}
+.kisayol{font-size:.85rem;color:var(--muted);margin:0}
+
+ol.sira{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+ol.sira li{display:grid;grid-template-columns:2.4em minmax(0,1fr);gap:8px;align-items:baseline;padding:6px 10px;border-radius:6px;background:var(--bg)}
+ol.sira .n{font-family:var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+ol.sira .ad{font-family:var(--f-display);font-weight:600;font-size:1.15rem;letter-spacing:.02em}
+ol.sira li.err .ad{color:var(--err)}
+ol.sira li.ok .ad{color:var(--ok)}
+.not{font-size:.88rem;color:var(--muted);margin:0}
+ul.yer{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:8px}
+ul.yer li::marker{color:var(--up)}
+
+/* Suflör sahnesi */
+.sahne{position:fixed;inset:0;background:var(--bg);display:grid;grid-template-rows:auto 1fr auto auto;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));gap:14px;z-index:20}
+.ustbar,.altbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.ustbar{font-family:var(--f-mono);font-size:clamp(1rem,2.2vw,1.6rem);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ustbar .sayac{color:var(--fg);font-size:clamp(1.6rem,4vw,3rem);font-weight:600;font-variant-numeric:tabular-nums}
+.merkez{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:clamp(6px,1.5vh,18px);min-height:0}
+.etiket{font-family:var(--f-display);font-weight:800;font-size:clamp(56px,10.5vw,200px);line-height:.95;text-wrap:balance;letter-spacing:.01em}
+.sahne[data-sinif="ok"] .etiket{color:var(--ok)}
+.sahne[data-sinif="err"] .etiket{color:var(--err)}
+.sahne[data-sinif="nötr"] .etiket{color:var(--fg)}
+.ipucu{font-size:clamp(20px,3vw,46px);color:var(--fg);opacity:.85;max-width:28ch;text-wrap:balance}
+.faz{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,7vw,128px);line-height:1;letter-spacing:.03em;color:var(--wait);font-variant-numeric:tabular-nums}
+.sahne[data-faz="kaldir"] .faz{color:var(--up)}
+.sahne[data-faz="indir"] .faz{color:var(--down)}
+.serit{height:clamp(14px,2.2vh,26px);background:var(--panel);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.dolgu{height:100%;width:0;background:var(--wait)}
+.sahne[data-faz="kaldir"] .dolgu{background:var(--up)}
+.sahne[data-faz="indir"] .dolgu{background:var(--down)}
+.sahne[data-faz="oku"] .dolgu,.sahne[data-faz="geri"] .dolgu{background:var(--fg)}
+.siradaki{font-size:clamp(1rem,2.2vw,1.7rem);color:var(--muted)}
+.siradaki b{font-family:var(--f-display);font-weight:600;color:var(--fg);letter-spacing:.02em}
+.sahne.duraklatildi .faz::after{content:" · DURAKLATILDI";color:var(--fg)}
+@media (prefers-reduced-motion:reduce){.dolgu{transition:none}}
+</style>
+
+<main id="kurulum" class="kurulum">
+  <header>
+    <p class="ust">Adım 7 · kendi kayıt</p>
+    <h1>Çekim suflörü</h1>
+    <p class="giris">Önce telefonda kaydı başlat, sonra buradan <b>Başlat</b>'a bas ve bant işaretine geç. Sayfa sayım bitince hareketleri sırayla dev yazıyla gösterir, sesli okur ve bip sesiyle <b>ne zaman kaldırıp ne zaman indireceğini</b> söyler. Sen yalnızca ekrana bakıp yaparsın.</p>
+  </header>
+
+  <div class="izgara">
+    <section class="kart" aria-labelledby="ayarBaslik">
+      <h2 id="ayarBaslik">Ayarlar</h2>
+
+      <fieldset>
+        <legend>Hangi video?</legend>
+        <div class="secim">
+          <label><input type="radio" name="video" id="vKal" value="kal"> Kalibrasyon (6 doğru)</label>
+          <label><input type="radio" name="video" id="vTest" value="test" checked> Test (21 tekrar)</label>
+          <label><input type="radio" name="video" id="vProva" value="prova"> Prova (her türden 1, kayıtsız)</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Kişi</legend>
+        <div class="secim">
+          <label><input type="radio" name="kisi" id="k1" value="kisi1" checked> Kişi 1 (sen)</label>
+          <label><input type="radio" name="kisi" id="k2" value="kisi2"> Kişi 2</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Süreler (saniye)</legend>
+        <div class="sureler">
+          <label for="sHazirlik">Başta yerine geçme<input id="sHazirlik" type="number" min="3" max="60" step="1" value="10"></label>
+          <label for="sOkuma">Hareketi okuma (kol aşağıda)<input id="sOkuma" type="number" min="1.5" max="10" step="0.5" value="3.5"></label>
+          <label for="sHareket">Kaldır + indir (normal)<input id="sHareket" type="number" min="2" max="8" step="0.5" value="3.5"></label>
+          <label for="sHizli">Kaldır + indir (hızlı)<input id="sHizli" type="number" min="1" max="2.5" step="0.1" value="1.4"></label>
+          <label for="sBekle">Sonra kol aşağıda bekle<input id="sBekle" type="number" min="1" max="8" step="0.5" value="2"></label>
+        </div>
+        <p class="not">Varsayılanlar Claude'un önerisi: normal tekrar yaklaşık 1,75 sn kaldırma + 1,75 sn indirme. Hızlı tekrarı 1 saniyenin altına indirme; sistem 0,8 sn'den kısa hareketi tekrar saymıyor.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ses</legend>
+        <label class="kutu" for="oBip"><input type="checkbox" id="oBip" checked> Bip sesi (kaldır / indir / sayım)</label>
+        <label class="kutu" for="oKonus"><input type="checkbox" id="oKonus" checked> Hareketi Türkçe sesli oku</label>
+        <label class="kutu" for="oTam"><input type="checkbox" id="oTam" checked> Başlayınca tam ekran</label>
+        <p class="durum" id="sesDurum">Türkçe ses aranıyor…</p>
+        <div class="dugmeler"><button class="btn" id="bDene" type="button">Sesi dene</button></div>
+      </fieldset>
+
+      <div class="dugmeler">
+        <button class="btn btn-ana" id="bBasla" type="button">Başlat</button>
+        <span class="not" id="toplam"></span>
+      </div>
+      <p class="kisayol">Çekim sırasında: <b>Boşluk</b> duraklat / devam, <b>Esc</b> durdur ve kuruluma dön.</p>
+    </section>
+
+    <div class="sag">
+      <section class="kart" aria-labelledby="siraBaslik">
+        <h2 id="siraBaslik">Sıra</h2>
+        <ol class="sira" id="sira"></ol>
+        <p class="not">Sıra `docs/CEKIM_LISTESI.md` ile aynı (kişi 1 tohum 0, kişi 2 tohum 1). Baş tekrarlarında ilk sola, ikinci sağa. Yeşil: doğru tekrar, turuncu: bilerek hata.</p>
+      </section>
+
+      <section class="kart" aria-labelledby="yerBaslik">
+        <h2 id="yerBaslik">Yerleşim</h2>
+        <ul class="yer">
+          <li><b>Dizüstüyü telefonun hemen yanına</b> koy; altına kutu ya da kitap koyup ekranı göz hizana yaklaştır. Ekran artık senin "sabit noktan".</li>
+          <li>Ekran kadraja girmesin; telefonun yanında ya da biraz arkasında kalsın.</li>
+          <li><b>Bakış</b> tekrarları için telefonun yaklaşık 1 m sağ-aşağısına, masa hizasına bir işaret koy.</li>
+          <li><b>Kalibrasyonu da bu sayfayla, aynı düzende yeniden çek.</b> Böylece kalibrasyonda ve testte aynı yere (ekrana) bakmış olursun.</li>
+          <li>Ses açık kalsın: bipler ve sesli okuma videoya da kaydolur, sonradan tekrarları eşleştirmeyi kolaylaştırır.</li>
+          <li>Her video için: telefonda kaydı başlat → <b>Başlat</b> → sayım bitene kadar banda geç → bitince telefona gidip kaydı durdur.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</main>
+
+<section id="sahne" class="sahne" hidden aria-live="polite">
+  <div class="ustbar"><span id="sVideo">TEST</span><span class="sayac" id="sSayac">0 / 21</span></div>
+  <div class="merkez">
+    <div class="etiket" id="sEtiket">HAZIRLIK</div>
+    <div class="ipucu" id="sIpucu"></div>
+    <div class="faz" id="sFaz"></div>
+  </div>
+  <div class="serit" aria-hidden="true"><div class="dolgu" id="sDolgu"></div></div>
+  <div class="altbar">
+    <span class="siradaki" id="sSiradaki"></span>
+    <span class="dugmeler">
+      <button class="btn" id="bDur" type="button">Duraklat (Boşluk)</button>
+      <button class="btn" id="bBitir" type="button">Durdur (Esc)</button>
+    </span>
+  </div>
+</section>
+
+<script>
+const TUR = {
+  kal:    {etiket:"DOĞRU", ipucu:"Doğal ve rahat; kendini zorlama", ses:"Doğru", sinif:"ok"},
+  dogru:  {etiket:"DOĞRU", ipucu:"Yandan, rahat, en yükseğe", ses:"Doğru", sinif:"ok"},
+  dirsek: {etiket:"DİRSEK BÜKÜK", ipucu:"Dirsek baştan sona yaklaşık 45° bükük", ses:"Dirsek bükük", sinif:"err"},
+  bakis:  {etiket:"DOĞRU · İŞARETE BAK", ipucu:"Hareket boyunca sağ-aşağıdaki işarete bak", ses:"Doğru. İşarete bak", sinif:"ok", bakis:true},
+  hizli:  {etiket:"DOĞRU · HIZLI", ipucu:"Tam yükseğe, hızlıca kaldır-indir", ses:"Doğru. Hızlı", sinif:"ok", hizli:true},
+  az:     {etiket:"AZ KALDIR", ipucu:"Sadece omuz hizasına, yaklaşık 90°", ses:"Az kaldır", sinif:"err"},
+  omuz:   {etiket:"OMUZ SİLK", ipucu:"Kaldırırken omzu kulağa doğru çek", ses:"Omuz silk", sinif:"err"},
+  bas_sol:{etiket:"BAŞ SOLA", ipucu:"Kaldırırken başını sola eğ", ses:"Baş sola", sinif:"err"},
+  bas_sag:{etiket:"BAŞ SAĞA", ipucu:"Kaldırırken başını sağa eğ", ses:"Baş sağa", sinif:"err"},
+  one:    {etiket:"ÖNE KAÇIR", ipucu:"Kolu önden-çapraz kaldır, dirsek düz", ses:"Öne kaçır", sinif:"err"}
+};
+const SIRA = {
+  kisi1:["dirsek","bakis","bakis","dogru","dogru","az","omuz","hizli","dogru","dirsek","bas_sol","dogru","bakis","az","omuz","hizli","omuz","one","bas_sag","dogru","one"],
+  kisi2:["dogru","dirsek","hizli","one","omuz","az","bakis","bakis","bakis","dogru","dirsek","dogru","dogru","omuz","bas_sol","dogru","bas_sag","one","az","omuz","hizli"]
+};
+const PROVA = ["dogru","omuz","bas_sol","bas_sag","dirsek","az","one","bakis","hizli"];
+const $ = id => document.getElementById(id);
+
+/* --- ayarlar --- */
+const ALANLAR = ["sHazirlik","sOkuma","sHareket","sHizli","sBekle"];
+function ayar(){
+  const sayi = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) && v > 0 ? v : d; };
+  return {
+    video: document.querySelector('input[name="video"]:checked').value,
+    kisi: document.querySelector('input[name="kisi"]:checked').value,
+    hazirlik: sayi("sHazirlik",10), okuma: sayi("sOkuma",3.5), hareket: sayi("sHareket",3.5),
+    hizli: sayi("sHizli",1.4), bekle: sayi("sBekle",2),
+    bip: $("oBip").checked, konusma: $("oKonus").checked, tam: $("oTam").checked
+  };
+}
+function kaydet(){ try{ localStorage.setItem("suflor", JSON.stringify(ayar())); }catch(e){} }
+function yukle(){
+  try{
+    const a = JSON.parse(localStorage.getItem("suflor") || "null"); if(!a) return;
+    const v = document.querySelector(`input[name="video"][value="${a.video}"]`); if(v) v.checked = true;
+    const k = document.querySelector(`input[name="kisi"][value="${a.kisi}"]`); if(k) k.checked = true;
+    const map = {sHazirlik:"hazirlik",sOkuma:"okuma",sHareket:"hareket",sHizli:"hizli",sBekle:"bekle"};
+    for(const id in map){ if(isFinite(a[map[id]])) $(id).value = a[map[id]]; }
+    $("oBip").checked = a.bip !== false; $("oKonus").checked = a.konusma !== false; $("oTam").checked = a.tam !== false;
+  }catch(e){}
+}
+
+/* --- plan --- */
+function ogeler(a){
+  if(a.video === "kal") return Array(6).fill("kal");
+  if(a.video === "prova") return PROVA.slice();
+  return SIRA[a.kisi].slice();
+}
+function plan(){
+  const a = ayar(), oge = ogeler(a), f = [{tip:"geri", sure:a.hazirlik}];
+  oge.forEach((t,i) => {
+    const h = TUR[t].hizli ? a.hizli : a.hareket;
+    f.push({tip:"oku", sure:a.okuma, i, t});
+    f.push({tip:"kaldir", sure:h/2, i, t});
+    f.push({tip:"indir", sure:h/2, i, t});
+    f.push({tip:"bekle", sure:a.bekle, i, t});
+  });
+  f.push({tip:"son", sure:5});
+  return {a, oge, fazlar:f};
+}
+function sureYaz(sn){ const m = Math.floor(sn/60), s = Math.round(sn%60); return `${m} dk ${String(s).padStart(2,"0")} sn`; }
+function listeyiCiz(){
+  const a = ayar(), oge = ogeler(a);
+  const ad = a.video === "kal" ? "Kalibrasyon" : a.video === "prova" ? "Prova" : `Test · ${a.kisi === "kisi1" ? "Kişi 1" : "Kişi 2"}`;
+  $("siraBaslik").textContent = `Sıra · ${ad}`;
+  $("sira").innerHTML = oge.map((t,i) => `<li class="${TUR[t].sinif}"><span class="n">${i+1}</span><span class="ad">${TUR[t].etiket}</span></li>`).join("");
+  const toplam = plan().fazlar.reduce((s,f) => s + f.sure, 0);
+  $("toplam").textContent = `Video süresi ≈ ${sureYaz(toplam)}`;
+}
+
+/* --- ses --- */
+let ac = null, trSes = null;
+function sesAc(){ try{ ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if(ac.state === "suspended") ac.resume(); }catch(e){ ac = null; } }
+function bip(fr=880, ms=170, vol=.28, gecikme=0){
+  if(!P || !P.a.bip || !ac) return;
+  try{
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + gecikme;
+    o.type = "sine"; o.frequency.value = fr;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + .012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + ms/1000);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + ms/1000 + .03);
+  }catch(e){}
+}
+function sesleriBul(){
+  try{
+    const v = speechSynthesis.getVoices();
+    trSes = v.find(x => /^tr(-|_|$)/i.test(x.lang)) || null;
+    $("sesDurum").textContent = trSes ? `Türkçe ses bulundu: ${trSes.name}.`
+      : "Bu tarayıcıda Türkçe ses bulunamadı; yalnızca bip çalınacak. (Edge'de Türkçe ses genelde vardır.)";
+  }catch(e){ $("sesDurum").textContent = "Sesli okuma desteklenmiyor; yalnızca bip çalınacak."; }
+}
+function soyle(m, zorla){
+  if(!(zorla || (P && P.a.konusma)) || !trSes || !("speechSynthesis" in window)) return;
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(m); u.lang = trSes.lang; u.voice = trSes; u.rate = 1.05; speechSynthesis.speak(u); }catch(e){}
+}
+
+/* --- motor --- */
+let P = null, k = -1, fazBasi = 0, raf = 0, duraklat = false, durakAni = 0, sonSaniye = null, kilit = null;
+const sahne = $("sahne");
+
+function baslat(){
+  kaydet(); sesAc(); P = plan(); k = -1; duraklat = false; sahne.classList.remove("duraklatildi");
+  $("kurulum").hidden = true; sahne.hidden = false;
+  $("sVideo").textContent = P.a.video === "kal" ? "KALİBRASYON" : P.a.video === "prova" ? "PROVA" : `TEST · ${P.a.kisi === "kisi1" ? "KİŞİ 1" : "KİŞİ 2"}`;
+  if(P.a.tam && document.documentElement.requestFullscreen){ document.documentElement.requestFullscreen().catch(()=>{}); }
+  try{ if("wakeLock" in navigator) navigator.wakeLock.request("screen").then(l => kilit = l).catch(()=>{}); }catch(e){}
+  ileri(); cancelAnimationFrame(raf); raf = requestAnimationFrame(dongu);
+}
+function durdur(){
+  cancelAnimationFrame(raf); P = null;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  try{ kilit && kilit.release(); }catch(e){} kilit = null;
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+  sahne.hidden = true; $("kurulum").hidden = false;
+}
+function ileri(){
+  k++; sonSaniye = null;
+  if(k >= P.fazlar.length){ bitti(); return; }
+  fazBasi = performance.now(); fazGir(P.fazlar[k]);
+}
+function siradakiYaz(i){
+  const n = P.oge.length;
+  if(i + 1 < n){ const t = P.oge[i+1]; $("sSiradaki").innerHTML = `Sıradaki: <b>${i+2} · ${TUR[t].etiket}</b>`; }
+  else $("sSiradaki").textContent = "Sıradaki: son, bitince 5 sn kıpırdama";
+}
+function fazGir(f){
+  sahne.dataset.faz = f.tip;
+  const n = P.oge.length;
+  if(f.tip === "geri"){
+    sahne.dataset.sinif = "nötr";
+    $("sSayac").textContent = `0 / ${n}`;
+    $("sEtiket").textContent = "YERİNE GEÇ";
+    $("sIpucu").textContent = "Bant işaretine geç · kollar yanda · ekrana bak";
+    $("sFaz").textContent = Math.ceil(f.sure);
+    $("sSiradaki").innerHTML = `İlk hareket: <b>1 · ${TUR[P.oge[0]].etiket}</b>`;
+    soyle("Yerine geç");
+    return;
+  }
+  if(f.tip === "son"){
+    sahne.dataset.sinif = "nötr";
+    $("sEtiket").textContent = "BİTTİ";
+    $("sIpucu").textContent = "Kollar yanda, kıpırdamadan dur";
+    $("sFaz").textContent = Math.ceil(f.sure);
+    $("sSiradaki").textContent = "";
+    bip(523,220); bip(659,260,.28,.25);
+    soyle("Bitti. Kıpırdama.");
+    return;
+  }
+  const d = TUR[f.t];
+  sahne.dataset.sinif = d.sinif;
+  $("sSayac").textContent = `${f.i+1} / ${n}`;
+  $("sEtiket").textContent = d.etiket;
+  $("sIpucu").textContent = d.ipucu;
+  siradakiYaz(f.i);
+  if(f.tip === "oku"){
+    $("sFaz").textContent = "HAZIRLAN";
+    soyle(`${f.i+1}. ${d.ses}`);
+  } else if(f.tip === "kaldir"){
+    $("sFaz").textContent = "KALDIR ↑"; bip(988,180,.32);
+  } else if(f.tip === "indir"){
+    $("sFaz").textContent = "İNDİR ↓"; bip(659,180,.32);
+  } else if(f.tip === "bekle"){
+    $("sFaz").textContent = d.bakis ? "BEKLE · EKRANA DÖN" : "BEKLE · KOL AŞAĞIDA";
+    if(d.bakis){ bip(784,90,.22); bip(784,90,.22,.16); }
+  }
+}
+function dongu(t){
+  if(!P) return;
+  if(!duraklat){
+    const f = P.fazlar[k], gecen = (t - fazBasi)/1000, oran = Math.min(1, gecen/f.sure);
+    $("sDolgu").style.width = (oran*100).toFixed(2) + "%";
+    if(f.tip === "geri" || f.tip === "son" || f.tip === "oku"){
+      const kalan = Math.max(0, Math.ceil(f.sure - gecen));
+      if(f.tip !== "oku") $("sFaz").textContent = kalan;
+      else $("sFaz").textContent = `HAZIRLAN · ${kalan}`;
+      if(f.tip === "geri" && kalan !== sonSaniye && kalan <= 3 && kalan > 0) bip(587,110,.25);
+      sonSaniye = kalan;
+    }
+    if(gecen >= f.sure){ ileri(); if(!P) return; }
+  }
+  raf = requestAnimationFrame(dongu);
+}
+function duraklatDegistir(){
+  if(!P) return;
+  if(!duraklat){ duraklat = true; durakAni = performance.now(); sahne.classList.add("duraklatildi"); $("bDur").textContent = "Devam (Boşluk)"; try{ speechSynthesis.cancel(); }catch(e){} }
+  else { duraklat = false; fazBasi += performance.now() - durakAni; sahne.classList.remove("duraklatildi"); $("bDur").textContent = "Duraklat (Boşluk)"; }
+}
+function bitti(){
+  cancelAnimationFrame(raf);
+  sahne.dataset.faz = "bekle"; sahne.dataset.sinif = "nötr";
+  $("sDolgu").style.width = "100%";
+  $("sEtiket").textContent = "KAYDI DURDUR";
+  $("sIpucu").textContent = P.a.video === "prova" ? "Prova bitti. Esc ile kuruluma dön." : "Telefona gidip kaydı durdur. Esc ile kuruluma dön.";
+  $("sFaz").textContent = "";
+  $("sSiradaki").textContent = "";
+  soyle(P.a.video === "prova" ? "Prova bitti." : "Kaydı durdur.");
+  const a = P.a; P = {a, oge:[], fazlar:[]};
+}
+
+/* --- olaylar --- */
+document.querySelectorAll('input[name="video"],input[name="kisi"]').forEach(el => el.addEventListener("change", () => { listeyiCiz(); kaydet(); }));
+ALANLAR.forEach(id => $(id).addEventListener("input", () => { listeyiCiz(); kaydet(); }));
+["oBip","oKonus","oTam"].forEach(id => $(id).addEventListener("change", kaydet));
+$("bBasla").addEventListener("click", baslat);
+$("bDur").addEventListener("click", duraklatDegistir);
+$("bBitir").addEventListener("click", durdur);
+$("bDene").addEventListener("click", () => {
+  sesAc(); const eski = P; P = {a:ayar()};
+  bip(988,180,.32); bip(659,180,.32,.35);
+  soyle("Yedi. Omuz silk.", true);
+  P = eski;
+});
+document.addEventListener("keydown", e => {
+  if(sahne.hidden) return;
+  if(e.code === "Space"){ e.preventDefault(); duraklatDegistir(); }
+  else if(e.key === "Escape"){ durdur(); }
+});
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible" && P && P.fazlar && P.fazlar.length && "wakeLock" in navigator){
+    navigator.wakeLock.request("screen").then(l => kilit = l).catch(()=>{});
+  }
+});
+if("speechSynthesis" in window){ sesleriBul(); speechSynthesis.onvoiceschanged = sesleriBul; }
+else $("sesDurum").textContent = "Sesli okuma desteklenmiyor; yalnızca bip çalınacak.";
+yukle(); listeyiCiz();
+</script>
+
+</body></html>

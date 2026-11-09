@@ -32,6 +32,8 @@
 9. **Çıktılar:** `sonuclar/kendi_kayit/<kisi>/` altına `tekrarlar.csv` (ham), `cumle_etiket.csv`, `karisiklik.csv`, `ozet.csv` ve `bilgi.json` (sürümler, kalibrasyon tepeleri, eşleşme biçimi). İki kişi birlikte: `sonuclar/kendi_kayit/ozet.csv`, `karisiklik.csv`.
 10. **Sunum yedeği (Karar 27):** Bu iki video ve yığın modu çıktısı sunumdaki yedektir.
 
+> **Düzeltme: 11** (9 Kas, Güncelleme 12): Madde 5'teki "Hatalı tekrarlar (12)" bir yazım hatasıdır. Protokole göre hatalı tekrar sayısı **11**'dir (3 omuz + 2 baş + 2 dirsek + 2 az kaldırma + 2 öne kaçma). Önceden kayıt korunsun diye bölümün kendisi değiştirilmedi; sonuçlar zaten 11 üzerinden hesaplandı.
+
 ## Yapılanlar (hazırlık)
 - `deneyler/kendi_kayit.py`:
   - `--sablon`: tohumlu karışık sıra ve `etiketler.csv` şablonu yazar; var olan dosyanın üzerine yazmaz.

@@ -143,3 +143,20 @@ def test_gunluk_kotada_beklemeden_durur():
     with pytest.raises(llm.LLMHatasi, match="kota"):
         ist.sor(llm.Istek("x", model="m"))
     assert s.cagri == 1 and saat.uykular == [] and len(ist.onbellek) == 0
+
+
+def test_yalniz_onbellek_saglayici_aga_gitmez(tmp_path):
+    """Karar 53: yeniden üretimde önbellekte olan yanıt aynen gelir, olmayan için istek atılmaz, hata verir."""
+    yol = tmp_path / "onbellek.jsonl"
+    i = llm.Istek("merhaba", model="m")
+    s = llm.SahteSaglayici()
+    s.ad = "gemini"                                 # anahtar sağlayıcı adına bağlı
+    llm.LLMIstemcisi(s, llm.Onbellek(yol)).sor(i)
+    boyut = yol.stat().st_size
+    yo = llm.YalnizOnbellekSaglayici("gemini")
+    ist = llm.LLMIstemcisi(yo, llm.Onbellek(yol))
+    y = ist.sor(i)
+    assert y.onbellekten and y.metin == "yanıt: merhaba" and yo.cagri == 0
+    with pytest.raises(llm.LLMHatasi):
+        ist.sor(llm.Istek("başka", model="m"))
+    assert yo.cagri == 1 and yol.stat().st_size == boyut    # önbellek dosyasına yazılmadı

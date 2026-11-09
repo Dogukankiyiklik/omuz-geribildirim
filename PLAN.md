@@ -28,14 +28,14 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 4 | 6 | Uygulama: kalibrasyon, canlı/video değerlendirme, **referans iskelet bindirme (Problem 3)** | 8–10 Kas | **Zorunlu, öncelikli** 📤 | ✅ |
 | 5 | 7 | Kendi kayıtlarımızla deneme (kullanıcı çeker; **çekim en geç 9 Kas akşamı**, Karar 35) | 9–11 Kas | Zorunlu 📤 | ✅ (9 Kas; tek kişi; hatalılarda katı 9/11, ilk iki 11/11; normal doğruda gereksiz uyarı 0/5, bakışta 3/3, hızlıda 2/2; ADIM_07) |
 | 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ✅ (Güncelleme 10; Karar 42 duyarlılık analizi bitti) |
-| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ✅ (7 Kas; sonuç olumsuz: SILUET 0,72 / YENI_mp122 0,97, çaprazda tanım başa takılıyor; ADIM_06b) |
+| 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ✅ olumsuz sonuç (7 Kas; Karar 52: SILUET 0,72 / YENI_mp122 0,97, çaprazda tanım başa takılıyor; ADIM_06b) |
 | 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⛔ yapılmaz (Karar 45; gelecek çalışma) |
-| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **13 Kas akşamı** | Zorunlu 📤 | 🔄 (hazırlık tamam; dondurma 13 Kas) |
+| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **11 Kas** (Güncelleme 12; en geç 13 Kas) | Zorunlu 📤 | 🔄 (belgeler ve önbellekli yeniden üretim hazır; kullanıcının `hepsi` çalıştırması ve `v-sunum` etiketi bekleniyor) |
 | — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu | ⏳ |
 | — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
 | — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |
 
-Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı · ⛔ yapılmayacak (Güncelleme 10: Adım 8 ✅, Adım 7 çekim bekleniyor, Adım 9 hazırlık tamam, Adım 10 ⛔. 7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35. Güncelleme 09: Deney 4 tasarımı, Adım 9 hazırlığı, sunum şekilleri; videoya bağlı değil). Ana tablodaki Adım 0–4 de tamamlandı.
+Durum: ✅ tamamlandı · 🔄 devam ediyor · ⏳ başlanmadı · ⛔ yapılmayacak (Güncelleme 12, 9 Kas: Adım 7 ✅, 6b ✅ olumsuz sonuç, 10 ⛔, Adım 9 🔄; dondurma 13 Kas'ı beklemeden, hedef 11 Kas. Güncelleme 10: Adım 8 ✅, Adım 7 çekim bekleniyor, Adım 9 hazırlık tamam, Adım 10 ⛔. 7 Kas 2026; Adım 5, Güncelleme 07 ile; Adım 6, Güncelleme 08 ile kapandı. Adım 7'nin hazırlığı bitti, çekim bekleniyor. Adım 8 çekimle paralel başlayabilir: Karar 35. Güncelleme 09: Deney 4 tasarımı, Adım 9 hazırlığı, sunum şekilleri; videoya bağlı değil). Ana tablodaki Adım 0–4 de tamamlandı.
 
 Sunum: **16 Kasım 2026.** **Kural (Güncelleme 05):** İsteğe bağlı adımlar (6, 7, 8 sıradaki) zorunlu adımları (4, 5 sıradaki) asla geciktiremez. Uygulama ve kendi kayıtlar bitmeden isteğe bağlılara geçilmez. 13 Kas akşamına kadar bitmeyen isteğe bağlı iş bırakılır.
 
@@ -508,6 +508,8 @@ Hocanın örnek çıktısı: *"Sağ kolunu yaklaşık 90° kaldırman gerekiyord
 
 **Güncelleme 10** (Karar 43–46): Depo ve gizli bilgi denetimi, kök `README.md` (bulgular ADIM_09'da); sunum şekillerinde yalnızca görsel düzeltme (3_kalibrasyon yazısı, 1 ve 3'e "önden + çapraz" altyazısı). Sıra: Adım 7 → Karar 42 etiketlemesi → danışmanın 6b kararı → 13 Kas dondurma.
 
+
+**Güncelleme 12** (Karar 51–56; ayrıntı: `ilerleme/GUNCELLEME_12.md`): Dondurma iş bitince, hedef 11 Kas. `hepsi.py`'ye önbellekten 6b, Deney 4 (`raporla`, `kaldirma-degerlendir`) ve Adım 7 (Karar 53). Belgeler: `OZET.md` (her sayının yanında kaynak CSV), `YENIDEN_KURULUM.md` (TASLAK kalkar), `LLM_KULLANIMI.md`, `SURUMLER.md`, `ARKA_PLAN.md` notu, README (Karar 54). Sıra: Claude Code belgeler + pytest + commit → kullanıcı `python -m deneyler.hepsi` → hepsi aynıysa `v-sunum` + push; fark çıkarsa dur (Karar 55). Sunum girdileri: `SUNUM_GIRDILERI.md`, `demo_kisi1.mp4`, `DEMO.md`, `4b_`/`5b_` (Karar 56).
 ---
 
 ## Adım 10 — (Yetişirse) REHAB24-6 doğrulaması ⛔

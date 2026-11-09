@@ -2,6 +2,10 @@
 
 Tek bir RGB kamerayla **kolu yana kaldırma (omuz abdüksiyonu)** egzersizini izleyen bir sistem. MediaPipe ile çıkarılan iskeletten hatalı tekrarları bulur (odak: omzun kulağa doğru kalkması, "omuz silkmesi"), hatanın türünü belirler (omuz, baş eğme, kolun öne kaçması, dirsek bükme, yetersiz kaldırma) ve kişiye **ne yapacağını söyleyen Türkçe bir cümle** verir. Yöntemin temeli **kişiye özel açı bandı**: kişinin birkaç doğru tekrarından, kolun her açısı için "omzun normal yeri" çıkarılır ve yeni tekrar bu banda göre değerlendirilir. Bütün sonuçlar açık REHAB26-ViewAngles veri setinde, kişi bazlı (birini dışarıda bırak) ölçülür. Bilgisayarlı Görü dersi projesi (sunum: 16 Kasım 2026).
 
+## Sonuçlar (kısaca)
+
+REHAB26-ViewAngles'ın 5 kişisinde, kişi bazlı birini-dışarıda-bırak ile: ham MediaPipe ölçüsü omuz silkmesini zayıf ayırıyor (AUC 0,70); kişinin kendi doğru tekrarlarından kurulan açı bandıyla 0,95'e çıkıyor (önden + çapraz 0,97), başkalarının tekrarlarından kurulan genel bant ise 0,62–0,67'de kalıyor. Önden + çapraz görüşte hata türü hatalı tekrarların 56,6/100'ünde ilk sırada, 67,4/100'ünde ilk iki içinde doğru söyleniyor; doğru tekrarların 7,5/100'ünde gereksiz uyarı çıkıyor. Cümleyi bir LLM'e yazdırmak kurala üstünlük getirmiyor, hatayı LLM'e buldurmak sonucu kötüleştiriyor. Kendi çektiğimiz videoda (tek kişi) 11 hatalı tekrarın 11'inde doğru hata cümlede geçti. Bütün tablolar, sınırlılıklar ve olumsuz sonuçlar: [`sonuclar/OZET.md`](sonuclar/OZET.md).
+
 ## Hızlı başlangıç
 
 ```bash

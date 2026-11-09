@@ -42,7 +42,7 @@ from cekirdek.konsol import sonuclari_yaz, utf8_cikti
 from cekirdek.metin_cozumleyici import cozumle
 
 CIKTI = veri.KOK / "sonuclar" / "kendi_kayit"
-ONBELLEK = veri.KOK / "veri" / "ara" / "kendi_kayit"
+ONBELLEK = veri.VERI_KOK / "ara" / "kendi_kayit"   # OMUZ_VERI yoksa veri/ara/kendi_kayit
 
 # Karar 33: test videosunun içeriği (21 tekrar)
 ETIKETLER = {"dogru": ht.DOGRU, "omuz": "ERR_ELEVATED_SHOULDER", "bas": "ERR_HEAD_TO_SIDE",
@@ -102,8 +102,9 @@ def etiketleri_oku(yol) -> pd.DataFrame:
     return df.sort_values("tekrar_no").reset_index(drop=True)
 
 
-def onbellekli_pozlar(yol) -> np.ndarray:
-    """MediaPipe noktaları; video değişmediyse önbellekten (veri/ara/kendi_kayit/)."""
+def onbellekli_pozlar(yol, yalniz_onbellek: bool = False) -> np.ndarray:
+    """MediaPipe noktaları; video değişmediyse önbellekten (veri/ara/kendi_kayit/).
+    yalniz_onbellek=True: önbellek yoksa MediaPipe çalıştırılmaz, durulur (yeniden üretim, Karar 53)."""
     from uygulama.toplu import pozlar
     yol = Path(yol)
     st = yol.stat()
@@ -111,6 +112,8 @@ def onbellekli_pozlar(yol) -> np.ndarray:
     dosya = ONBELLEK / f"{anahtar}.npy"
     if dosya.exists():
         return np.load(dosya)
+    if yalniz_onbellek:
+        raise SystemExit(f"önbellek yok: {dosya} (--yalniz-onbellek: MediaPipe çalıştırılmadı)")
     print(f"MediaPipe: {yol} (birkaç dakika sürebilir)")
     lm = pozlar(yol)
     dosya.parent.mkdir(parents=True, exist_ok=True)
@@ -242,14 +245,15 @@ def cumle_etiket(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------- 5) çalıştırma
-def calistir(kisi: str, kalibrasyon, test, etiketler, eslesme=None, cikti: Path = CIKTI) -> pd.DataFrame | None:
+def calistir(kisi: str, kalibrasyon, test, etiketler, eslesme=None, cikti: Path = CIKTI,
+             yalniz_onbellek: bool = False) -> pd.DataFrame | None:
     from uygulama.poz import mediapipe_surumu
     from uygulama.toplu import degerlendir_video, kalibre_et, video_bilgisi
     etiket = etiketleri_oku(etiketler)
     klasor = Path(cikti) / kisi
     fps, W, H, _ = video_bilgisi(kalibrasyon)
-    kal = kalibre_et(kalibrasyon, W / H, fps, None, lm=onbellekli_pozlar(kalibrasyon))
-    o = degerlendir_video(test, kal, lm=onbellekli_pozlar(test))
+    kal = kalibre_et(kalibrasyon, W / H, fps, None, lm=onbellekli_pozlar(kalibrasyon, yalniz_onbellek))
+    o = degerlendir_video(test, kal, lm=onbellekli_pozlar(test, yalniz_onbellek))
     es = eslestir(len(o.tekrarlar), etiket, eslesme)
     if not es:
         yol = klasor / "ayrilan_tekrarlar.csv"
@@ -309,6 +313,8 @@ def main():
     ap.add_argument("--test")
     ap.add_argument("--etiketler")
     ap.add_argument("--eslesme", help="ayrılan tekrar sayısı tutmazsa: 'ayrilan,tekrar_no' CSV")
+    ap.add_argument("--yalniz-onbellek", action="store_true",
+                    help="MediaPipe noktaları önbellekte yoksa dur (yeniden üretim, Karar 53)")
     args = ap.parse_args()
     utf8_cikti()
     if args.sablon:
@@ -318,7 +324,8 @@ def main():
         return
     if not (args.kalibrasyon and args.test and args.etiketler):
         ap.error("--kalibrasyon, --test ve --etiketler gerekli (ya da --sablon)")
-    calistir(args.kisi, args.kalibrasyon, args.test, args.etiketler, args.eslesme)
+    calistir(args.kisi, args.kalibrasyon, args.test, args.etiketler, args.eslesme,
+             yalniz_onbellek=args.yalniz_onbellek)
 
 
 if __name__ == "__main__":

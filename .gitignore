@@ -13,3 +13,6 @@ sonuclar/deney4/onbellek.jsonl
 # Üretilen videolar (yeniden üretilebilir; büyük)
 sonuclar/**/*.mp4
 .pytest_cache/
+# Kişisel görüntü (Karar 56; kişi 1 kendi kaydı): yerelde kalır
+sonuclar/sunum/4b_*.png
+sonuclar/sunum/5b_*.png

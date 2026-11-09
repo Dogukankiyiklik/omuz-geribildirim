@@ -16,6 +16,9 @@ Kullanım (işlem sırası):
     python -m deneyler.deney4 pilot --model gemini-2.5-flash      # 5 tekrar × B, C = 10 istek (raporlanmaz)
     python -m deneyler.deney4 calistir --model gemini-2.5-flash   # 150 × B, C = 300 istek; kesilirse aynı komut
     python -m deneyler.deney4 raporla                   # ağ yok: kayıtlı yanıtlardan tabloları yeniden yazar
+    python -m deneyler.deney4 onbellekten --model gemini-3.5-flash-lite --onbellek <yol>/onbellek.jsonl
+                                                        # ağ yok (Karar 53, deneyler/hepsi.py): orneklem.csv'den
+                                                        # girdiler, yanıtlar yalnızca önbellekten, sonra raporla
     python -m deneyler.deney4 elle-uret                 # 45 cümlelik körlemesine etiketleme dosyası
     python -m deneyler.deney4 elle-degerlendir          # kullanıcının etiketleri ile çıkarıcının uyumu
     python -m deneyler.deney4 kaldirma-uret             # Karar 42: "kaldır" kalıplı bütün cümleler, körlemesine
@@ -648,7 +651,7 @@ def raporla(girdiler: pd.DataFrame, yanitlar: pd.DataFrame, klasor: Path, bootst
 
 def main():
     ap = argparse.ArgumentParser(description="Deney 4: LLM ile kural tabanlı geri bildirim")
-    ap.add_argument("islem", choices=["hazirla", "modeller", "pilot", "calistir", "raporla", "elle-uret",
+    ap.add_argument("islem", choices=["hazirla", "modeller", "pilot", "calistir", "raporla", "onbellekten", "elle-uret",
                                       "elle-degerlendir", "kaldirma-uret", "kaldirma-degerlendir"])
     ap.add_argument("--model", default=VARSAYILAN_MODEL)
     ap.add_argument("--dusunme", default="otomatik",
@@ -657,6 +660,7 @@ def main():
     ap.add_argument("--rpm", type=float, default=10.0, help="dakikadaki en fazla istek (bekleme = 60/rpm s)")
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--cikti", default=str(CIKTI))
+    ap.add_argument("--onbellek", default=str(llm.ONBELLEK_YOLU), help="onbellekten: okunacak onbellek.jsonl")
     ap.add_argument("--sahte", action="store_true",
                     help="kaldirma-degerlendir: insan etiketi yerine çıkarıcının kendi kararı (boru hattı denemesi; "
                          "sonuclar/'a yazılmaz)")
@@ -713,6 +717,23 @@ def main():
             for r in y.itertuples():
                 print(f"\n[{r.orneklem_no} · {r.kosul}] {r.metin}")
         print(f"\nÇıktı: {hedef}")
+        return
+
+    if args.islem == "onbellekten":        # ağ yok (Karar 53): girdiler + yanıtlar yalnızca önbellekten + raporla
+        o = pd.read_csv(klasor / "orneklem.csv", encoding="utf-8-sig", keep_default_na=False)
+        g = girdileri_hazirla(tekrar_secimi(o))
+        sonuclari_yaz({"girdiler": g}, klasor, xlsx_adi="girdiler.xlsx")
+        ob = llm.Onbellek(args.onbellek)
+        istemci = llm.LLMIstemcisi(llm.YalnizOnbellekSaglayici(args.saglayici), ob)
+        dusunme = dusunme_ayari(args.model, args.dusunme)
+        y, durum = calistir_llm(g, istemci, args.model, dusunme, istemleri_oku(), yazdir=False)
+        beklenen = len(g) * len(LLM_KOSULLARI)
+        print(f"Önbellek: {args.onbellek} ({len(ob)} kayıt) · {args.model} · yanıt {len(y)}/{beklenen} · "
+              f"ağ isteği 0 · {durum}")
+        if len(y) != beklenen:
+            raise SystemExit(f"üretilmedi: önbellekte eksik yanıt var ({len(y)}/{beklenen}); istek atılmadı.")
+        sonuclari_yaz({"yanitlar": y}, klasor, xlsx_adi="yanitlar.xlsx")
+        raporla(g, y, klasor, args.bootstrap)
         return
 
     if args.islem == "raporla":            # ağ yok: kayıtlı girdiler + yanıtlardan tabloları yeniden yazar

@@ -1,0 +1,24 @@
+﻿metrik,grup,pay,payda,kaçta kaç
+katı: cümledeki ilk hata = etiket,hatalı (hepsi),9,11,9/11
+ilk iki: etiket cümlede söylendi,hatalı (hepsi),11,11,11/11
+olumlu cümle (hiç hata söylenmedi),hatalı (hepsi),0,11,0/11
+katı: cümledeki ilk hata = etiket,hatalı: omuz,3,3,3/3
+ilk iki: etiket cümlede söylendi,hatalı: omuz,3,3,3/3
+katı: cümledeki ilk hata = etiket,hatalı: baş,2,2,2/2
+ilk iki: etiket cümlede söylendi,hatalı: baş,2,2,2/2
+katı: cümledeki ilk hata = etiket,hatalı: öne kaçma,1,2,1/2
+ilk iki: etiket cümlede söylendi,hatalı: öne kaçma,2,2,2/2
+katı: cümledeki ilk hata = etiket,hatalı: dirsek,1,2,1/2
+ilk iki: etiket cümlede söylendi,hatalı: dirsek,2,2,2/2
+katı: cümledeki ilk hata = etiket,hatalı: az kaldırma,2,2,2/2
+ilk iki: etiket cümlede söylendi,hatalı: az kaldırma,2,2,2/2
+gereksiz uyarı (cümlede en az bir hata),doğru (normal),0,5,0/5
+gereksiz uyarı (cümlede en az bir hata),"doğru, bakış",3,3,3/3
+gereksiz uyarı (cümlede en az bir hata),"doğru, hızlı",2,2,2/2
+hız notu çıktı,"doğru, hızlı",2,2,2/2
+hız notu çıktı,doğru (normal),0,5,0/5
+hız notu çıktı,"doğru, bakış",0,3,0/3
+hız notu çıktı (betimsel),hatalı (hepsi),0,11,0/11
+kamera uyarısı (betimsel),bütün tekrarlar,0,21,0/21
+sol kol notu (betimsel),bütün tekrarlar,0,21,0/21
+denetim: hasta ve uzman metninden aynı hata listesi,bütün tekrarlar,21,21,21/21

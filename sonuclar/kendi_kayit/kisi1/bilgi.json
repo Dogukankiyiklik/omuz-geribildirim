@@ -1,0 +1,48 @@
+{
+  "kisi": "kisi1",
+  "tarih": "2026-11-09T15:45:01",
+  "mediapipe": "1.2.2",
+  "kural": {
+    "egitim_makro_f1": 0.633744125344293,
+    "egzersiz": "ex1",
+    "sistem": "v2_yonlu",
+    "kaldirma_surumu": "ilk",
+    "olcu_surumu": "saglam",
+    "egitim_gorusu": "önden+çapraz",
+    "kisiler": [
+      "Honza",
+      "Mima",
+      "Petra",
+      "Terka",
+      "Vasil"
+    ],
+    "egitim_tekrar": 1363,
+    "commit": "d978bfc",
+    "tarih": "2026-11-07T02:39:51"
+  },
+  "hiz_esigi_s": 1.9,
+  "kamera_esigi": 0.38874061034852636,
+  "kalibrasyon": {
+    "video": "veri/kendi_kayit/kisi1/kalibrasyon.MOV",
+    "ayrilan": 6,
+    "kabul": 6,
+    "kalite_ret": 0,
+    "tepe_acilari": [
+      142.7,
+      144.7,
+      139.7,
+      139.5,
+      140.8,
+      138.3
+    ],
+    "uyari": ""
+  },
+  "test": {
+    "video": "veri/kendi_kayit/kisi1/test.MOV",
+    "ayrilan": 21,
+    "etiketli": 21,
+    "eslesme": "sıra",
+    "eslenmeyen_etiketli": [],
+    "en_boy": 0.5625
+  }
+}

@@ -1,7 +1,7 @@
 # ADIM 09 — Sonuçları dondurma
 
-**Tarih:** 2026-11-07 (hazırlık; Güncelleme 09, Karar 37–39)
-**Durum:** Kısmen: yalnızca hazırlık. Dondurma 13 Kasım akşamı yapılacak. Bekleyenler: Adım 7 ve 8'in sonuçları, `deneyler/hepsi.py`'nin tam çalıştırması (kullanıcı), `sonuclar/OZET.md`, `v-sunum` etiketi.
+**Tarih:** 2026-11-07 (hazırlık; Güncelleme 09, Karar 37–39), 2026-11-09 (Güncelleme 12, Karar 51–56)
+**Durum:** Kısmen. Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Bekleyen: kullanıcının `python -m deneyler.hepsi` tam çalıştırması, ardından `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
 
 ## Basit anlatım
 - **Yeniden üretim:** `deneyler/hepsi.py` projenin son kaydedilmiş (commit'lenmiş) hâlinin temiz bir kopyasını açıyor. Bu kopyada eski sonuç dosyaları yok. Bütün deneyleri sırayla baştan çalıştırıp çıkan her tabloyu bizim kayıtlı tablolarımızla karşılaştırıyor. Hepsi aynı çıkarsa "bu sonuçlar bu koddan, bu veriden çıkıyor" diyebiliriz. Hocanın istediği "yeniden kurulabilirlik" budur.
@@ -138,3 +138,79 @@ Tahmin: önden + çapraz Ex1 = **1363 tekrar, 162 931 kare** (her tekrar ±10 ka
 
 ### Karar 45 — Adım 10
 - ⛔ Yapılmaz; `docs/GELECEK_CALISMA.md` madde 11 ("başka bir veri setinde, görülmemiş kişilerde doğrulama"); PLAN'da işaretlendi.
+
+## Ek: Güncelleme 12 — dondurma belgeleri ve önbellekli yeniden üretim (9 Kas; Karar 51–56)
+
+### Basit anlatım
+- **Neden önbellek?** Üç adım baştan çalıştırılamayacak kadar pahalı ya da dışa bağımlı: 6b'nin segmentasyonu ~1,5 saat, Deney 4 internet ve Gemini anahtarı ister, Adım 7 kişisel videodan MediaPipe çalıştırır. Bunların **ara çıktıları** (önbellek) saklı. `hepsi` artık bu üç adımın tablolarını önbellekten yeniden üretiyor: "bu tablolar bu koddan ve bu ara çıktılardan çıkıyor" diyebiliyoruz. Önbellekte eksik bir şey varsa adım durur ve "üretilmedi" der; ağa istek atmaz.
+- **`OZET.md`:** Bütün projenin özeti. Her deneyin bir tablosu, iddiaların ne kadar güçlü olduğu, sınırlılıklar ve işe yaramayan denemeler. Her sayının yanında hangi dosyadan geldiği yazıyor.
+- **Sunum girdileri:** Sunumda kullanılabilecek sayıların listesi (hocanın üç problemine göre), kendi videomuzdan 45 saniyelik bir demo yedeği ve sunumda adım adım ne yapılacağını anlatan demo talimatı.
+
+*Jargon:* **Önbellek:** daha önce hesaplanmış bir sonucun diskte saklanan kopyası; aynı hesap tekrar gerekince yeniden yapılmaz, oradan okunur.
+
+### Yapılanlar
+- **Karar 51–56** `KARARLAR.md`'ye; PLAN durumları (Adım 7 ✅, 6b ✅ olumsuz sonuç, 10 ⛔, Adım 9 🔄, hedef 11 Kas).
+- **ADIM_07:** "Önceden belirlenenler"in altına "Düzeltme: 11" notu (bölümün kendisi değişmedi).
+- **Karar 52:** `GELECEK_CALISMA.md` madde 12.
+- **Karar 53 — `deneyler/hepsi.py`:**
+  - Adımlar artık bir `Adim` yapısı: yer tutuculu komut (`{VERI}`, `{PROJE}`, `{HEDEF}`), adım başına karşılaştırılacak dosya listesi, yok sayılan sütun, insan girdisi dosyalar, kaynak açıklaması. `adimlar.csv`'ye `kaynak` sütunu, `ozet.md`'ye "Yeniden üretim: N/N aynı" satırı.
+  - Yeni adımlar (eski 12 adımdan sonra): `siluet` (önbellek `veri/ara/siluet/`), `deney4_orneklem`, `deney4` (`deney4 onbellekten`: `orneklem.csv`'den girdiler, yanıtlar yalnızca `onbellek.jsonl`'den, sonra `raporla`), `deney4_kaldirma` (`kaldirma-degerlendir`; kullanıcının `elle_kaldirma.xlsx` dosyası ve anahtarı girdi olarak kopyalanır), `kendi_kayit` (`--yalniz-onbellek`).
+  - Boş CSV (`siluet/nan_nedenleri.csv`) karşılaştırmayı çökertiyordu; düzeltildi (iki taraf da boşsa "aynı").
+  - `LISTELENEN`'den `kendi_kayit` çıktı; `deney4` ve `siluet`'in yeniden üretilmeyen kısımları ile `siluet_sure` listeleniyor.
+- **Yardımcı değişiklikler (sonuçları değiştirmez):**
+  - `cekirdek/llm.py`: `YalnizOnbellekSaglayici` (ağa gitmez; önbellekte olmayan istekte hata verir).
+  - `deneyler/deney4.py`: `onbellekten` işlemi ve `--onbellek` seçeneği.
+  - `deneyler/kendi_kayit.py`: önbellek yolu `VERI_KOK`'a bağlandı (`OMUZ_VERI` yoksa yine `veri/ara/kendi_kayit`); `--yalniz-onbellek`.
+  - `deneyler/siluet.py`: `--sinirlar` (kare başına sınırların yazılacağı yer; yeniden üretim `veri/` içine yazmasın diye).
+- **Testler:** `test_hepsi.py` (+5: yeni adımların sırası ve bağımlılıkları, yer tutucular, dosya seçimi ve yok sayılan sütun, girdi kopyalama, boş CSV), `test_llm.py` (+1: yalnızca önbellek sağlayıcısı ağa gitmez ve dosyaya yazmaz).
+- **Karar 54 — belgeler:** `sonuclar/OZET.md` (yeni), `docs/YENIDEN_KURULUM.md` (TASLAK kalktı; önbellekli adımlar ve baştan üretim tablosu; kendi videoyla kullanım), `docs/LLM_KULLANIMI.md` (rapor notu), `docs/SURUMLER.md` (TASLAK kalktı; `pip freeze` 7 Kas ile aynı; MediaPipe ve Gemini notu), `docs/ARKA_PLAN.md` (v1 notu + güncel v2 satırı; eski tablo duruyor), `README.md` (sonuçlar paragrafı), `docs/cekim_suflor.html` (kullanıcının `docs/Çekim Suflörü.html` dosyası, içeriği değişmeden ASCII adla).
+- **Karar 56 — sunum girdileri:** `docs/SUNUM_GIRDILERI.md`, `docs/DEMO.md`; `python -m deneyler.sunum_sekilleri --kendi-kayit` → `sonuclar/sunum/4b_geri_bildirim.png`, `5b_bindirme.png`, `demo_kisi1.mp4` ve `profiller/kisi1.npz`.
+
+### Değişen / eklenen dosyalar
+| Dosya | Ne işe yarıyor |
+| --- | --- |
+| `deneyler/hepsi.py`, `testler/test_hepsi.py` | Önbellekli adımlar (Karar 53) |
+| `cekirdek/llm.py`, `deneyler/deney4.py`, `testler/test_llm.py` | Ağsız Deney 4 yeniden üretimi |
+| `deneyler/kendi_kayit.py`, `deneyler/siluet.py` | Önbellek seçenekleri |
+| `deneyler/sunum_sekilleri.py` | `--kendi-kayit` (Karar 56); 5_bindirme çizimi ortak `bindirme_sekli` fonksiyonuna taşındı |
+| `sonuclar/OZET.md`, `docs/*.md`, `README.md` | Dondurma belgeleri |
+| `.gitignore` | `sonuclar/sunum/4b_*.png`, `5b_*.png` (kişisel görüntü) |
+
+### Nasıl çalıştırılır
+```bash
+python -m deneyler.hepsi                           # tam yeniden üretim, kullanıcı (~1–1,5 sa)
+python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 dk)
+```
+
+### Sonuçlar
+**Önbellekli adımların tek tek denemesi** (Claude Code, commit öncesi; çıktı geçici klasöre, kayıtlı dosyalarla `csv_karsilastir`):
+- `deney4 onbellekten` (21 s; ağ isteği 0, 300/300 yanıt önbellekte): `girdiler`, `yanitlar` (`onbellekten` sütunu yok sayılarak), `cumleler`, `ozet`, `sinif`, `kisi`, `bootstrap` → 7/7 aynı (en büyük fark 0.0). `kaldirma-degerlendir`: 4/4 aynı.
+- `kendi_kayit --yalniz-onbellek` (3 s): `kisi1/tekrarlar`, `cumle_etiket`, `karisiklik`, `ozet` ve birlikte `ozet`, `karisiklik` → 6/6 aynı.
+- `siluet --sinirlar <geçici>` (28,5 s): `ozet`, `kisi_auc`, `bootstrap`, `betimsel`, `tekrarlar` 5/5 aynı; `nan_nedenleri` boş dosya, karşılaştırıcı çöktü; düzeltildi, sonra aynı.
+
+**`hepsi` üzerinden deneme (temiz worktree):** `python -m deneyler.hepsi --adimlar deney1_v2 deney2 deney3 deney3_saglam kamera_acisi hiz_esigi kural_disa_aktar siluet deney4_orneklem deney4 deney4_kaldirma kendi_kayit` (Claude Code; commit `20f15b7`; çıktı geçici klasörde). 12 adımın hepsi çıkış kodu 0; süreler deney1_v2 99.8 s, deney2 98.9 s, deney3 35.1 s, deney3_saglam 36.2 s, siluet 31.5 s, deney4 21.7 s, deney4_kaldirma 8.2 s, kendi_kayit 3.1 s; toplam 5.7 dk. **Karşılaştırılan dosya: 74 · aynı: 74** ("Yeniden üretim: 74/74 aynı"). Ağ isteği yok. Temiz kopya kaldırıldı. Bu bir deneme; tam çalıştırma (Deney 1, 1b, 1c, Ex7, tekrar ayırma dahil) kullanıcıda.
+
+**Kişi 1 demo (`--kendi-kayit`):** kalibrasyon 6 tekrar, profil `profiller/kisi1.npz`; `demo_kisi1.mp4` 1350 kare, **45.0 s**. Seçilen dört tekrarın hasta cümlesi Adım 7 sonuç dosyasıyla (`kendi_kayit/kisi1/tekrarlar.csv`) **4/4 aynı**:
+- 4 (doğru): "Hareketi doğru yaptın. Kolun yaklaşık 140 dereceye çıktı, omzun ve dirseğin yerindeydi."
+- 7 (omuz): "Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut."
+- 11 (baş): "Kolun yukarıdayken başını yaklaşık 30 derece yana eğdin. Başını dik tut, karşıya bak. Ayrıca kolun yukarıdayken dirseğini yaklaşık 5 derece büktün. Kolunu düz tut."
+- 6 (az kaldırma): "Kolunu 105 dereceye kadar kaldırdın; normalde 140 dereceye çıkıyorsun. Kolunu yaklaşık 35 derece daha yukarı kaldır. Ayrıca kolun yukarıdayken başını yaklaşık 5 derece yana eğdin. Başını dik tut, karşıya bak."
+
+**pytest:** 209 geçti, 1 xfail (68,48 s).
+
+### Kabul ölçütü kontrolü
+- [x] `OZET.md` var; sayılar kaynak CSV'lerden kopyalandı ve her sayının yanında kaynak yazılı.
+- [x] Karar 53 eklemeleri ve testleri; önbellekli adımlar kayıtlı sonuçlarla aynı.
+- [x] `YENIDEN_KURULUM.md`, `LLM_KULLANIMI.md`, `SURUMLER.md` son hali; `ARKA_PLAN.md` notu; README.
+- [x] Sunum girdileri (Karar 56).
+- [ ] Tam yeniden üretim (kullanıcı) → `OZET.md`'ye commit ve "N/N aynı".
+- [ ] `v-sunum` etiketi ve push.
+
+### Kararlar ve sapmalar
+- **Deney 4'te `orneklem.csv` de yeniden üretiliyor.** Karar 53 yalnızca `raporla` ve `kaldirma-degerlendir` diyor. `raporla` girdi olarak `girdiler.csv` ve `yanitlar.csv` okuyor; bunları kopyalamak yerine zinciri baştan kurdum: örneklem (tohum 0, Deney 3 çıktısından) → girdiler → önbellekten yanıtlar → tablolar. Böylece önbellek anahtarları da sınanıyor: girdiler bir karakter bile farklı olsa yanıt bulunamaz ve adım "üretilmedi" olur. LLM'e hiç istek gitmez.
+- **`yanitlar.csv`'de `onbellekten` sütunu karşılaştırmada yok sayılıyor.** Asıl çalıştırmada yanıtlar ağdan geldi (`False`), yeniden üretimde önbellekten (`True`). Bu sütun yanıtın içeriğini değil, nereden geldiğini söylüyor. Metin, bitiş nedeni, deneme ve model sütunları birebir karşılaştırılıyor.
+- **İnsan girdisi kopyalanıyor:** `elle_kaldirma.xlsx` ve `elle_kaldirma_anahtar.csv` kullanıcının etiketi; yeniden üretilemez, temiz kopyaya kopyalanır ve karşılaştırılmaz.
+- **Kişisel görüntü:** `4b_`, `5b_` PNG'leri ve `demo_kisi1.mp4` kişi 1'in yüzünü gösteriyor; depo GitHub'a gönderileceği için PNG'ler de `.gitignore`'a eklendi. Karar 56 yalnızca video için "git'e girmez" diyordu. Raporda ya da depoda kullanılacaksa kullanıcının kararı.
+- **Demo süresi:** İlk üretim 36,6 s çıktı (Karar 56: ~45–60 s). Tekrar öncesi pay 1 → 2 s, oynatım sonrası 0,7 → 1,5 s, başlık 1,2 → 1,5 s yapıldı; 45,0 s. İçerik ve cümleler değişmedi. 5b'nin alt yazısı sığmadığı için kısaltıldı.
+- **Suflör sayfası** `docs/Çekim Suflörü.html` → `docs/cekim_suflor.html` (Karar 54'teki ad; içerik aynı). Sayfa yalnızca Google Fonts'tan yazı tipi çekiyor.
+- **5_bindirme çizimi** ortak bir fonksiyona taşındı (kod yolu aynı). Veri seti şekilleri yeniden üretilmedi (Karar 56: veri seti sürümleri kalır).

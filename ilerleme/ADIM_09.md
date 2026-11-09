@@ -1,7 +1,7 @@
 # ADIM 09 — Sonuçları dondurma
 
 **Tarih:** 2026-11-07 (hazırlık; Güncelleme 09, Karar 37–39), 2026-11-09 (Güncelleme 12, Karar 51–56)
-**Durum:** Kısmen. Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Tam yeniden üretim 119/120 aynı (ex7/d2_esikler.csv'de fazladan bir sütun; sayılar aynı); Karar 55 gereği durdu, danışman kararı bekleniyor. Sonra `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
+**Durum:** Kısmen. Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Tam yeniden üretim 119/120 aynı; tek fark Karar 57 ile giderildi ve Ex7 doğrulandı (24/24). Ardından `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
 
 ## Basit anlatım
 - **Yeniden üretim:** `deneyler/hepsi.py` projenin son kaydedilmiş (commit'lenmiş) hâlinin temiz bir kopyasını açıyor. Bu kopyada eski sonuç dosyaları yok. Bütün deneyleri sırayla baştan çalıştırıp çıkan her tabloyu bizim kayıtlı tablolarımızla karşılaştırıyor. Hepsi aynı çıkarsa "bu sonuçlar bu koddan, bu veriden çıkıyor" diyebiliriz. Hocanın istediği "yeniden kurulabilirlik" budur.
@@ -217,8 +217,8 @@ python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 
 - [x] Karar 53 eklemeleri ve testleri; önbellekli adımlar kayıtlı sonuçlarla aynı.
 - [x] `YENIDEN_KURULUM.md`, `LLM_KULLANIMI.md`, `SURUMLER.md` son hali; `ARKA_PLAN.md` notu; README.
 - [x] Sunum girdileri (Karar 56).
-- [ ] Tam yeniden üretim: çalıştırıldı, 119/120 aynı; 1 dosyada biçim farkı (yukarıda), danışman kararı bekleniyor.
-- [ ] `v-sunum` etiketi ve push.
+- [x] Tam yeniden üretim: 119/120 aynı; tek fark (etiket sütunu) Karar 57 ile giderildi, Ex7 yeniden çalıştırıldı: 24/24 aynı.
+- [x] `v-sunum` etiketi ve push (aşağıda).
 
 ### Kararlar ve sapmalar
 - **Deney 4'te `orneklem.csv` de yeniden üretiliyor.** Karar 53 yalnızca `raporla` ve `kaldirma-degerlendir` diyor. `raporla` girdi olarak `girdiler.csv` ve `yanitlar.csv` okuyor; bunları kopyalamak yerine zinciri baştan kurdum: örneklem (tohum 0, Deney 3 çıktısından) → girdiler → önbellekten yanıtlar → tablolar. Böylece önbellek anahtarları da sınanıyor: girdiler bir karakter bile farklı olsa yanıt bulunamaz ve adım "üretilmedi" olur. LLM'e hiç istek gitmez.
@@ -233,4 +233,10 @@ python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 
 - **Kullanıcı kontrolü:** `python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/kisi1/test.MOV` Claude Code tarafından açıldı, kullanıcı izledi: cümleler, akış ve tuşlar sorunsuz.
 - **Bulunan kozmetik sorun:** Pencere tam ekran yapılınca görüntü en-boy oranını korumadan yayılıyor, video ve yazılar bozuk görünüyordu. Sebep: Windows'taki OpenCV (Win32 arka ucu) görüntüyü pencereye esnetiyor; `WINDOW_KEEPRATIO` bu arka uçta çalışmıyor.
 - **Düzeltme (yalnızca gösterim):** `uygulama/main.py`: `goster()` her kareyi pencerenin o anki boyutuna oranı koruyarak ölçekliyor, kenarları koyu dolduruyor (`sigdir`); fare tıklamaları `goruntu_koordinati` ile görüntü koordinatına geri çevriliyor. Ölçüm, karar ve cümle kodu değişmedi. Testler: `testler/test_pencere.py` (+2); uygulama = Deney 3 testi geçti; tam `pytest` 211 geçti, 1 xfail. Kullanıcı tam ekranda kontrol etti: sorun yok.
+
+### Karar 57 — Ex7 eşik tablosu ve dondurma (9 Kas)
+- Danışman kararı: kayıtlı `sonuclar/ex7/d2_esikler.csv` yeniden üretilen haliyle (`sonuclar/hepsi/ex7_d2_esikler_yeniden.csv`) değiştirildi; sütun karşılaştırmada yok sayılmadı. Ayrı commit: `b4a3fb5`.
+- Doğrulama: `python -m deneyler.hepsi --adimlar ex7` (commit `b4a3fb5`, 2.4 dk): **Karşılaştırılan dosya: 24 · aynı: 24** ("Yeniden üretim: 24/24 aynı").
+- **Sapma (küçük):** `--adimlar` çalıştırması özetini `sonuclar/hepsi/` altına yazıp tam çalıştırmanın özetinin üzerine yazdı. Tam çalıştırmanın dosyaları git'ten geri alındı; Ex7 doğrulaması `sonuclar/hepsi/ex7_dogrulama/` altına taşındı. Kod değiştirilmedi (dondurma).
+- `OZET.md`'ye yeniden üretim satırı yazıldı (Karar 57'deki cümle).
 

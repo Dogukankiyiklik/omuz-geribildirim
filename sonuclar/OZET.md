@@ -2,7 +2,7 @@
 
 > Bütün sayılar köşeli parantez içindeki kaynak dosyadan kopyalandı (`sonuclar/` altına göre yol). Tablolarda 3 ya da 2 basamağa yuvarlandı; tam değerler kaynak dosyada. Yöntem Karar 18 ile donduruldu; aşağıdaki hiçbir sayıya bakılarak yöntem değiştirilmedi.
 >
-> **Yeniden üretim:** _dondurmada eklenecek (commit kimliği ve "yeniden üretim: N/N aynı"; Karar 55)._
+> **Yeniden üretim (commit `ecc6762`):** 120 dosyanın 119'u ilk tam çalıştırmada birebir aynı çıktı. 1 dosyada (`ex7/d2_esikler.csv`) yalnızca sonradan eklenen bir etiket sütunu eksikti; kayıtlı dosya güncellendi (Karar 57) ve Ex7 adımı yeniden çalıştırılarak doğrulandı. Hiçbir sayı değişmedi. [`hepsi/ozet.md`; Ex7 doğrulaması commit `b4a3fb5`, 24/24 aynı: `hepsi/ex7_dogrulama/ozet.md`]
 
 ## Ne yaptık, ne bulduk (5 cümle)
 1. Tek bir RGB kamerayla kolu yana kaldırma egzersizinde omuz silkmesini ve dört başka hatayı bulan, kişiye **Türkçe ve ölçülü** bir düzeltme cümlesi veren bir sistem kurduk; açık REHAB26-ViewAngles veri setinin 5 kişisinde kişi bazlı birini-dışarıda-bırak ile ölçtük.

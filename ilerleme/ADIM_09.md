@@ -228,3 +228,9 @@ python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 
 - **Demo süresi:** İlk üretim 36,6 s çıktı (Karar 56: ~45–60 s). Tekrar öncesi pay 1 → 2 s, oynatım sonrası 0,7 → 1,5 s, başlık 1,2 → 1,5 s yapıldı; 45,0 s. İçerik ve cümleler değişmedi. 5b'nin alt yazısı sığmadığı için kısaltıldı.
 - **Suflör sayfası** `docs/Çekim Suflörü.html` → `docs/cekim_suflor.html` (Karar 54'teki ad; içerik aynı). Sayfa yalnızca Google Fonts'tan yazı tipi çekiyor.
 - **5_bindirme çizimi** ortak bir fonksiyona taşındı (kod yolu aynı). Veri seti şekilleri yeniden üretilmedi (Karar 56: veri seti sürümleri kalır).
+
+### Demo denemesi ve pencere düzeltmesi (9 Kas; etiketten önce)
+- **Kullanıcı kontrolü:** `python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/kisi1/test.MOV` Claude Code tarafından açıldı, kullanıcı izledi: cümleler, akış ve tuşlar sorunsuz.
+- **Bulunan kozmetik sorun:** Pencere tam ekran yapılınca görüntü en-boy oranını korumadan yayılıyor, video ve yazılar bozuk görünüyordu. Sebep: Windows'taki OpenCV (Win32 arka ucu) görüntüyü pencereye esnetiyor; `WINDOW_KEEPRATIO` bu arka uçta çalışmıyor.
+- **Düzeltme (yalnızca gösterim):** `uygulama/main.py`: `goster()` her kareyi pencerenin o anki boyutuna oranı koruyarak ölçekliyor, kenarları koyu dolduruyor (`sigdir`); fare tıklamaları `goruntu_koordinati` ile görüntü koordinatına geri çevriliyor. Ölçüm, karar ve cümle kodu değişmedi. Testler: `testler/test_pencere.py` (+2); uygulama = Deney 3 testi geçti; tam `pytest` 211 geçti, 1 xfail. Kullanıcı tam ekranda kontrol etti: sorun yok.
+

@@ -57,6 +57,44 @@ class KareDeposu:
         return None if b is None else cv2.imdecode(np.frombuffer(b, np.uint8), cv2.IMREAD_COLOR)
 
 
+# Pencere görünümü (yalnızca gösterim; ölçüm ve kararları etkilemez). Windows'ta (Win32 arka ucu) OpenCV,
+# pencere büyütülünce görüntüyü en-boy oranını korumadan yayar. goster() her kareyi pencerenin o anki boyutuna
+# oranı koruyarak ölçekler, kenarları koyu doldurur; fare koordinatları GORUNUM ile görüntü koordinatına çevrilir.
+GORUNUM = {"k": 1.0, "ox": 0, "oy": 0}
+KENAR_RENGI = (20, 20, 20)
+
+
+def sigdir(img: np.ndarray, w: int, h: int) -> tuple[np.ndarray, float, int, int]:
+    """img'i w×h tuvale oranı koruyarak ortala. Dönüş: (tuval, ölçek, x payı, y payı)."""
+    H, W = img.shape[:2]
+    k = min(w / W, h / H)
+    nw, nh = max(1, int(round(W * k))), max(1, int(round(H * k)))
+    ox, oy = (w - nw) // 2, (h - nh) // 2
+    tuval = np.empty((h, w, 3), np.uint8)
+    tuval[:] = KENAR_RENGI
+    yontem = cv2.INTER_AREA if k < 1 else cv2.INTER_CUBIC
+    tuval[oy:oy + nh, ox:ox + nw] = cv2.resize(img, (nw, nh), interpolation=yontem)
+    return tuval, k, ox, oy
+
+
+def goster(img: np.ndarray) -> None:
+    try:
+        _, _, w, h = cv2.getWindowImageRect(PENCERE)
+    except cv2.error:
+        w = h = 0
+    if w > 0 and h > 0 and (w, h) != (img.shape[1], img.shape[0]):
+        img, k, ox, oy = sigdir(img, w, h)
+        GORUNUM.update(k=k, ox=ox, oy=oy)
+    else:
+        GORUNUM.update(k=1.0, ox=0, oy=0)
+    cv2.imshow(PENCERE, img)
+
+
+def goruntu_koordinati(x: int, y: int) -> tuple[float, float]:
+    """Penceredeki fare konumu → çizilen görüntüdeki konum."""
+    return (x - GORUNUM["ox"]) / GORUNUM["k"], (y - GORUNUM["oy"]) / GORUNUM["k"]
+
+
 class Girdi:
     """Klavye ve fare olaylarını tek bir eylem kuyruğunda toplar."""
 
@@ -69,6 +107,7 @@ class Girdi:
     def _fare(self, olay, x, y, *_):
         if olay != cv2.EVENT_LBUTTONDOWN:
             return
+        x, y = goruntu_koordinati(x, y)
         for b in self.dugmeler:
             if b.icinde(x - self.panel_x, y):
                 self.kuyruk.append(b.eylem)
@@ -179,7 +218,7 @@ def hazirlik(cap, poz, girdi: Girdi, sure: float, ayna: bool) -> float | None:
         for metin, boy, rk, kalin in satirlar:
             img = pn.metin_yaz(img, metin, (16, y), boy, rk, kalin=kalin, kutu=True)
             y += int(boy * 1.7)
-        cv2.imshow(PENCERE, img)
+        goster(img)
         if n == 1:
             ekrana_sigdir(img.shape[1], img.shape[0])
             one_getir()
@@ -266,7 +305,7 @@ def calistir(cap, oturum: Oturum, poz, girdi: Girdi, canli: bool, otomatik_onay:
         if time.time() - mesaj_t > MESAJ_SURE_S:
             mesaj = ""
         sag, girdi.dugmeler = pn.panel(Y, oturum, uzman, oynatici is not None, mesaj, egz, kalan, video=not canli)
-        cv2.imshow(PENCERE, pn.ekran(sol, sag))
+        goster(pn.ekran(sol, sag))
         if first:
             ekrana_sigdir(G + pn.PANEL_G, Y)
             one_getir()
@@ -322,7 +361,7 @@ def calistir(cap, oturum: Oturum, poz, girdi: Girdi, canli: bool, otomatik_onay:
     # kaynak bitti: son oynatımı ve paneli göster
     while oynatici is not None and not oynatici.bitti:
         sag, girdi.dugmeler = pn.panel(Y, oturum, uzman, True, mesaj, egz, video=not canli)
-        cv2.imshow(PENCERE, pn.ekran(oynatici.kare(G, Y), sag))
+        goster(pn.ekran(oynatici.kare(G, Y), sag))
         if "cikis" in girdi.bekle(int(1000 / fps)):
             return True
     return False

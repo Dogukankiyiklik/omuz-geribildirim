@@ -30,7 +30,7 @@ Danışman sonuçları yorumlar; gerekirse bir sonraki adım için düzeltme ver
 | 6 | 8 | Deney 4: LLM ile kural tabanlı karşılaştırması (Gemini ücretsiz / Ollama); süre sınırı 1 gün | 11 Kas | Bildiri 📤 | ✅ (Güncelleme 10; Karar 42 duyarlılık analizi bitti) |
 | 7 | 6b | Omuz bölgesi siluet ölçütü; süre sınırı 1 gün; segmentasyon saatler sürebilir, önce süre tahmini | 11–12 Kas | İsteğe bağlı 📤 | ✅ olumsuz sonuç (7 Kas; Karar 52: SILUET 0,72 / YENI_mp122 0,97, çaprazda tanım başa takılıyor; ADIM_06b) |
 | 8 | 10 | REHAB24-6 ile 10 yeni kişi; kullanıcı etiketler; önce veri biçimi, iş büyükse dur ve sor | 12–13 Kas | İsteğe bağlı | ⛔ yapılmaz (Karar 45; gelecek çalışma) |
-| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **11 Kas** (Güncelleme 12; en geç 13 Kas) | Zorunlu 📤 | 🔄 (belgeler ve önbellekli yeniden üretim hazır; kullanıcının `hepsi` çalıştırması ve `v-sunum` etiketi bekleniyor) |
+| 9 | 9 | Sonuçları dondurma, şekiller, `sonuclar/OZET.md` | **11 Kas** (Güncelleme 12; en geç 13 Kas) | Zorunlu 📤 | ✅ (9 Kas; yeniden üretim 119/120 + Karar 57; `v-sunum` = `0c89a4e`) |
 | — | — | 5 dk sunum (danışmanla, Claude Code dışında) | 13–15 Kas | Zorunlu | ⏳ |
 | — | — | **1 sayfalık rapor** (hocanın şablonu; sunumdan sonra teslim) | 16 Kas sonrası | Zorunlu | ⏳ |
 | — | 11 | ~~Ex7 genellemesi~~ → Adım 4b'ye taşındı | — | — | — |

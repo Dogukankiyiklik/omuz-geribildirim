@@ -1,7 +1,7 @@
 # ADIM 09 — Sonuçları dondurma
 
 **Tarih:** 2026-11-07 (hazırlık; Güncelleme 09, Karar 37–39), 2026-11-09 (Güncelleme 12, Karar 51–56)
-**Durum:** Kısmen. Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Tam yeniden üretim 119/120 aynı; tek fark Karar 57 ile giderildi ve Ex7 doğrulandı (24/24). Ardından `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
+**Durum:** Tamamlandı (9 Kas; `v-sunum` = `0c89a4e`). Belgeler, önbellekli yeniden üretim ve sunum girdileri hazır (en sondaki Ek: Güncelleme 12). Tam yeniden üretim 119/120 aynı; tek fark Karar 57 ile giderildi ve Ex7 doğrulandı (24/24). Ardından `OZET.md`'ye yeniden üretim satırı, `v-sunum` etiketi ve push (Karar 55). Hedef 11 Kas.
 
 ## Basit anlatım
 - **Yeniden üretim:** `deneyler/hepsi.py` projenin son kaydedilmiş (commit'lenmiş) hâlinin temiz bir kopyasını açıyor. Bu kopyada eski sonuç dosyaları yok. Bütün deneyleri sırayla baştan çalıştırıp çıkan her tabloyu bizim kayıtlı tablolarımızla karşılaştırıyor. Hepsi aynı çıkarsa "bu sonuçlar bu koddan, bu veriden çıkıyor" diyebiliriz. Hocanın istediği "yeniden kurulabilirlik" budur.
@@ -240,3 +240,4 @@ python -m deneyler.sunum_sekilleri --kendi-kayit   # 4b, 5b, demo_kisi1.mp4 (~2 
 - **Sapma (küçük):** `--adimlar` çalıştırması özetini `sonuclar/hepsi/` altına yazıp tam çalıştırmanın özetinin üzerine yazdı. Tam çalıştırmanın dosyaları git'ten geri alındı; Ex7 doğrulaması `sonuclar/hepsi/ex7_dogrulama/` altına taşındı. Kod değiştirilmedi (dondurma).
 - `OZET.md`'ye yeniden üretim satırı yazıldı (Karar 57'deki cümle).
 
+- **Dondurma tamam (9 Kas):** `v-sunum` etiketi commit `0c89a4e` üzerinde; `main` ve etiket GitHub'a gönderildi (`git ls-remote --tags origin v-sunum` etiketi gösteriyor). Geçmişte kişisel dosya yok (`.mp4`, `.MOV`, `4b_`, `5b_`, `profiller/`, `.env` aramasında eşleşme yok). Bundan sonra yöntem, deney ve sonuç kodu değişmez (Karar 55).

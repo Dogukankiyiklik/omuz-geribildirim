@@ -26,7 +26,7 @@ Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyle
 | `sunum/` | Sunum şekilleri (`deneyler/sunum_sekilleri.py`). `4b_*` ve `5b_*` kişisel görüntü içerdiği için depoya girmez. | `1_problem.png` … `5_bindirme.png` |
 | `gorsel_kontrol/` | Görsel kontrol aracının videoları (`araclar/gorsel_kontrol.py`); yalnızca yerelde | – |
 
-`hepsi/` klasörü `python -m deneyler.hepsi` çalıştırılınca oluşur. Son çalıştırmanın raporu: `arsiv/sonuclar/hepsi/`.
+`hepsi/` son yeniden üretimin raporudur (`python -m deneyler.hepsi` her çalıştırmada yeniden yazar): `ozet.md`, adım süreleri (`adimlar.csv`) ve dosya dosya karşılaştırma (`regresyon.csv`).
 
 ## Kısaltmalar
 

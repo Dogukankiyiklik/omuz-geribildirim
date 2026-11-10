@@ -1,13 +1,12 @@
 """
 Adil model: hatalı bir tekrar, doğru tekrarlarla AYNI SAYIDA (n−1) doğru tekrardan kurulan modelle
-değerlendirilir (CLAUDE.md, "Deney dürüstlüğü").
+değerlendirilir. Böylece doğru ve hatalı tekrarlar eşit koşulda karşılaştırılır.
 
-Güncelleme 03, Karar 7: Eskiden n doğru tekrardan biri RASTGELE dışarıda bırakılıyordu ("atla").
-Artık her doğru tekrar SIRAYLA dışarıda bırakılır, n model kurulur ve E'lerin ortalaması alınır.
-Böylece hatalı tekrarların E'si de tohumdan bağımsız (deterministik) olur.
-Doğru tekrarlar zaten birini-dışarıda-bırak ile değerlendirilir; onlar için bu fonksiyon gerekmez.
+Her doğru tekrar SIRAYLA dışarıda bırakılır, n model kurulur ve E'lerin ortalaması alınır. Böylece
+hatalı tekrarların E'si rastgelelikten bağımsız (deterministik) olur. Doğru tekrarlar zaten
+birini-dışarıda-bırak ile değerlendirilir; onlar için bu fonksiyon gerekmez.
 
-Bu bir deney protokolüdür: uygulamada (Adım 6) kalibrasyonun bütün tekrarları tek bir modele girer.
+Bu bir deney protokolüdür: uygulamada kalibrasyonun bütün tekrarları tek bir modele girer.
 """
 from __future__ import annotations
 
@@ -36,7 +35,7 @@ def ortalama_E(Eler: list[dict[str, float]], olcutler) -> dict[str, float]:
 
 def adil_ortalama_hata(dogrular: list, hata: Callable[[list], tuple[dict, dict]], olcutler):
     """
-    Karar 7: her (n−1)'li alt küme için hata(alt_kume) -> (E, ek) çağrılır; E'lerin ortalaması döner.
+    Her (n−1)'li alt küme için hata(alt_kume) -> (E, ek) çağrılır; E'lerin ortalaması döner.
 
     Dönüş: (E_ortalama, ekler) — ekler: her alt kümenin (E, ek) çifti, sırayla (i. eleman = i. doğru
     tekrar dışarıda). Çağıran taraf ek bilgileri (ör. kapsam) kendi kuralıyla birleştirir.

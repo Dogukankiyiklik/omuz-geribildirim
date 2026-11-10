@@ -109,7 +109,7 @@ def veri_seti_kalibrasyonu(video_id: str, kamera: str, yonelim: int, kalibrasyon
     etiketi doğru olan ilk `kalibrasyon_sayisi` tekrarla kalibrasyon yapılır (sağlık kontrolü ve main.py --veri-seti).
     Dönüş: sözlük (yol, fps, W, H, bas, son, lm, s, o, es, etiket, kal, poz_farki).
     """
-    from deneyler.tekrar_ayirma import eslestir
+    from cekirdek.tekrar_ayirici import eslestir
     seg = veri.segmentasyon_oku()
     s = seg[(seg.video_id == video_id) & (seg.person_orientation == yonelim)].sort_values("first_frame")
     if s.empty:

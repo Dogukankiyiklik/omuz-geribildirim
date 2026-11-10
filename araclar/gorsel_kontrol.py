@@ -68,7 +68,7 @@ def _font(boyut: int, kalin: bool = False):
 # ---------------------------------------------------------------- değerlendirme ve eşikler
 def degerlendir(tohum: int = 0):
     """Deney 1'i baştan çalıştırır (~10 s); her tekrarın bant modeli ve E'si ile bir tablo döner."""
-    kayitlar = list(tekrar_degerlendirmeleri("zip", tohum=tohum))
+    kayitlar = list(tekrar_degerlendirmeleri(tohum=tohum))
     df = pd.DataFrame([{
         "video": d["t"].video, "kamera": d["t"].kamera, "yonelim": d["t"].yonelim,
         "tekrar_no": d["t"].tekrar_no, "satir": d["t"].satir, "kisi": d["t"].kisi,

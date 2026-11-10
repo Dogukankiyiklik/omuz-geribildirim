@@ -1,28 +1,25 @@
 """
-Kural tabanlı Türkçe geri bildirim (Adım 5, Deney 3; uygulama da aynı kodu kullanır).
+Kural tabanlı Türkçe geri bildirim (Deney 3; uygulama da aynı kodu kullanır).
 
-Deney 2'nin kararını (cekirdek/hata_turu.py; en fazla 2 hata, 2. hata ancak z'si de T'yi geçerse)
-bir "sapma kodu"na ve oradan ölçü içeren bir cümleye çevirir. Tanımlar ADIM_05.md "Önceden
-belirlenenler" bölümünde, kod ve sonuçlardan önce sabitlendi:
+Hata türü kararını (cekirdek/hata_turu.py; en fazla 2 hata, 2. hata ancak z'si de T'yi geçerse)
+bir "sapma kodu"na ve oradan ölçü içeren bir cümleye çevirir. Tanımlar, kod ve sonuçlardan önce sabitlendi:
   faz      : tekrarın kendi (yumuşatılmış) kol eğrisinden; ≥ 0,85·tepe = "kol en üstteyken",
              öncesi "kaldırırken", sonrası "indirirken". Söylenen faz: beklenen yöndeki bant dışı
              fazlalığın toplamının en büyük olduğu faz (eşitlikte kaldırırken → üstte → indirirken).
   an       : seçilen faz içinde fazlalığın en büyük olduğu kare; ölçü = o karedeki ham değer,
-             beklenen = o karedeki μ. Hatalıda μ ve bant_disi n modelin ortalaması (Karar 7).
+             beklenen = o karedeki μ. Hatalıda μ ve bant_disi n modelin ortalaması (adil model).
   şiddet   : eğitim kişilerinin o hatayla etiketli (önden + çapraz) tekrarlarındaki kural puanının
              üçte birlik dilimleri (az kaldırma dahil; puan max(d, 0)).
   birimler : açı → derece; YENI ve kol_boyu → gövde boyunun %'si; omuz için ayrıca omuz çizgisi
              eğimi (omuz_egim, yalnızca anlatım). En yakın 1'e yuvarlanır; fark yuvarlanmış
              değerlerin farkıdır. Santimetre yok.
 
-Güncelleme 07:
-  Karar 21 : "sağlam ölçü" (olcu_surumu = "saglam"): ölçü tek kare yerine seçilen fazdaki K karelerinin
-             medyanı. K = beklenen yönde fazlalığı > 0 olan ve ölçütün eklemlerinin hepsinin görünürlüğü
-             ≥ 0,5 olan kareler; |K| < 3 ise görünürlük koşulu kalkar; yine < 3 ise tek kare kuralı.
-             Tespit, faz ve faz seçimi değişmez. Uygulamanın varsayılanı "saglam"; Deney 3'ün birincil
-             sonucu "tek_kare".
-  Karar 28 : iki katmanlı geri bildirim. Aynı SapmaKodu'ndan hasta_cumlesi (kısa; yüzde ve şiddet kelimesi
-             yok; yalnızca 5°'ye yuvarlanmış derece) ve uzman ayrıntısı (hata_cumlesi, bugünkü ölçülü cümle).
+Sağlam ölçü (olcu_surumu = "saglam"): ölçü tek kare yerine seçilen fazdaki K karelerinin medyanı.
+  K = beklenen yönde fazlalığı > 0 olan ve ölçütün eklemlerinin hepsinin görünürlüğü ≥ 0,5 olan kareler;
+  |K| < 3 ise görünürlük koşulu kalkar; yine < 3 ise tek kare kuralı. Tespit, faz ve faz seçimi değişmez.
+  Uygulamanın varsayılanı "saglam"; Deney 3'ün birincil sonucu "tek_kare".
+İki katmanlı geri bildirim: aynı SapmaKodu'ndan hasta_cumlesi (kısa; yüzde ve şiddet kelimesi yok;
+  yalnızca 5°'ye yuvarlanmış derece) ve uzman ayrıntısı (hata_cumlesi, ölçülü cümle).
 """
 from __future__ import annotations
 
@@ -44,7 +41,7 @@ YUZDE_OLCUTLERI = {"YENI", "kol_boyu"}   # gövde boyuna bölünmüş uzunluklar
 OMUZ_ANLATIM = "omuz_egim"
 TARAF = "sağ"                            # Ex1'de sağ kol
 
-# Karar 21
+# sağlam ölçü
 OLCU_SURUMLERI = ("tek_kare", "saglam")
 VARSAYILAN_OLCU = "saglam"               # uygulamanın varsayılanı; Deney 3'ün birincil sonucu "tek_kare" ile
 GORUNURLUK_ESIGI = 0.5                   # MediaPipe'ın varsayılan görünürlük eşiği (veriye bakılmadan)
@@ -57,7 +54,7 @@ GORUNURLUK_EKLEMLERI = {"YENI": (8, 12), "bas": (7, 8, 11, 12, 23, 24), "on_kacm
 YOL_TEK = "tek_kare"                         # olcu_surumu = "tek_kare"
 YOL_GORUNUR = "saglam_gorunur"               # K: fazlalık > 0 ve görünürlük ≥ 0,5, |K| ≥ 3
 YOL_GORUNURLUKSUZ = "saglam_gorunurluksuz"   # görünürlük koşulu kaldırıldı, |K| ≥ 3
-YOL_YEDEK = "saglam_tek_kare_yedek"          # yine |K| < 3: ADIM_05 tek kare kuralı
+YOL_YEDEK = "saglam_tek_kare_yedek"          # yine |K| < 3: tek kare kuralı
 YOL_TEPE = "tepe"                            # az kaldırma: tepe açısı (değişmez)
 
 
@@ -123,7 +120,7 @@ def _nanort(diziler: list[np.ndarray]) -> np.ndarray:
 
 def model_ortalamasi(ayrintilar: list[dict], olcut: str) -> tuple[np.ndarray, np.ndarray]:
     """
-    Karar 7: n modelin aci_bandi_hatasi(..., ayrinti=True) ek çıktılarından kare başına μ ve imzalı
+    Adil model: n modelin aci_bandi_hatasi(..., ayrinti=True) ek çıktılarından kare başına μ ve imzalı
     bant_disi ortalaması (geçersiz karelerde NaN; hiçbir modelin geçerli olmadığı kare NaN).
     """
     mu = _nanort([np.where(a["gecerli"], a["mu"][olcut], np.nan) for a in ayrintilar])
@@ -132,7 +129,7 @@ def model_ortalamasi(ayrintilar: list[dict], olcut: str) -> tuple[np.ndarray, np
 
 
 def tau_ortalamasi(ayrintilar: list[dict], olcut: str) -> np.ndarray:
-    """Karar 7 ile aynı ortalama, τ için (Deney 4 C koşulunun bant özeti; geçersiz karelerde NaN)."""
+    """model_ortalamasi ile aynı ortalama, τ için (geçersiz karelerde NaN)."""
     return _nanort([np.where(a["gecerli"], a["tau"][olcut], np.nan) for a in ayrintilar])
 
 
@@ -144,7 +141,7 @@ def fazlalik(bant_disi: np.ndarray, yon: int) -> np.ndarray:
 
 
 def an_sec(kol: np.ndarray, deger: np.ndarray, mu: np.ndarray, bant_disi: np.ndarray, yon: int):
-    """(faz, kare) — ADIM_05 madde 1–2. Ölçülecek kare yoksa (None, None)."""
+    """(faz, kare): modül açıklamasındaki faz ve an kuralı. Ölçülecek kare yoksa (None, None)."""
     faz = anlatim_fazlari(kol)
     fazla = fazlalik(bant_disi, yon)
     if (fazla > 0).any():
@@ -167,7 +164,7 @@ def olcut_gorunurlugu(dizi: np.ndarray, olcut: str) -> np.ndarray:
 
 def saglam_kareler(kol, bant_disi, yon: int, faz_secimi: int, gorunurluk=None):
     """
-    Karar 21: seçilen fazdaki K kareleri ve yolu. Dönüş (indeksler, yol); |K| < 3 ise (None, YOL_YEDEK).
+    Sağlam ölçü: seçilen fazdaki K kareleri ve yolu. Dönüş (indeksler, yol); |K| < 3 ise (None, YOL_YEDEK).
     gorunurluk None ise görünürlük koşulu uygulanamaz ve doğrudan görünürlüksüz yola geçilir.
     """
     K0 = (anlatim_fazlari(kol) == faz_secimi) & (fazlalik(bant_disi, yon) > 0)
@@ -201,7 +198,7 @@ class SapmaKodu:
     ek_olcu: float | None = None      # omuz: omuz çizgisi eğimi (°)
     ek_beklenen: float | None = None
     taraf: str = TARAF
-    olcu_yolu: str = ""               # Karar 21: ölçünün hangi yoldan alındığı (YOL_*)
+    olcu_yolu: str = ""               # ölçünün hangi yoldan alındığı (YOL_*)
     olcu_kare_sayisi: int = 0         # ölçünün alındığı kare sayısı (|K|; tek kare = 1)
 
     @property
@@ -243,8 +240,8 @@ class SapmaKodu:
 def durus_kodu(hata: str, olcut: str, yon: int, siddet: str, kol, deger, mu, bant_disi,
                ek_deger=None, ek_mu=None, olcu_surumu: str = VARSAYILAN_OLCU, gorunurluk=None) -> SapmaKodu:
     """
-    Duruş hatası (omuz, baş, öne kaçma, dirsek) için sapma kodu. Faz ve an: ADIM_05 madde 1–2.
-    olcu_surumu "tek_kare": ölçü o anki tek kare; "saglam": K karelerinin medyanı (Karar 21).
+    Duruş hatası (omuz, baş, öne kaçma, dirsek) için sapma kodu. Faz ve an: modül açıklamasına bakın.
+    olcu_surumu "tek_kare": ölçü o anki tek kare; "saglam": K karelerinin medyanı.
     gorunurluk: kare başına ölçütün eklemlerinin en küçük görünürlüğü (olcut_gorunurlugu).
     """
     if olcu_surumu not in OLCU_SURUMLERI:
@@ -393,10 +390,10 @@ def geri_bildirim(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum: int = 
     return metin
 
 
-# ---------------------------------------------------------------- Karar 28: hasta cümlesi
+# ---------------------------------------------------------------- hasta cümlesi
 # Kısa: ne oldu (fazıyla) + ne yapmalı. Yüzde, "gövde boyu" ve şiddet kelimesi yok. Sayı yalnızca derece,
 # 5°'ye yuvarlanmış; söylenen fark yuvarlanmış iki değerin farkı. Fark 0 ise (ya da işareti cümlenin
-# yönüyle çelişiyorsa) sayı söylenmez. Öne kaçmada sayı yok (arsiv/docs/GELECEK_CALISMA.md madde 5).
+# yönüyle çelişiyorsa) sayı söylenmez. Öne kaçmada sayı söylenmez.
 HASTA_FAZ = {KALDIRIRKEN: "Kolunu kaldırırken", USTTE: "Kolun yukarıdayken", INDIRIRKEN: "Kolunu indirirken"}
 HASTA_ADIM = 5
 
@@ -488,6 +485,6 @@ def hasta_geri_bildirimi(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum:
 
 
 def iki_katman(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum: int = 0) -> dict:
-    """Karar 28: {'hasta_cumlesi', 'uzman_ayrintisi'}; uygulama paneli ve Deney 3 bunu kullanır."""
+    """İki katman: {'hasta_cumlesi', 'uzman_ayrintisi'}; uygulama paneli ve Deney 3 bunu kullanır."""
     return {"hasta_cumlesi": hasta_geri_bildirimi(kodlar, tepe, sira, tohum),
             "uzman_ayrintisi": geri_bildirim(kodlar, tepe, sira, tohum)}

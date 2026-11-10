@@ -10,9 +10,9 @@ Referans iskeleti kullanıcının iskeletine çakıştırma (hocanın Problem 3'
        * döndürme: dinlenme gövde ekseni açılarının farkı (kalça ortası → omuz ortası).
      Ölçek ve döndürme tekrar BAŞINDAKİ dinlenme karelerinden bir kez hesaplanır, kare kare değil:
      kare kare gövde uzunluğuna ölçeklemek, omuz kalkınca gövde de "uzadığı" için silkmeyi
-     referansa da taşıyıp gizlerdi (bkz. arsiv/ilerleme/ADIM_02b.md, Kararlar).
+     referansa da taşıyıp gizlerdi.
 
-Görsel kontrol aracı (araclar/gorsel_kontrol.py) ve uygulama (Adım 6) bu kodu ortak kullanır.
+Görsel kontrol aracı (araclar/gorsel_kontrol.py) ve uygulama bu kodu ortak kullanır.
 Koordinatlar en-boy düzeltilmiş birimdedir (görüntü yüksekliği = 1); piksele çevirmek için
 yükseklikle (H) çarpmak yeter: x_px = x * H, y_px = y * H.
 """
@@ -33,7 +33,6 @@ KEMIKLER = [
     (12, 14), (14, 16), (11, 13), (13, 15),    # kollar
     (11, 23), (12, 24), (23, 24),              # gövde
 ]
-EKLEMLER = sorted({j for k in KEMIKLER for j in k})
 
 # Hangi ölçüt banttan çıkınca hangi kemik kırmızı olur (ve hangi eklem vurgulanır).
 OLCUT_UZUVLARI: dict[str, list[tuple[int, int]]] = {

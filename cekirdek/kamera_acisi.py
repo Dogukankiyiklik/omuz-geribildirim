@@ -1,5 +1,5 @@
 """
-Kamera açısı uyarısı (Karar 9, ayrıntısı Güncelleme 07 / Karar 26).
+Kamera açısı uyarısı.
 
 Oran = dinlenmede (tekrar öncesi ilk 8 kare) omuz genişliği / gövde boyu, en-boy düzeltmeli, karelerin
 medyanı. Kişi kameraya döndükçe 2B'de omuz çizgisi kısalır ve oran düşer. Eşik, veri setinin çapraz

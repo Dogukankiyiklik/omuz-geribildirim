@@ -95,7 +95,7 @@ def bant_ornegi(klasor: Path = KLASOR, video="ex1_Honza", kamera="cam1", yonelim
     Bant, gösterilen doğru tekrar HARİÇ diğer doğru tekrarlardan kurulur (birini-dışarıda-bırak);
     silkmeli tekrar aynı modelle ölçülür. Her iki tekrar DTW ile referans tekrarın zamanına hizalanır.
     """
-    tekrarlar = veri.tekrarlari_yukle(1, kaynak="zip")
+    tekrarlar = veri.tekrarlari_yukle(1)
     grup = veri.gruplara_ayir(tekrarlar)[(video, kamera, yonelim)]
     dogrular = [t for t in grup if t.dogru]
     dogru = dogrular[0]

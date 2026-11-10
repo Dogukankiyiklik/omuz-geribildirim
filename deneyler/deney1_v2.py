@@ -261,11 +261,11 @@ def tohum_tablosu(df0, df1, kosullar=("v1", "v1b", "v2")) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------- çalıştır
-def calistir(tohum=0, cikti=CIKTI, bootstrap_n=2000, tohum_duyarliligi=True, yazdir=True, kaynak="zip"):
+def calistir(tohum=0, cikti=CIKTI, bootstrap_n=2000, tohum_duyarliligi=True, yazdir=True):
     t0 = time.time()
     cikti = Path(cikti)
     cikti.mkdir(parents=True, exist_ok=True)
-    tekrarlar = veri.tekrarlari_yukle(1, kaynak=kaynak)
+    tekrarlar = veri.tekrarlari_yukle(1)
     ozl = ozellik_tablosu(tekrarlar)
     parcalar = []
     for kosul in KOSULLAR:

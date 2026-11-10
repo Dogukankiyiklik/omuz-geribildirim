@@ -1,8 +1,8 @@
 """
-Anahtar kelime çıkarıcı (Adım 5, Deney 3; Deney 4'te LLM cümleleri de bununla ölçülür).
+Anahtar kelime çıkarıcı (Deney 3 ve kendi kayıt deneyi).
 
 Bir Türkçe geri bildirim metninden hangi hata türlerinin söz edildiğini bulur. Sözlük tabanlıdır ve
-şablonlara özel değildir (ADIM_05, önceden belirlenenler madde 8):
+şablonlara özel değildir (kurallar önceden belirlendi):
   1. Metin küçük harfe çevrilir (Türkçe I/İ) ve parçalara ayrılır: . ! ? ; : , ve karşıtlık
      bağlaçları (ama, ancak, fakat, ayrıca, yalnız).
   2. Olumlu parçalar ("normal aralıkta", "doğru yaptın", "devam et" vb.) hata saymaz.

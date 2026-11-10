@@ -1,5 +1,5 @@
 """
-Uygulamanın karar kuralı dosyası (Güncelleme 07, Karar 24).
+Uygulamanın karar kuralı dosyası.
 
 Uygulamada test kişisi yoktur; kural beş kişinin hepsinin önden + çapraz tekrarlarıyla, LOSO'daki eğitim
 adımıyla birebir aynı prosedürle kurulur (ht.esik_sec + gb.siddet_esikleri). Dosyayı

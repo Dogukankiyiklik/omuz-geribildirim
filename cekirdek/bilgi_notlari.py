@@ -1,20 +1,20 @@
 """
-Bilgi notları (Güncelleme 08, Karar 30 ve 31). Hata türü DEĞİLDİR.
+Bilgi notları. Hata türü DEĞİLDİR.
 
 Bu notlar karar kuralına girmez, hiçbir metriğe (katı, ilk iki, gereksiz uyarı ...) katılmaz.
 Uygulamada hasta cümlesinin altında ayrı bir not olarak gösterilir ve oturum CSV'sine ayrı sütunlarda yazılır.
 
-  * Hız (Karar 31): tekrar süresi, veri setinin önden + çapraz DOĞRU tekrarlarındaki sürelerin 5. yüzdeliğinden
+  * Hız: tekrar süresi, veri setinin önden + çapraz DOĞRU tekrarlarındaki sürelerin 5. yüzdeliğinden
     kısaysa "Hareketi biraz daha yavaş yap." Süre = (son kare − ilk kare + 1) / FPS; veri setinde
     first_frame…last_frame, uygulamada tekrar ayırıcının sınırları. Eşik deneyler/hiz_esigi.py ile üretilir
     (modeller/hiz_esigi.json). Veri setinde hız etiketi olmadığı için doğruluğu ölçülemez.
-  * Sol kol (Karar 31): tekrar sırasında sol kolun açısı (sağ kolla aynı tanım: üst kol ile aşağı yön arasındaki
+  * Sol kol: tekrar sırasında sol kolun açısı (sağ kolla aynı tanım: üst kol ile aşağı yön arasındaki
     açı; tepe, aynı 5 karelik medyanla yumuşatılmış eğriden) 60°'yi geçerse "Yalnızca sağ kolunu kaldır."
     60° tekrar ayırıcının tepe şartıdır (ta.EN_AZ_TEPE); yeni bir sabit değildir.
-  * Kamera (Karar 30): her değerlendirme tekrarının dinlenme oranına kalibrasyondaki eşik (Karar 26) uygulanır.
+  * Kamera: her değerlendirme tekrarının dinlenme oranına kamera açısı eşiği (cekirdek/kamera_acisi.py) uygulanır.
     Eşiğin altındaysa karar ve cümle yine gösterilir, altına not eklenir. Yeni eşik yoktur.
 
-Genel bir "hareket tanınmadı" notu bilerek YOKTUR (Karar 31): tanımı yeni bir eşik gerektirir ve sınanamaz.
+Genel bir "hareket tanınmadı" notu bilerek YOKTUR: tanımı yeni bir eşik gerektirir ve sınanamaz.
 """
 from __future__ import annotations
 

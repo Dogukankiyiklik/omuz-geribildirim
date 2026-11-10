@@ -13,7 +13,6 @@ Referans: referans/deney1_omuz_olcutleri.py. Bu betik aynı mantığı cekirdek/
 
 Kullanım:
     python -m deneyler.deney1                     # orijinal veri (zip), en-boy 9/16, tohum 0
-    python -m deneyler.deney1 --kaynak npz        # danışmanın küçültülmüş kopyası
 Çıktı: sonuclar/deney1/{tekrarlar.csv, ozet.csv, bootstrap.csv, hata_turu_ortalama.csv}
 """
 from __future__ import annotations
@@ -36,8 +35,7 @@ SILKME = "ERR_ELEVATED_SHOULDER"
 GORUS_GRUPLARI = ["önden (0–20°)", "çapraz (30–60°)", "profil (70–90°)"]
 
 
-def tekrar_degerlendirmeleri(kaynak: str = "zip", en_boy: float = veri.EN_BOY, tohum: int = 0,
-                             npz_yolu=veri.KUCUK_NPZ, tekrarlar=None):
+def tekrar_degerlendirmeleri(en_boy: float = veri.EN_BOY, tohum: int = 0, tekrarlar=None):
     """
     Deney 1'in tekrar tekrar değerlendirmesi. Her tekrar için bir sözlük üretir:
       t (Tekrar), f (ölçüt eğrileri), model (bant), ref (bandın referans Tekrar'ı),
@@ -47,7 +45,7 @@ def tekrar_degerlendirmeleri(kaynak: str = "zip", en_boy: float = veri.EN_BOY, t
     """
     rng = np.random.default_rng(tohum)
     if tekrarlar is None:
-        tekrarlar = veri.tekrarlari_yukle(1, kaynak=kaynak, npz_yolu=npz_yolu)
+        tekrarlar = veri.tekrarlari_yukle(1)
     for (vid, kam, o), grup in veri.gruplara_ayir(tekrarlar).items():
         tl = [{"t": t, "f": ozellikler(t.dizi, OLCUTLER, en_boy)} for t in grup]
         dogrular = [x for x in tl if x["t"].dogru]
@@ -66,11 +64,10 @@ def tekrar_degerlendirmeleri(kaynak: str = "zip", en_boy: float = veri.EN_BOY, t
                    "E": bant_hatasi(model, x["f"], OLCUTLER), "H": ham_skor(x["f"], OLCUTLER)}
 
 
-def tekrar_skorlari(kaynak: str = "zip", en_boy: float = veri.EN_BOY, tohum: int = 0,
-                    npz_yolu=veri.KUCUK_NPZ) -> pd.DataFrame:
+def tekrar_skorlari(en_boy: float = veri.EN_BOY, tohum: int = 0) -> pd.DataFrame:
     """Her tekrar için bant ve ham skorlar (tekrar başına bir satır)."""
     kayit = []
-    for d in tekrar_degerlendirmeleri(kaynak, en_boy, tohum, npz_yolu):
+    for d in tekrar_degerlendirmeleri(en_boy, tohum):
         t, E, H = d["t"], d["E"], d["H"]
         satir = {"video": t.video, "kamera": t.kamera, "yonelim": t.yonelim, "gorus": t.gorus,
                  "hata": t.hata, "ek_hata": t.ek_hata, "satir": t.satir}
@@ -125,10 +122,10 @@ def bootstrap_tablosu(df: pd.DataFrame, n: int = 2000, tohum: int = 1) -> pd.Dat
     return pd.DataFrame(satirlar)
 
 
-def calistir(kaynak="zip", en_boy=veri.EN_BOY, tohum=0, cikti=veri.KOK / "sonuclar" / "deney1",
-             npz_yolu=veri.KUCUK_NPZ, bootstrap_n=2000, yazdir=True) -> pd.DataFrame:
+def calistir(en_boy=veri.EN_BOY, tohum=0, cikti=veri.KOK / "sonuclar" / "deney1",
+             bootstrap_n=2000, yazdir=True) -> pd.DataFrame:
     t0 = time.time()
-    df = tekrar_skorlari(kaynak, en_boy, tohum, npz_yolu)
+    df = tekrar_skorlari(en_boy, tohum)
     tablo = ozet_tablosu(df)
     cikti = Path(cikti)
     cikti.mkdir(parents=True, exist_ok=True)
@@ -141,7 +138,7 @@ def calistir(kaynak="zip", en_boy=veri.EN_BOY, tohum=0, cikti=veri.KOK / "sonucl
 
     if yazdir:
         silkme, dogru, diger = maskeler(df)
-        print(f"Kaynak: {kaynak}, en-boy: {en_boy:.4f}, tohum: {tohum}")
+        print(f"En-boy: {en_boy:.4f}, tohum: {tohum}")
         print(f"Tekrar sayıları (3 kamera dahil): silkme={silkme.sum()}, doğru={dogru.sum()}, "
               f"diğer hatalar={diger.sum()}\n")
         pd.set_option("display.width", 200)
@@ -159,7 +156,6 @@ def calistir(kaynak="zip", en_boy=veri.EN_BOY, tohum=0, cikti=veri.KOK / "sonucl
 
 def main():
     ap = argparse.ArgumentParser(description="Deney 1: omuz silkme ölçütleri")
-    ap.add_argument("--kaynak", choices=["zip", "npz"], default="zip")
     ap.add_argument("--en-boy", type=float, default=veri.EN_BOY)
     ap.add_argument("--tohum", type=int, default=0)
     ap.add_argument("--cikti", default=str(veri.KOK / "sonuclar" / "deney1"))
@@ -167,8 +163,8 @@ def main():
                     help="sonda galeri videolarını üretme (galeri ~1–2 dk sürer, videos.zip gerekir)")
     args = ap.parse_args()
     utf8_cikti()
-    calistir(args.kaynak, args.en_boy, args.tohum, args.cikti)
-    if not args.galeri_yok and args.kaynak == "zip" and veri.VIDEO_ZIP.exists():
+    calistir(args.en_boy, args.tohum, args.cikti)
+    if not args.galeri_yok and veri.VIDEO_ZIP.exists():
         from araclar.gorsel_kontrol import galeri  # görsel kontrol aracı; çekirdeği içe aktarır
         print("\nGaleri üretiliyor (her gruptan 3 video)...")
         galeri(Path(args.cikti) / "galeri", tohum=args.tohum)

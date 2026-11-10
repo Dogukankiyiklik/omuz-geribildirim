@@ -1,5 +1,5 @@
 """
-Canlı tekrar ayırma (Güncelleme 07, Karar 25; önceden sabit, sınama sonucuna göre değiştirilmez).
+Canlı tekrar ayırma (kurallar önceden sabitlendi; sınama sonucuna göre değiştirilmez).
 
 Kural:
   * Kol açısı 5 karelik hareketli medyanla yumuşatılır (kenarlarda en yakın değer tekrarlanır;
@@ -16,6 +16,10 @@ Kural:
 Tek uygulama: `TekrarAyirici` kareleri teker teker alır (uygulama, canlı kamera). Bir dizinin tamamı için
 `tekrarlari_bul` aynı sınıfı kare kare besler (veri setinde sınama, video dosyası). Yumuşatılmış değer
 merkezli pencere gerektirdiği için 2 kare gecikmeyle hesaplanır; `bitir()` kalan kareleri işler.
+
+Etiketle eşleştirme: `eslestir`, bulunan tekrarları veri setinin etiketli tekrarlarıyla zaman örtüşmesine
+(IoU ≥ 0,5) göre bire bir eşler. Ayırıcının sınanması (deneyler/tekrar_ayirma.py) ve uygulamanın
+veri setiyle sağlık kontrolü (uygulama/toplu.py) aynı fonksiyonu kullanır.
 """
 from __future__ import annotations
 
@@ -158,3 +162,28 @@ def tekrarlari_bul(kol: np.ndarray, fps: float = FPS) -> list[AyrilanTekrar]:
     for v in np.asarray(kol, float):
         cikti += a.ekle(v)
     return cikti + a.bitir()
+
+
+# ---------------------------------------------------------------- etiketli tekrarlarla eşleştirme
+IOU_ESIGI = 0.5
+
+
+def iou(a0: int, a1: int, b0: int, b1: int) -> float:
+    """Kapalı aralıklar [a0, a1] ve [b0, b1] (kare) için kesişim / birleşim."""
+    kes = max(0, min(a1, b1) - max(a0, b0) + 1)
+    return kes / ((a1 - a0 + 1) + (b1 - b0 + 1) - kes)
+
+
+def eslestir(etiketli: list[tuple[int, int]], bulunan: list[tuple[int, int]]):
+    """Bire bir açgözlü eşleşme (en yüksek IoU önce). Dönüş: {etiket indeksi: (bulunan indeksi, IoU)}."""
+    adaylar = sorted(((iou(*e, *b), i, j) for i, e in enumerate(etiketli) for j, b in enumerate(bulunan)),
+                     reverse=True)
+    es, kullanilan = {}, set()
+    for v, i, j in adaylar:
+        if v < IOU_ESIGI:
+            break
+        if i in es or j in kullanilan:
+            continue
+        es[i] = (j, v)
+        kullanilan.add(j)
+    return es

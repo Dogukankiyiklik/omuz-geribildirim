@@ -1,15 +1,15 @@
 """
-Hata türünü bulma (Adım 4, Deney 2): bir tekrar doğru mu, yanlışsa hangi hata?
+Hata türünü bulma (Deney 2): bir tekrar doğru mu, yanlışsa hangi hata?
 
-Her hata türünün bir ölçütü vardır (arsiv/PLAN.md, Adım 4):
+Her hata türünün bir ölçütü vardır:
   ERR_ELEVATED_SHOULDER : YENI (kulak – omuz mesafesi / gövde)       — açı bandı
   ERR_HEAD_TO_SIDE      : bas (M39 F3)                               — açı bandı
   ERR_ARM_FORWARD       : on_kacma (M39 F1) ya da kol_boyu           — açı bandı; hangisi, eğitim kişilerinde seçilir
   ERR_BENT_ARM          : dirsek (M39 F4)                            — açı bandı
   ERR_LOW_ABDUCTION     : kaldirma = tepe kol açısı eksikliği. İki sürüm (kaldirma_surumu):
-                          "ilk"    (VARSAYILAN, Karar 17–18): d = (kalibrasyon tepelerinin medyanı − tepe)
+                          "ilk"    (VARSAYILAN, kullanılan yöntem): d = (kalibrasyon tepelerinin medyanı − tepe)
                                    / max(tepe IQR'si, 5°); yönlü puan max(d, 0), yönsüz |d|; yön eğitimden.
-                          "revize" (Karar 13; başarısız deneme, yalnızca rapor için): tek kutulu tepe bandı, E 0–1.
+                          "revize" (denenip elenen; yalnızca karşılaştırma için): tek kutulu tepe bandı, E 0–1.
 
 Karar kuralı (basit ve açıklanabilir):
   1. Her ölçüt için tekrarın puanı: duruş ölçütlerinde açı/zaman bandı hatası E (yönsüz ya da yönlü),
@@ -21,7 +21,7 @@ Karar kuralı (basit ve açıklanabilir):
   5. Yönlü bantta yön, eğitim kişilerinde (ilgili hatalı tekrarların ortalama imzalı farkı −
      doğru tekrarlarınki) işaretinden bulunur; elle yazılmaz.
 
-Bu modül deneyde (deneyler/deney2.py) ve uygulamada (Adım 6) aynı şekilde kullanılır.
+Bu modül deneyde (deneyler/deney2.py) ve uygulamada aynı şekilde kullanılır.
 Girdi: tekrar başına puan tablosu (pandas), sütunlar puan_sutunu() / fark_sutunu() ile adlandırılır.
 """
 from __future__ import annotations
@@ -42,12 +42,12 @@ KISA_AD = {DOGRU: "doğru", "ERR_ELEVATED_SHOULDER": "omuz", "ERR_HEAD_TO_SIDE":
            "ERR_ARM_FORWARD": "öne kaçma", "ERR_BENT_ARM": "dirsek", "ERR_LOW_ABDUCTION": "az kaldırma"}
 
 KALDIRMA = "kaldirma"
-KALDIRMA_ILK = "kaldirma_ilk"   # puan tablosunda ilk sürümün d'si: sütun F_kaldirma_ilk (Karar 7 ortalaması)
+KALDIRMA_ILK = "kaldirma_ilk"   # puan tablosunda ilk sürümün d'si: sütun F_kaldirma_ilk (adil modellerin ortalaması)
 KALDIRMA_SURUMLERI = ("ilk", "revize")
-VARSAYILAN_KALDIRMA = "ilk"     # Karar 17: önceden belirlenmiş birincil yöntem; Karar 18: dondurulmuş
-TEPE_IQR_ALT_SINIR = 5.0   # derece; ilk sürüm (Güncelleme 02)
+VARSAYILAN_KALDIRMA = "ilk"     # önceden belirlenmiş birincil yöntem; dondurulmuş
+TEPE_IQR_ALT_SINIR = 5.0   # derece; ilk sürüm
 ON_KACMA_ADAYLARI = ("on_kacma", "kol_boyu")
-TEPE_ALT_SINIR = 10.0      # derece; tepe bandının yarı genişliği en az bu (Karar 13; literatürden, değiştirilmez)
+TEPE_ALT_SINIR = 10.0      # derece; tepe bandının yarı genişliği en az bu (literatürden, değiştirilmez)
 TEPE_GUVEN = 0.975         # τ = t(0,975; n−1)·s/√n
 EPS = 0.01                 # z ölçeğinde payda: IQR + ε (E 0–1 aralığında; %1)
 ESIK_IZGARASI = np.linspace(0, 100, 201)  # T adayları: eğitimdeki max z'nin yüzdelikleri
@@ -84,12 +84,6 @@ class HataTanimi:
 EX1 = HataTanimi("ex1", tuple(HATALAR), {"ERR_ELEVATED_SHOULDER": ("YENI",), "ERR_HEAD_TO_SIDE": ("bas",),
                                          "ERR_ARM_FORWARD": ON_KACMA_ADAYLARI, "ERR_BENT_ARM": ("dirsek",),
                                          "ERR_LOW_ABDUCTION": (KALDIRMA,)})
-# Ex7 (Adım 4b, Güncelleme 05): eşleme önceden belirlendi; aday seçimi yok, az kaldırma sınıfı yok.
-EX7_HATALAR = ["ERR_ELEVATED_SHOULDER", "ERR_TORSO_FORWARD", "ERR_TORSO_ROTATION", "ERR_BENT_ARM", "ERR_ARM_TO_SIDE"]
-EX7 = HataTanimi("ex7", tuple(EX7_HATALAR), {"ERR_ELEVATED_SHOULDER": ("YENI",), "ERR_TORSO_FORWARD": ("govde_egim",),
-                                             "ERR_TORSO_ROTATION": ("govde_donme",), "ERR_BENT_ARM": ("dirsek",),
-                                             "ERR_ARM_TO_SIDE": ("kol_boyu",)})
-KISA_AD.update({"ERR_TORSO_FORWARD": "gövde öne", "ERR_TORSO_ROTATION": "gövde dönme", "ERR_ARM_TO_SIDE": "kol yana"})
 
 
 # ---------------------------------------------------------------- tekrar başına puanlar
@@ -109,7 +103,7 @@ def fark_sutunu(olcut: str) -> str:
 
 def kaldirma_sapmasi(tepe: float, kalibrasyon_tepeleri) -> float:
     """
-    İlk sürüm (Güncelleme 02; Karar 17 ile ana yöntem): d = (kalibrasyon tepelerinin medyanı − tekrarın
+    İlk sürüm (kullanılan yöntem): d = (kalibrasyon tepelerinin medyanı − tekrarın
     tepesi) / max(kalibrasyon tepelerinin IQR'si, 5°). Pozitif = kol normalden az kalktı.
     """
     t = np.asarray(kalibrasyon_tepeleri, dtype=float)
@@ -125,7 +119,7 @@ def _surum_kontrol(kaldirma_surumu: str) -> str:
 
 def tepe_bandi(kalibrasyon_tepeleri) -> tuple[float, float]:
     """
-    Tek kutulu tepe bandı (Güncelleme 05, Karar 13): μ = kalibrasyon tepelerinin ortalaması,
+    Tek kutulu tepe bandı ("revize" sürüm): μ = kalibrasyon tepelerinin ortalaması,
     τ = max(t(0,975; n−1) · s / √n, 10°). s örneklem standart sapması (n−1 paydalı).
     10° alt sınır: MediaPipe–gonyometre uyumu ≈ ±7° (M20), tek kamerada uçta 15°'ye varan hata (M41, M42).
     """
@@ -165,7 +159,7 @@ def beklenen_yonler(egitim: pd.DataFrame, esleme, kaldirma_surumu: str = VARSAYI
     """
     Her ölçütün beklenen hata yönü, eğitim tekrarlarından: işaret(ilgili hatalı tekrarların ortalama
     imzalı farkı − doğru tekrarlarınki). Fark 0 ya da tanımsızsa +1.
-    Kaldırma: ilk sürümde yön d'den öğrenilir (ilk sürüm koduyla aynı); revizede sabit +1 (Karar 13).
+    Kaldırma: ilk sürümde yön d'den öğrenilir (ilk sürüm koduyla aynı); revizede sabit +1.
     """
     esleme = hata_olcutleri(esleme) if isinstance(esleme, str) else esleme
     yonler = {}
@@ -203,7 +197,7 @@ class KararKurali:
 
     @property
     def on_olcut(self):
-        """Ex1'de öne kaçma için seçilen ölçüt (geri uyumluluk); Ex7'de None."""
+        """Öne kaçma için seçilen ölçüt (on_kacma ya da kol_boyu)."""
         return self.esleme.get("ERR_ARM_FORWARD")
 
     def yon(self, olcut: str) -> int:
@@ -247,7 +241,7 @@ def esik_sec(egitim: pd.DataFrame, yonlu: bool, tanim: HataTanimi = EX1,
              kaldirma_surumu: str = VARSAYILAN_KALDIRMA) -> KararKurali:
     """
     Eğitim tekrarlarında makro-F1'i (DOGRU + hatalar, katı) en yükseğe çıkaran ölçüt eşlemesi ve T.
-    Ex1'de tek seçim öne kaçma ölçütüdür (on_kacma / kol_boyu); Ex7'de eşleme sabittir.
+    Tek seçim öne kaçma ölçütüdür (on_kacma / kol_boyu).
     T adayları: eğitimdeki max z dağılımının yüzdelikleri (ESIK_IZGARASI). Eşitlikte ilk aday
     (öne kaçmada on_kacma, T'de küçük olan) seçilir.
     """
@@ -266,7 +260,7 @@ def esik_sec(egitim: pd.DataFrame, yonlu: bool, tanim: HataTanimi = EX1,
     return kural
 
 
-# ---------------------------------------------------------------- ilk iki hata (Karar 14)
+# ---------------------------------------------------------------- ilk iki hata
 def ilk_iki(z: pd.DataFrame, T: float) -> pd.DataFrame:
     """
     Tekrar başına en yüksek iki z'nin hataları ve kuralın söyleyeceği hatalar.

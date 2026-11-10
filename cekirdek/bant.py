@@ -79,7 +79,7 @@ def bant_hatasi(model: dict, tekrar: dict, olcutler, yon: dict[str, int] | None 
 def coklu_referans_hatasi(dogrular: list[dict], tekrar: dict, olcutler,
                           yon: dict[str, int] | None = None) -> dict[str, float]:
     """
-    Çoklu referans (Güncelleme 02, Karar 1): modeldeki her doğru tekrar sırayla referans yapılır,
+    Çoklu referans: modeldeki her doğru tekrar sırayla referans yapılır,
     bant kurulur ve E hesaplanır; E'lerin ortalaması döner. Rastgele referans seçimi ortadan kalkar.
     """
     return coklu_model_hatasi(coklu_referans_modelleri(dogrular, olcutler), tekrar, olcutler, yon)
@@ -87,7 +87,7 @@ def coklu_referans_hatasi(dogrular: list[dict], tekrar: dict, olcutler,
 
 def coklu_referans_modelleri(dogrular: list[dict], olcutler) -> list[dict]:
     """Çoklu referansın bantları: her doğru tekrar sırayla referans (n model). Aynı model kümesiyle
-    birçok tekrar değerlendirilecekse (ör. genel bant, Adım 3) bir kez kurulup yeniden kullanılır."""
+    birçok tekrar değerlendirilecekse (ör. genel bant, Deney 1b) bir kez kurulup yeniden kullanılır."""
     return [bant_modeli_ref(dogrular, r, olcutler) for r in range(len(dogrular))]
 
 

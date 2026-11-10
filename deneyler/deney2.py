@@ -98,7 +98,7 @@ def _model_puani(model, alt_f, f, bant, olcutler=OLCUTLER, kaldirma=True):
 
 
 def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True, olcutler=OLCUTLER, kaldirma=True) -> pd.DataFrame:
-    """Tekrar başına puanlar. Ex1: olcutler=DENEY2_OLCUTLERI, kaldirma=True; Ex7: EX7_OLCUTLERI, False."""
+    """Tekrar başına puanlar (olcutler=DENEY2_OLCUTLERI, kaldirma=True)."""
     olcutler = list(olcutler)
     ozl = ozl or {id(t): ozellikler(t.dizi, olcutler) for t in tekrarlar}
     kayit = []

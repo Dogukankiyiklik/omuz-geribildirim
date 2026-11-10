@@ -26,33 +26,12 @@ from cekirdek import tekrar_ayirici as ta
 from cekirdek import veri
 from cekirdek.konsol import sonuclari_yaz, utf8_cikti
 from cekirdek.ozellikler import ozellikler
+from cekirdek.tekrar_ayirici import IOU_ESIGI, eslestir, iou  # noqa: F401 (eşleştirme çekirdekte)
 from deneyler.tablolar import ONDEN_CAPRAZ, TUMU, gorus_maskesi
 
 CIKTI = veri.KOK / "sonuclar" / "tekrar_ayirma"
-IOU_ESIGI = 0.5
 HEDEF_ORAN = 90.0   # Karar 25: %90'ın altı ADIM_06'ya yazılır ve kullanıcıya söylenir
 GORUSLER = (ONDEN_CAPRAZ, TUMU, "profil (70–90°)")
-
-
-def iou(a0: int, a1: int, b0: int, b1: int) -> float:
-    """Kapalı aralıklar [a0, a1] ve [b0, b1] (kare) için kesişim / birleşim."""
-    kes = max(0, min(a1, b1) - max(a0, b0) + 1)
-    return kes / ((a1 - a0 + 1) + (b1 - b0 + 1) - kes)
-
-
-def eslestir(etiketli: list[tuple[int, int]], bulunan: list[tuple[int, int]]):
-    """Bire bir açgözlü eşleşme (en yüksek IoU önce). Dönüş: {etiket indeksi: (bulunan indeksi, IoU)}."""
-    adaylar = sorted(((iou(*e, *b), i, j) for i, e in enumerate(etiketli) for j, b in enumerate(bulunan)),
-                     reverse=True)
-    es, kullanilan = {}, set()
-    for v, i, j in adaylar:
-        if v < IOU_ESIGI:
-            break
-        if i in es or j in kullanilan:
-            continue
-        es[i] = (j, v)
-        kullanilan.add(j)
-    return es
 
 
 def calistir_diziler(seg: pd.DataFrame):

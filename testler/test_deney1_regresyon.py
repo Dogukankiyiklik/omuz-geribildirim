@@ -3,8 +3,8 @@ Deney 1 regresyon testi: çekirdek, referans kodun sonuçlarını (referans/bekl
 ±0,01 içinde yeniden üretmeli. Tohum 0, en-boy 9/16.
 
   * test_sonuc_dosyasi : sonuclar/deney1/ozet.csv (kullanıcının çalıştırdığı) varsa onu karşılaştırır.
-  * test_yeniden_uret  : deneyi her iki kaynakla (orijinal zip ve küçük npz) geçici klasörde
-                         yeniden çalıştırıp karşılaştırır (~15 s / kaynak).
+  * test_yeniden_uret  : deneyi orijinal veriyle (zip) geçici klasörde yeniden çalıştırıp
+                         karşılaştırır (~15 s).
 """
 import numpy as np
 import pandas as pd
@@ -37,12 +37,9 @@ def test_sonuc_dosyasi():
     assert karsilastir(pd.read_csv(SONUC), pd.read_csv(BEKLENEN)) <= TOLERANS
 
 
-@pytest.mark.parametrize("kaynak", ["zip", "npz"])
-def test_yeniden_uret(kaynak, tmp_path):
-    if kaynak == "zip" and not veri.ISKELET_ZIP.exists():
+def test_yeniden_uret(tmp_path):
+    if not veri.ISKELET_ZIP.exists():
         pytest.skip("orijinal zip yok")
-    if kaynak == "npz" and not veri.KUCUK_NPZ.exists():
-        pytest.skip("rehab26_kucuk.npz yok")
     from deneyler import deney1
-    tablo = deney1.calistir(kaynak, tohum=0, cikti=tmp_path, bootstrap_n=0, yazdir=False)
+    tablo = deney1.calistir(tohum=0, cikti=tmp_path, bootstrap_n=0, yazdir=False)
     assert karsilastir(tablo, pd.read_csv(BEKLENEN)) <= TOLERANS

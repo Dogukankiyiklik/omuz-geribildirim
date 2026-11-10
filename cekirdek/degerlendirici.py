@@ -1,15 +1,14 @@
 """
 Tek bir tekrarın değerlendirilmesi: puan → karar → sapma kodu → iki katmanlı cümle.
 
-Deney 2 (puanlar), Deney 3 (sapma kodu) ve uygulama (Adım 6) bu modülü ortak kullanır. Böylece
-uygulamanın verdiği karar, deneyde ölçülen kararla aynı koddan gelir (CLAUDE.md, "ortak çekirdek").
+Deney 2 (puanlar), Deney 3 (sapma kodu) ve uygulama bu modülü ortak kullanır. Böylece uygulamanın
+verdiği karar, deneyde ölçülen kararla aynı koddan gelir.
 
-  * tekrar_puanlari : bir açı bandı modeliyle puanlar (deneyler/deney2._model_puani'nin v2 dalı buraya
-                      taşındı; davranış aynı, Deney 2 regresyon testi denetler).
+  * tekrar_puanlari : bir açı bandı modeliyle puanlar (Deney 2 regresyon testi denetler).
   * puan_satiri     : puanları kural.z'nin okuduğu sütunlara çevirir (deney2.puan_tablosu ile aynı adlar).
-  * kod_uret        : bir hata için SapmaKodu (deneyler/deney3'ten taşındı).
-  * Profil, degerlendir : uygulama. Kalibrasyondaki bütün doğru tekrarlardan kurulan TAM model
-                      (ADIM_05 madde 3, Karar 24); değerlendirilen tekrar kalibrasyona girmez.
+  * kod_uret        : bir hata için SapmaKodu.
+  * Profil, degerlendir : uygulama. Kalibrasyondaki bütün doğru tekrarlardan kurulan TAM model;
+                      değerlendirilen tekrar kalibrasyona girmez.
 """
 from __future__ import annotations
 
@@ -30,7 +29,7 @@ YONLER = (0, 1, -1)
 
 # ---------------------------------------------------------------- puanlar (Deney 2 ile ortak)
 def kaldirma_ekle(E: dict, fark: dict, f: dict, kalibrasyon_f: list[dict], yonler=YONLER) -> None:
-    """Az kaldırma: revize puan (Karar 13; karşılaştırma) ve ilk sürüm d (Karar 17, ana yöntem)."""
+    """Az kaldırma: revize puan (yalnızca karşılaştırma) ve ilk sürüm d (kullanılan yöntem)."""
     tepeler = [tepe_acisi(u["kol"]) for u in kalibrasyon_f]
     Ek, fark[ht.KALDIRMA] = ht.kaldirma_puanlari(tepe_acisi(f["kol"]), tepeler)
     E.update({(ht.KALDIRMA, y): Ek[y] for y in yonler})
@@ -87,7 +86,7 @@ class Profil:
 
     def __post_init__(self):
         if len(self.kalibrasyon_f) < 3:
-            raise ValueError("kalibrasyon için en az 3 tekrar gerekir (uygulama en az 5 ister, Karar 8)")
+            raise ValueError("kalibrasyon için en az 3 tekrar gerekir (uygulama en az 5 ister)")
         self.model = aci_bandi_modeli(self.kalibrasyon_f, OLCUTLER)
         self.model_ek = aci_bandi_modeli(self.kalibrasyon_f, ANLATIM)
         self.tepeler = [tepe_acisi(u["kol"]) for u in self.kalibrasyon_f]

@@ -113,7 +113,7 @@ def test_v1_deney1_ile_ayni():
     ts = veri.tekrarlari_yukle(1)
     v1 = deney1_v2.skor_tablosu(ts, "v1", 0)
     ref = pd.DataFrame([{"satir": d["t"].satir, "kamera": d["t"].kamera, **{f"r_{k}": d["E"][k] for k in deney1.OLCUTLER}}
-                        for d in deney1.tekrar_degerlendirmeleri("zip", tekrarlar=ts)])
+                        for d in deney1.tekrar_degerlendirmeleri(tekrarlar=ts)])
     m = v1.merge(ref, on=["satir", "kamera"])
     assert len(m) == len(v1) == len(ref)
     for k in deney1.OLCUTLER:

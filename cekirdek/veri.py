@@ -1,26 +1,17 @@
 """
 REHAB26-ViewAngles verisini okuma.
 
-Ana kaynak: orijinal Zenodo dosyaları (`veri/rehab26/`). İskeletler doğrudan
-`jointSequences-mediapipe.zip` içinden okunur (zip'i açmaya gerek yok); açılmış
-bir klasör de verilebilir.
+İskeletler doğrudan `veri/rehab26/jointSequences-mediapipe.zip` içinden okunur (zip'i açmaya gerek yok);
+açılmış bir klasör de verilebilir. Her tekrar (kare, 33, 4) float64 dizi olarak döner. Son eksen:
+x, y (görüntüye göre 0–1, y aşağı doğru), z (MediaPipe göreli derinlik), görünürlük.
 
-Yardımcı kaynak: `veri/rehab26_kucuk.npz` (danışmanın küçültülmüş kopyası,
-13 eklem, float16). Yalnızca regresyon karşılaştırması için.
-
-Her iki kaynak da aynı biçimde döner: her tekrar için (kare, 33, 4) float64 dizi.
-Son eksen: x, y (görüntüye göre 0–1, y aşağı doğru), z (MediaPipe göreli derinlik),
-görünürlük. npz kaynağında tutulmayan 20 eklem NaN olur. Böylece ölçüt kodu her
-iki kaynakta da MediaPipe indeksleriyle (11 sol omuz, 12 sağ omuz, ...) çalışır.
-
-Adım 0'da doğrulanan bilgiler (bkz. arsiv/ilerleme/ADIM_00.md):
+Veriyle ilgili doğrulanmış bilgiler:
   * 2B x, y piksel değil, görüntü boyutuna bölünmüş (0–1) değerlerdir.
   * Videolar 1080 x 1920 (dikey). Açı/mesafe için x *= 1080/1920 = 9/16 yapılır.
 """
 from __future__ import annotations
 
 import io
-import json
 import os
 import zipfile
 from dataclasses import dataclass, field
@@ -31,13 +22,12 @@ import pandas as pd
 
 KOK = Path(__file__).resolve().parent.parent
 # Veri klasörü (git'e girmez). OMUZ_VERI ortam değişkeni başka bir yeri gösterebilir: deneyler/hepsi.py temiz
-# kopyada deneyleri çalıştırırken asıl veri klasörünü yalnızca okumak için kullanır (Karar 37).
+# kopyada deneyleri çalıştırırken asıl veri klasörünü yalnızca okumak için kullanır.
 VERI_KOK = Path(os.environ["OMUZ_VERI"]) if os.environ.get("OMUZ_VERI") else KOK / "veri"
 VERI_KLASORU = VERI_KOK / "rehab26"
 SEGMENTASYON = VERI_KLASORU / "Segmentation.csv"
 ISKELET_ZIP = VERI_KLASORU / "jointSequences-mediapipe.zip"
 VIDEO_ZIP = VERI_KLASORU / "videos.zip"
-KUCUK_NPZ = VERI_KOK / "rehab26_kucuk.npz"
 
 # Videolar 1080 x 1920 (genişlik x yükseklik); normalize x'i yüksekliğe göre ölçeklemek için.
 VIDEO_GENISLIK, VIDEO_YUKSEKLIK = 1080, 1920
@@ -46,9 +36,6 @@ EN_BOY = VIDEO_GENISLIK / VIDEO_YUKSEKLIK  # = 9/16 = 0.5625
 KAMERALAR = ("cam1", "cam2", "cam3")
 KAMERA_KONUMU = {"cam1": 0, "cam2": 45, "cam3": 90}  # görüş açısı = kamera konumu − yönelim
 
-# Küçültülmüş npz'de tutulan 13 eklem (MediaPipe indeksleri), sırasıyla.
-EKLEMLER_13 = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24]
-EKLEM_SAYISI = 33
 PAY = 10  # her tekrarın başına ve sonuna eklenen kare sayısı
 
 
@@ -131,7 +118,7 @@ class Tekrar:
 
     @property
     def etiketli(self) -> slice:
-        """Pay kareleri hariç, Segmentation.csv'deki first_frame … last_frame aralığı (Karar 3)."""
+        """Pay kareleri hariç, Segmentation.csv'deki first_frame … last_frame aralığı."""
         return slice(self.etiket_bas, len(self.dizi) if self.etiket_son is None else self.etiket_son)
 
 
@@ -154,24 +141,13 @@ def _tekrar_olustur(i: int, r: pd.Series, kamera: str, b: int, dizi: np.ndarray)
     )
 
 
-def tekrarlari_yukle(egzersiz: int | list[int] = 1, kaynak: str = "zip", pay: int = PAY,
-                     kameralar=KAMERALAR, iskelet_yolu: Path | str = ISKELET_ZIP,
-                     npz_yolu: Path | str = KUCUK_NPZ,
-                     seg: pd.DataFrame | None = None) -> list[Tekrar]:
-    """
-    Seçilen egzersiz(ler)in tüm tekrarlarını, her kamera için ayrı bir Tekrar olarak döner.
-
-    kaynak = "zip": orijinal veri (ana kaynak), 33 eklem, float64.
-    kaynak = "npz": rehab26_kucuk.npz (yalnızca karşılaştırma), 13 eklem dolu, diğerleri NaN.
-    """
+def tekrarlari_yukle(egzersiz: int | list[int] = 1, pay: int = PAY, kameralar=KAMERALAR,
+                     iskelet_yolu: Path | str = ISKELET_ZIP, seg: pd.DataFrame | None = None) -> list[Tekrar]:
+    """Seçilen egzersiz(ler)in tüm tekrarlarını, her kamera için ayrı bir Tekrar olarak döner (33 eklem, float64)."""
     seg = segmentasyon_oku() if seg is None else seg
     egz = [egzersiz] if isinstance(egzersiz, int) else list(egzersiz)
     secili = seg[seg.exercise_id.isin(egz)]
-    if kaynak == "zip":
-        return _zipten(secili, pay, kameralar, iskelet_yolu)
-    if kaynak == "npz":
-        return _npzden(secili, kameralar, npz_yolu)
-    raise ValueError(f"bilinmeyen kaynak: {kaynak}")
+    return _zipten(secili, pay, kameralar, iskelet_yolu)
 
 
 def _zipten(secili, pay, kameralar, iskelet_yolu) -> list[Tekrar]:
@@ -185,40 +161,6 @@ def _zipten(secili, pay, kameralar, iskelet_yolu) -> list[Tekrar]:
                 if b >= s:
                     continue
                 cikti.append(_tekrar_olustur(i, r, kam, b, a[b:s].astype(np.float64)))
-    return cikti
-
-
-def npz_anahtarlari(npz_yolu: Path | str = KUCUK_NPZ) -> dict[tuple[int, str], str]:
-    """npz anahtarlarını (satır, kamera) -> anahtar sözlüğüne çevirir. Biçim: vid|kam|2d|veri|satirN|repR|oY"""
-    d = np.load(npz_yolu)
-    cikti = {}
-    for k in d.files:
-        if k == "__meta__":
-            continue
-        vid, kam, tur, _, satir, _, _ = k.split("|")
-        if tur == "2d":
-            cikti[(int(satir[5:]), kam)] = k
-    return cikti
-
-
-def _npzden(secili, kameralar, npz_yolu) -> list[Tekrar]:
-    d = np.load(npz_yolu)
-    meta = json.loads(str(d["__meta__"])) if "__meta__" in d.files else {}
-    eklemler = meta.get("eklemler", EKLEMLER_13)
-    pay = int(meta.get("pay", PAY))
-    anahtarlar = npz_anahtarlari(npz_yolu)
-    cikti = []
-    for vid, grup in secili.groupby("video_id", sort=True):
-        for kam in kameralar:
-            for i, r in grup.iterrows():
-                k = anahtarlar.get((int(i), kam))
-                if k is None:
-                    continue
-                kucuk = d[k].astype(np.float64)
-                dizi = np.full((kucuk.shape[0], EKLEM_SAYISI, kucuk.shape[2]), np.nan)
-                dizi[:, eklemler, :] = kucuk
-                b = max(0, int(r.first_frame) - pay)
-                cikti.append(_tekrar_olustur(i, r, kam, b, dizi))
     return cikti
 
 

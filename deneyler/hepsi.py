@@ -14,7 +14,7 @@ Kendi kayıt deneyi, kayıtlı ara çıktılardan (önbellekten) üretilir; vide
 Ödevin dışında kalan eski deneyler burada yok.
 
 Kullanım:
-    python -m deneyler.hepsi                 # tam çalıştırma (~2 dk)
+    python -m deneyler.hepsi                 # tam çalıştırma (~1,5 dk)
     python -m deneyler.hepsi --hizli         # küçük alt küme (deney 1, kamera açısı, hız eşiği), ~1 dk
     python -m deneyler.hepsi --adimlar deney2 deney3   # yalnızca seçilen adımlar (bağımlılıklar kullanıcının işi)
     python -m deneyler.hepsi --temizle       # temiz kopyayı (git worktree) kaldırır

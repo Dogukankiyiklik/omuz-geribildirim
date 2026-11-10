@@ -56,7 +56,7 @@ Sıfırdan kurulum, veri seti ve deneylerin yeniden üretimi: [`docs/YENIDEN_KUR
 | `modeller/` | Uygulamanın kullandığı kural ve eşik dosyaları (JSON) |
 | `sonuclar/` | Deney çıktıları (CSV, `ozet.csv`, sunum şekilleri) |
 | `testler/` | pytest testleri |
-| `referans/` | Silkme tespitinin ilk sürümü ve beklenen sonuçları; kod değişince sonuçların bozulmadığını sınayan test bunları kullanır |
+| `referans/` | Silkme tespitinin (Deney 1) beklenen sonuçları; kod değişince sonuçların bozulmadığını sınayan test bunu kullanır |
 | `docs/` | Belgeler |
 | `arsiv/` | Ödevin parçası olmayan her şey: bildiri deneyleri, geliştirme kayıtları. Neden orada olduklarını [`arsiv/README.md`](arsiv/README.md) anlatır |
 | `veri/` | Veri setleri (git'e **girmez**) |

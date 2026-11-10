@@ -8,7 +8,7 @@ yalnızca yeni bir fonksiyon yazmak yeter.
 Sağ kol egzersiz yapıyor. MediaPipe: 8 sağ kulak, 11 sol omuz, 12 sağ omuz, 14 sağ dirsek,
 23 sol kalça, 24 sağ kalça.
 
-Kaynak: referans/deney1_omuz_olcutleri.py — davranış birebir korunur.
+Deney 1 ölçütleri ilk Deney 1 kodundan alındı; davranış birebir korunur (testler/test_deney1_regresyon.py).
 """
 from __future__ import annotations
 

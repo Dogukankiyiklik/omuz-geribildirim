@@ -9,7 +9,7 @@ from cekirdek.hizalama import dtw_yol, hizala
 from cekirdek.ozellikler import OLCUTLER, olcut, ozellikler
 
 
-# ---------------------------------------------------------------- referans DTW (saf Python, referans koddan)
+# ---------------------------------------------------------------- referans DTW (saf Python, ilk Deney 1 kodundan)
 def dtw_yol_referans(a, b):
     a = (a - a.mean()) / (a.std() + 1e-9)
     b = (b - b.mean()) / (b.std() + 1e-9)

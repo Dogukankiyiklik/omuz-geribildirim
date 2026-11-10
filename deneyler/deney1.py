@@ -9,7 +9,8 @@ hatalardan) en iyi ayırıyor? Kişiye özel tolerans bandı (M39) bu ayrımı i
   bant : kişiye özel tolerans bandı, birini-dışarıda-bırak; hatalı tekrarlar da aynı sayıda
          (n−1) doğru tekrardan kurulan modelle ölçülür (adil model)
 
-Referans: referans/deney1_omuz_olcutleri.py. Bu betik aynı mantığı cekirdek/ ile çalıştırır.
+Beklenen sonuçlar (referans/beklenen_deney1_ozet.csv) Deney 1'in ilk kodundan üretildi; bu betik aynı mantığı
+cekirdek/ ile çalıştırır ve aynı sonucu verir (testler/test_deney1_regresyon.py).
 
 Kullanım:
     python -m deneyler.deney1                     # orijinal veri (zip), en-boy 9/16, tohum 0
@@ -41,7 +42,7 @@ def tekrar_degerlendirmeleri(en_boy: float = veri.EN_BOY, tohum: int = 0, tekrar
       t (Tekrar), f (ölçüt eğrileri), model (bant), ref (bandın referans Tekrar'ı),
       ref_f (referansın ölçüt eğrileri), E (bant hataları), H (ham skorlar).
     Görsel kontrol aracı da bunu kullanır; böylece videoda gösterilen bant ve E, tablodakiyle aynıdır.
-    Rastgele sayıların çekilme sırası referans kodla aynıdır (değiştirme: regresyon testi bozulur).
+    Rastgele sayıların çekilme sırası ilk Deney 1 koduyla aynıdır (değiştirme: regresyon testi bozulur).
     """
     rng = np.random.default_rng(tohum)
     if tekrarlar is None:

@@ -1,5 +1,5 @@
 """
-Deney 1 regresyon testi: çekirdek, referans kodun sonuçlarını (referans/beklenen_deney1_ozet.csv)
+Deney 1 regresyon testi: çekirdek, ilk Deney 1 kodunun sonuçlarını (referans/beklenen_deney1_ozet.csv)
 ±0,01 içinde yeniden üretmeli. Tohum 0, en-boy 9/16.
 
   * test_sonuc_dosyasi : sonuclar/deney1/ozet.csv (kullanıcının çalıştırdığı) varsa onu karşılaştırır.

@@ -4,7 +4,7 @@ DTW (dinamik zaman bükme) ile zamansal hizalama.
 İki tekrar farklı hızda yapılabilir. DTW, tekrarın her karesini referans tekrarın "aynı andaki"
 karesine eşler. Eşleme kol açısına göre yapılır (omuz ölçütüne göre değil).
 
-Referans koddaki saf Python döngüsü numba ile derlendi; hesap sırası aynı olduğu için
+İlk Deney 1 kodundaki saf Python döngüsü numba ile derlendi; hesap sırası aynı olduğu için
 sonuç (yol) birebir aynıdır (testler/test_cekirdek.py karşılaştırır).
 """
 from __future__ import annotations

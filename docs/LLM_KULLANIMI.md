@@ -6,7 +6,7 @@
 - `cekirdek/`, `deneyler/`, `uygulama/`, `araclar/` ve `testler/` altındaki kodun yazılması.
 - Hata ayıklama, testler ve kısa sınamalar.
 - Deneylerin bir kısmının, kullanıcının isteğiyle çalıştırılması. Son yeniden üretimi (10 Kasım 2026, `sonuclar/hepsi/`) Claude Code çalıştırdı.
-- Geliştirme kayıtları (`arsiv/ilerleme/`), belgeler (`docs/`, klasörlerdeki README'ler) ve sunum şekilleri (`deneyler/sunum_sekilleri.py`). Belgelerdeki sayılar sonuç dosyalarından kopyalandı.
+- Geliştirme kayıtları (`arsiv/ilerleme/`), belgeler (`docs/`, klasörlerdeki README'ler) ve sunum şekilleri (`deneyler/sunum_sekilleri.py`; 10 Kasım 2026'da kaldırıldı, git geçmişinde `cc39d2a`). Belgelerdeki sayılar sonuç dosyalarından kopyalandı.
 - Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması, kalıntıların temizlenmesi ve belgelerin yeniden yazılması.
 
 ## Claude (ayrı sohbet): planlama ve yorum

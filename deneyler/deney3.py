@@ -268,8 +268,7 @@ def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM) -> None:
                "", f"**Hasta cümlesi:** {r.hasta_cumlesi}", "",
                f"<sub>Uzman ayrıntısı: {r.uzman_ayrintisi}</sub>", ""]
     md += ["## Okurken", "- Hasta cümlesi anlaşılır mı? Ne yapman gerektiğini söylüyor mu?",
-           "- Uzman ayrıntısındaki ölçü (derece, gövde %'si) mantıklı görünüyor mu?",
-           "- Yanlış etiketlenmiş görünen örnekleri `araclar/gorsel_kontrol.py` ile videoda izleyebilirsin.", ""]
+           "- Uzman ayrıntısındaki ölçü (derece, gövde %'si) mantıklı görünüyor mu?", ""]
     yol.write_text("\n".join(md), encoding="utf-8")
 
 

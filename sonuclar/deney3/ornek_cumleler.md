@@ -187,4 +187,3 @@ Sistem: kişiye özel açı bandı (yönlü), Deney 2'nin karar kuralı. Ölçü
 ## Okurken
 - Hasta cümlesi anlaşılır mı? Ne yapman gerektiğini söylüyor mu?
 - Uzman ayrıntısındaki ölçü (derece, gövde %'si) mantıklı görünüyor mu?
-- Yanlış etiketlenmiş görünen örnekleri `araclar/gorsel_kontrol.py` ile videoda izleyebilirsin.

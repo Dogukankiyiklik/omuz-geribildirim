@@ -32,12 +32,6 @@ Bunlar yeni bir yöntem değil, uygulamanın okuduğu `modeller/*.json` dosyalar
 
 Uygulamanın karar kuralı dosyası `modeller/kural_ex1.json` ise `araclar/kural_disa_aktar.py` ile üretilir (Deney 2 ve 3'ten sonra).
 
-## Şekiller ve galeriler
-
-| Betik | Ne üretir |
-| --- | --- |
-| `sunum_sekilleri.py` | Sunumun şekilleri (`sonuclar/sunum/`). Yalnızca kayıtlı sonuç dosyalarından okur; 4 ve 5 numaralı şekiller ile demo videosu, uygulamanın kendi çizim koduyla pencere açmadan üretilir. `--kendi-kayit` kişisel kayıttan 4b, 5b ve `demo_kisi1.mp4` üretir (bunlar git'e girmez). |
-
 ## Yardımcılar
 
 | Dosya | Görevi |

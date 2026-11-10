@@ -12,7 +12,7 @@ Referans iskeleti kullanıcının iskeletine çakıştırma (hocanın Problem 3'
      kare kare gövde uzunluğuna ölçeklemek, omuz kalkınca gövde de "uzadığı" için silkmeyi
      referansa da taşıyıp gizlerdi.
 
-Görsel kontrol aracı (araclar/gorsel_kontrol.py) ve uygulama bu kodu ortak kullanır.
+Uygulama (uygulama/panel.py) bu kodu kullanır.
 Koordinatlar en-boy düzeltilmiş birimdedir (görüntü yüksekliği = 1); piksele çevirmek için
 yükseklikle (H) çarpmak yeter: x_px = x * H, y_px = y * H.
 """

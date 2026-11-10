@@ -82,7 +82,6 @@ def kisiye_ozel_degerlendirmeleri(tekrarlar, ozl=None, olcutler=OLCUTLER):
     Her tekrar için kişiye özel açı bandı değerlendirmesi (sözlük):
       t, f (etiketli kareler), model, digerleri / digerleri_f (bandın doğru tekrarları), E,
       ek (kapsam, aralik_disi, tepe_acisi), model_sayisi (hatalı tekrarda n, doğruda 1).
-    Görsel kontrol aracı da bunu kullanır; videoda görünen bant ve E tablodakiyle aynıdır.
     """
     ozl = ozellik_tablosu(tekrarlar, olcutler) if ozl is None else ozl
     for _, grup in veri.gruplara_ayir(tekrarlar).items():

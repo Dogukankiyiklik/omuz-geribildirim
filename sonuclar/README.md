@@ -4,7 +4,7 @@ Deneylerin çıktıları. Belgelerdeki (`docs/DENEYLER.md`, rapor, sunum) her sa
 
 - **CSV** dosyaları asıl kayıttır. UTF-8 ile yazılır ve ondalık ayırıcı noktadır.
 - **`sonuclar.xlsx`** aynı tabloların Excel kopyasıdır. Türkçe Excel, CSV'deki ondalık noktayı binlik ayırıcı sanabildiği için tablolara Excel'de bakarken bu dosyayı açın.
-- **Videolar** (`.mp4`) yeniden üretilebilir ve büyük oldukları için depoya girmez. Bunlar `deney1/galeri/` (görsel kontrol aracının `--galeri` çıktısı) ve `sunum/demo_*.mp4` gibi dosyalardır.
+- **Videolar** (`.mp4`) yeniden üretilebilir ve büyük oldukları için depoya girmez. Bunlar `sunum/demo_*.mp4` gibi dosyalardır.
 
 Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyler.hepsi` ile denetlenir.
 
@@ -21,8 +21,7 @@ Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyle
 | `hiz_esigi/` | Hız notunun eşiği (`modeller/hiz_esigi.json`) | `ozet.csv` |
 | `kural_disa_aktar/` | Uygulamanın kural dosyasının (`modeller/kural_ex1.json`) deneydeki kurallarla karşılaştırması | `loso_karsilastirma.csv` |
 | `uygulama_saglik/` | Uygulamanın MediaPipe sürümü (1.2.2) ile veri setininki (0.10.20) aynı videoda ne kadar farklı (`python -m uygulama.toplu --veri-seti ex1_Honza`) | `ex1_Honza_cam1_o0_poz_farki.csv` |
-| `sunum/` | Sunum şekilleri (`deneyler/sunum_sekilleri.py`). `4b_*` ve `5b_*` kişisel görüntü içerdiği için depoya girmez. | `1_problem.png` … `5_bindirme.png` |
-| `gorsel_kontrol/` | Görsel kontrol aracının videoları (`araclar/gorsel_kontrol.py`); yalnızca yerelde | – |
+| `sunum/` | Sunum demosunun yedekleri (`docs/DEMO.md`). Üreten betik kaldırıldı (`cc39d2a` commit'inde `deneyler/sunum_sekilleri.py`). `4b_*`, `5b_*` ve videolar kişisel görüntü içerdiği için depoya girmez. | `4_geri_bildirim.png`, `5_bindirme.png` |
 
 `hepsi/` son yeniden üretimin raporudur (`python -m deneyler.hepsi` her çalıştırmada yeniden yazar): `ozet.md`, adım süreleri (`adimlar.csv`) ve dosya dosya karşılaştırma (`regresyon.csv`).
 

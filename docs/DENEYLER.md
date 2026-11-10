@@ -43,8 +43,6 @@ Kulak–omuz ölçüsü (`YENI`), silkmeli tekrar ile doğru tekrar [`deney1/oze
 - Profil görüşte bant da zayıflıyor (kulak–omuz 0,842) [`deney1/ozet.csv`].
 - Kişi başına bakıldığında kişiye özel bant her kişide 0,84 ile 0,98 arasında [`deney1/ozet.csv`, "kişi özeti"; kişi kişi değerler `deney1/kisi_auc.csv`].
 
-Şekil: `sonuclar/sunum/1_problem.png` (ham → bant, kişi başına nokta), `2_fikir_aci_bandi.png` (bir doğru ve bir silkmeli tekrar bandla birlikte) ve `3_kalibrasyon.png` (genel bant ile kişiye özel bant).
-
 ## Soru 2 (Problem 1): Sistem hatanın türünü doğru söylüyor mu?
 
 **Cevap: kısmen.** Önden + çapraz görüşte hatalı tekrarların yarısından biraz fazlasında ilk söylenen hata doğru; üçte ikisinde doğru hata cümlede geçiyor. Doğru tekrarların çoğuna "doğru" deniyor. Beş hata türü arasında rastgele tahmin %20 tutturur; sonuç bunun çok üstünde, ama kusursuz değil.

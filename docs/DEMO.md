@@ -10,11 +10,11 @@
   - `sonuclar/sunum/demo_kisi1.mp4`,
   - `sonuclar/sunum/demo_yedek_veriseti.mp4`,
   - `modeller/pose_landmarker_full.task` (MediaPipe modeli; yoksa ilk çalıştırmada internetten indirilir).
-- [ ] Eksik olan varsa yeniden üretilir:
+- [ ] `profiller/kisi1.npz` eksikse uygulamanın kendisiyle yeniden üretilir (kalibrasyon videosundan; mevcut dosyayla birebir aynı çıktığı 10 Kasım 2026'da denetlendi):
   ```bash
-  python -m deneyler.sunum_sekilleri --kendi-kayit   # profiller/kisi1.npz, demo_kisi1.mp4, 4b_, 5b_ (~3–5 dk)
-  python -m deneyler.sunum_sekilleri                 # demo_yedek_veriseti.mp4 ve 1–5 numaralı şekiller (~2 dk)
+  python -m uygulama.toplu --isim kisi1 --kalibrasyon-video veri/kendi_kayit/kisi1/kalibrasyon.MOV --video veri/kendi_kayit/kisi1/test.MOV
   ```
+- [ ] Yedek videolar ve `4b_` / `5b_` ekran görüntüleri (`sonuclar/sunum/`) yalnızca bu bilgisayarda var (`4_` ve `5_` git'te). Onları üreten betik kaldırıldı (`cc39d2a` commit'inde `deneyler/sunum_sekilleri.py`); silinirse 2. ve 3. yolun dosyalı kısmı kullanılamaz.
 - [ ] Videoları oynatacak bir oynatıcı (Windows Medya Oynatıcı ya da VLC) açılıp denenmiş olsun.
 
 ## 1. Canlı: kişi 1 profiliyle `test.MOV` (birincil)
@@ -54,7 +54,7 @@ python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/ki
 | Sorun | Ne yapılır |
 | --- | --- |
 | Dosya açılmıyor (kodek) | VLC ile açılır; olmazsa 3. yol. |
-| Dosya yok | `python -m deneyler.sunum_sekilleri --kendi-kayit` (~3–5 dk); zaman yoksa 3. yol. |
+| Dosya yok | 3. yol. |
 
 ## 3. İkinci yedek: veri seti demosu
 - **Önce dosya:** `sonuclar/sunum/demo_yedek_veriseti.mp4`. Yaklaşık 25 s; veri setinden Honza, tekrar 5–7 ve oynatımları.

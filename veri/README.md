@@ -14,13 +14,3 @@ https://zenodo.org/records/23018128 — lisans CC BY-NC 4.0. Tüm dosyaları `ve
 | `videos.zip` | 8,4 GB | Orijinal videolar; 3 egzersiz × 5 kişi × 3 kamera, 30 FPS. Görsel kontrol için gerekli. |
 
 Zip'leri açmak zorunlu değil; kod doğrudan zip'ten okuyabilir.
-
-## Yardımcı dosya
-
-`rehab26_kucuk.npz`: Veri setinin küçültülmüş kopyası (yalnızca tekrar kareleri, 13 eklem, 2B, float16). Silkme tespitinin ilk sonuçları (`referans/beklenen_deney1_ozet.csv`) bu dosyadan üretildi. Varsa `veri/` klasörüne konur; test, aynı sonucun hem bu dosyadan hem orijinal zip'ten yeniden üretildiğini kontrol eder. Yoksa ilgili test atlanır.
-
-## Kendi kayıt
-
-`kendi_kayit/kisi1/`: Projenin kendi çekimi (kalibrasyon ve test videosu, tekrar etiketleri). Kişisel görüntü olduğu için depoya girmez.
-
-`ara/`: Programların oluşturduğu ara dosyalar. `ara/videolar/` veri setinden çıkarılmış videolar, `ara/kendi_kayit/` kendi kaydın MediaPipe iskelet noktaları (önbellek). Depoya girmez.

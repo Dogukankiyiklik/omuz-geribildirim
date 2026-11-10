@@ -47,7 +47,7 @@ Uygulamanın karar kuralı dosyası `modeller/kural_ex1.json` ise `araclar/kural
 | `hepsi.py` | **Bütün deneyleri temiz bir kopyada yeniden çalıştırır** ve çıkan her CSV'yi kayıtlı sonuçla karşılaştırır. Son commit'in kopyasını açar (`git worktree`), veriyi yalnızca okur ve özeti `sonuclar/hepsi/ozet.md`'ye yazar. |
 
 ```bash
-python -m deneyler.hepsi            # hepsi (~8 dk)
+python -m deneyler.hepsi            # hepsi (~4 dk)
 python -m deneyler.hepsi --hizli    # yalnızca deney1, kamera açısı, hız eşiği (~1 dk)
 python -m deneyler.hepsi --temizle  # temiz kopyayı kaldırır
 ```

@@ -31,7 +31,7 @@ pytest -q                         # ~1 dk; veri yoksa veri gerektiren testler at
 Bütün deneyleri temiz bir kopyada yeniden üretip kayıtlı sonuçlarla karşılaştırmak için:
 
 ```bash
-python -m deneyler.hepsi            # ~8 dk; özet: sonuclar/hepsi/ozet.md
+python -m deneyler.hepsi            # ~4 dk; özet: sonuclar/hepsi/ozet.md
 python -m deneyler.hepsi --hizli    # ~1 dk; kurulum denemesi (Deney 1, kamera açısı, hız eşiği)
 python -m deneyler.hepsi --temizle  # bittikten sonra temiz kopyayı kaldırır
 ```

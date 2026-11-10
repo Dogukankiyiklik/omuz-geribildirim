@@ -20,7 +20,7 @@ pytest -q                         # ~1 dk; veri yoksa veri gerektiren testler at
 ## 2. Veri
 
 - **Veri seti:** REHAB26-ViewAngles, https://zenodo.org/records/23018128 (DOI 10.5281/zenodo.23018128, CC BY-NC 4.0).
-- **Nereye:** dosyalar `veri/rehab26/` altına konur. Hangi dosyanın ne olduğu [`veri/README.md`](../veri/README.md)'de. `videos.zip` (8,4 GB) yalnızca video gösteren işler için gerekir: görsel kontrol, galeriler, sunum şekilleri ve uygulamanın `--veri-seti` modu.
+- **Nereye:** dosyalar `veri/rehab26/` altına konur. Hangi dosyanın ne olduğu [`veri/README.md`](../veri/README.md)'de. `videos.zip` (8,4 GB) yalnızca uygulamanın `--veri-seti` modu (veri setinden bir videoyu oynatma ve sağlık kontrolü) için gerekir; deneyler videoya ihtiyaç duymaz.
 - **Zip'ler:** açılmaz; kod doğrudan zip'ten okur. `veri/` git'e girmez.
 - **Deneyler MediaPipe çalıştırmaz:** veri setindeki hazır iskeletleri kullanırlar (MediaPipe 0.10.20). Uygulama ise MediaPipe 1.2.2 kullanır; aradaki fark [`SURUMLER.md`](SURUMLER.md)'de.
 

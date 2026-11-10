@@ -137,7 +137,7 @@ Bant fikri, μ ve τ'nun tanımı ve τ'ya alt sınır **Jánošová ve ark. (20
 
 **Omuza özel iyileştirme ne?** İki şey: (1) omzu kulağa göre ölçmek (omuz noktasını tek başına değil, kafaya göre); (2) asıl katkı olarak bu ölçüyü **kol açısına koşullu, kişiye özel** bir bantla değerlendirmek. Ödevde sayılan "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" tam olarak bu. Ödevde önerilen yumuşatma ve omuz bölgesi (siluet) de denendi, ikisi de bu yöntemden iyi çıkmadı.
 
-**Referans video kimin?** Kişinin kendi kalibrasyon tekrarları. Başkasının tekrarlarından kurulan "genel" bant çok daha kötü çalıştı (0,62–0,67'ye karşı 0,95). Yani referans bilerek kişiye özel.
+**Referans video kimin?** Kişinin kendi kalibrasyon tekrarları. Başkalarının tekrarlarından kurulan "genel" bant çok daha kötü çalıştı (0,67'ye karşı 0,95; [`DENEYLER.md`](DENEYLER.md), Soru 1). Yani referans bilerek kişiye özel.
 
 **DTW nerede kullanılıyor?** Yalnızca bindirmede (iki tekrarı zamanda eşlemek için). Hata puanı kol açısına göre hesaplandığı için puanlamada zaman hizalamasına gerek kalmıyor.
 

@@ -53,10 +53,10 @@ Kod ve sonuç klasörlerinin her birinde, içindeki dosyaları anlatan bir `READ
 | --- | --- |
 | `uygulama/` | Uygulama: kamera/video, kalibrasyon, panel, bindirmeli oynatım (`main.py`), pencere açmadan CSV (`toplu.py`) |
 | `cekirdek/` | Ortak kod: ölçüler, açı bandı, hata türü, Türkçe cümle, DTW, bindirme. Uygulama ve deneyler aynı kodu kullanır |
-| `deneyler/` | Deney betikleri (silkme tespiti, genel ve kişiye özel bant karşılaştırması, hata türü, geri bildirim, tekrar ayırma, kendi kayıt, sunum şekilleri) ve hepsini yeniden üreten `hepsi.py` |
-| `araclar/` | Uygulamanın kural dosyasını üreten `kural_disa_aktar.py`, görsel kontrol aracı |
+| `deneyler/` | Deney betikleri (silkme tespiti: ham / genel bant / kişiye özel bant; hata türü; Türkçe geri bildirim; kendi kayıt; tekrar ayırma; uygulamanın iki eşiği) ve hepsini yeniden üreten `hepsi.py` |
+| `araclar/` | Uygulamanın kural dosyasını üreten `kural_disa_aktar.py` |
 | `modeller/` | Uygulamanın kullandığı kural ve eşik dosyaları (JSON) |
-| `sonuclar/` | Deney çıktıları (CSV, `ozet.csv`, sunum şekilleri) |
+| `sonuclar/` | Deney çıktıları (CSV, her deneyin `ozet.csv`'si) ve sunum demosunun yedekleri |
 | `testler/` | pytest testleri |
 | `referans/` | Silkme tespitinin (Deney 1) beklenen sonuçları; kod değişince sonuçların bozulmadığını sınayan test bunu kullanır |
 | `docs/` | Belgeler (yukarıdaki liste; ayrıca sunum demosu `DEMO.md`, paket sürümleri `SURUMLER.md`, yapay zekâ kullanımı `LLM_KULLANIMI.md`) |

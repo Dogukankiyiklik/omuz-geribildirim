@@ -98,7 +98,7 @@ Cümleye çevirme kayıpsız: cümlenin söylediği hata, karar kuralının buld
 
 ## Denenip işe yaramayanlar
 
-Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/README.md)); kaynak yolları `arsiv/sonuclar/` altına göre. İlk ikisi ödevin Problem 2 için önerdiği yöntemlerdi.
+Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/README.md)); kaynak yolları `arsiv/sonuclar/` altına göre. İki zaman bandı satırının kaynağı ise git geçmişinde (satırda yazılı commit). İlk ikisi ödevin Problem 2 için önerdiği yöntemlerdi.
 
 | Deneme | Sonuç | Kaynak |
 | --- | --- | --- |
@@ -113,7 +113,7 @@ Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/READM
 ## Sınırlılıklar
 
 1. **Veri:** 5 sağlıklı kişi; hatalar taklit, gerçek hasta yok.
-2. **Dar bant:** τ, ortalamanın güven aralığıdır, yeni bir tekrarın düşebileceği aralık değil. 6 tekrarla bant, yeni tekrar için gereken aralıktan yaklaşık 2,6 kat dar; küçük sapmalar da uyarıya dönüşebiliyor.
+2. **Dar bant:** τ, ortalamanın güven aralığıdır, yeni bir tekrarın düşebileceği aralık değil. Yeni bir tekrarın düşeceği aralık (tahmin aralığı) t·s·√(1+1/n) olurdu; oranı √(n+1), yani 6 tekrarla √7 ≈ 2,6. Bant bu kadar dar olduğu için küçük sapmalar da uyarıya dönüşebiliyor (hesap; ölçülmüş bir sonuç değil).
 3. **Tek kamera, 2B:** derinlik yok; dereceler yaklaşık. Öne kaçma ile dirsek, baş eğme ile omuz silkmesi karışabiliyor. Profil görüş uygun değil.
 4. **Kalibrasyon şart:** kişi her kurulumda 6 doğru tekrar yapmalı ve kamera aynı yerde durmalı.
 5. **Bakış ve hız:** başka yere bakmak ya da çok hızlı yapmak gereksiz uyarı üretebiliyor (kendi kayıt).

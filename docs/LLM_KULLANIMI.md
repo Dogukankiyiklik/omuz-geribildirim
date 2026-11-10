@@ -7,7 +7,7 @@
 - Hata ayıklama, testler ve kısa sınamalar.
 - Deneylerin bir kısmının, kullanıcının isteğiyle çalıştırılması. Son yeniden üretimi (10 Kasım 2026, `sonuclar/hepsi/`) Claude Code çalıştırdı.
 - Geliştirme kayıtları (`arsiv/ilerleme/`), belgeler (`docs/`, klasörlerdeki README'ler) ve sunum şekilleri (`deneyler/sunum_sekilleri.py`; 10 Kasım 2026'da kaldırıldı, git geçmişinde `cc39d2a`). Belgelerdeki sayılar sonuç dosyalarından kopyalandı.
-- Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması, kalıntıların temizlenmesi ve belgelerin yeniden yazılması.
+- Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması, kalıntıların temizlenmesi ve belgelerin yeniden yazılması. Aynı gün, kullanıcının isteğiyle Deney 1–3 uygulamanın kullandığı tek yönteme indirildi, sunum şekilleri betiği ve görsel kontrol aracı kaldırıldı, çekirdekte artık kullanılmayan kod silindi; her adımda bütün sonuçların birebir aynı yeniden üretildiği `deneyler/hepsi.py` ile denetlendi.
 
 ## Claude (ayrı sohbet): planlama ve yorum
 - Literatür taraması (`arsiv/docs/ARKA_PLAN.md`).

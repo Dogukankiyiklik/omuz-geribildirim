@@ -5,16 +5,12 @@ Kaynak: hocanın verdiği Word dosyası, [`ODEV_asil.docx`](ODEV_asil.docx) ("Bi
 ## Proje konusu
 Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıcıya anlamlı geri bildirim üretilmesi. Üç problemden en az birini çözen **çalışan bir uygulama** isteniyor; birden fazlası seçilebilir. **Proje üçünü de kapsıyor.**
 
-## Dikkat: ödev metni yoga diyor, proje omuz egzersizi yapıyor
+## Not: ödev metni yoga diyor, proje omuz egzersizi yapıyor
 
-Word dosyasında Problem 1'in başlığı "**Yoga** Hareketinin Doğruluğunun Ölçülmesi ve Doğal Dil Geri Bildirimi", Problem 3'ünki "Referans **Yoga** Hareketi ile Kullanıcı Hareketinin Aynı Video Üzerinde Çakıştırılması". İkisi de "doğru yoga hareketini gösteren bir referans video" ile kullanıcının videosunu karşılaştırmayı anlatıyor. Problem 2 ise doğrudan omuz/skapula ölçümü.
+Word dosyası Problem 1 ve 3'ü yoga hareketi ve "doğru yoga hareketini gösteren bir referans video" üzerinden anlatıyor. Hoca derste hareketin yoga olmasının şart olmadığını, istenen hareketin seçilebileceğini ve kısıtların katı olmadığını söyledi (kullanıcının aktarımı, 10 Kasım 2026). Projenin iki tercihi sunumda ve raporda **açıkça söylenir**:
 
-Projede iki fark var; sunumda sorulursa cevabı hazır olmalı:
-
-- **Hareket:** yoga pozu yerine kolu yana kaldırma (omuz rehabilitasyon egzersizi). Gerekçe: Problem 2 omuzu istiyor; üç problem aynı harekette, aynı uygulamada birlikte çözüldü. İstenen adımların hepsi (ölçüm, referansla karşılaştırma, hata büyüklüğü, doğal dil, zamansal + geometrik hizalama, bindirme) bu harekette yapılıyor.
-- **Referans:** başka birinin "doğru" videosu yerine kişinin kendi 6 doğru tekrarı. Gerekçe ölçüldü: başkalarının tekrarlarından kurulan bant çok daha kötü çalışıyor (AUC 0,67'ye karşı 0,95; [`DENEYLER.md`](DENEYLER.md) Soru 1). Bindirme kodu iki farklı kişinin tekrarını da hizalayabiliyor ([`SISTEM.md`](SISTEM.md), sık sorulan sorular).
-
-Bu sapmanın hocayla konuşulup konuşulmadığı bu depoda kayıtlı değil; sunumdan önce teyit etmek iyi olur.
+- **Hareket:** kolu yana kaldırma (omuz rehabilitasyon egzersizi). Problem 2 omuzu istiyor; üç problem aynı harekette, aynı uygulamada birlikte çözüldü.
+- **Referans:** başka birinin videosu yerine kişinin kendi 6 doğru tekrarı. Gerekçe ölçüldü: başkalarının tekrarlarından kurulan bant çok daha kötü çalışıyor (AUC 0,67'ye karşı 0,95; [`DENEYLER.md`](DENEYLER.md) Soru 1).
 
 ## Problemler ve şartlar
 

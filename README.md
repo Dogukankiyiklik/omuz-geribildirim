@@ -19,7 +19,7 @@ Yöntemin temeli **kişiye özel açı bandı**: kişinin 6 doğru tekrarından,
 - [`docs/SISTEM.md`](docs/SISTEM.md): sistemin adım adım çalışması ve yararlanılan literatür.
 - [`docs/DENEYLER.md`](docs/DENEYLER.md): deneyler, sonuçlar ve sınırlılıklar.
 - [`docs/ODEV.md`](docs/ODEV.md): ödev şartları ve projedeki karşılıkları (hocanın özgün dosyası: `docs/ODEV_asil.docx`).
-- [`docs/LITERATUR.md`](docs/LITERATUR.md): kodda `M39`, `M01` gibi kodlarla anılan makaleler, hangisinden ne alındığı ve özetleri.
+- [`docs/LITERATUR.md`](docs/LITERATUR.md): kodda `M39`, `M01` gibi kodlarla anılan makaleler, hangisinden ne alındığı, rapor için kaynak önerisi ve özetleri.
 - [`docs/YENIDEN_KURULUM.md`](docs/YENIDEN_KURULUM.md): sıfırdan kurulum ve deneylerin yeniden üretimi.
 
 ## Hızlı başlangıç

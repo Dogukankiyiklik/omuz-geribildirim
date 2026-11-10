@@ -1,12 +1,12 @@
 # Literatür: projede kullanılan makaleler
 
-Kodda ve belgelerde geçen `M39`, `M01` gibi adlar makale kodlarıdır. Bu belge yalnızca **yöntemde gerçekten kullanılan** sekiz makaleyi içerir: önce hangisinden ne alındığı, sonra her birinin özeti.
+Kodda ve belgelerde geçen `M39`, `M01` gibi adlar makale kodlarıdır. Bu belge projede işe yarayan on iki makaleyi içerir: yöntemine bir bileşeni giren sekiz makale ve bir tasarım kararının gerekçesi olan dört makale. Önce hangisinden ne alındığı, sonra her birinin özeti.
 
 - Özetler, daha geniş bir literatür özetinden (16 makale) **değiştirilmeden** kopyalandı; o dosya ve makalelerin PDF'leri depoda değil.
 - Özetler makalelerin metninden üretken yapay zekâ (Claude) ile çıkarıldı ([`LLM_KULLANIMI.md`](LLM_KULLANIMI.md)). Sayfa numaraları makaleye aittir; rapora ya da sunuma bir sayı alınmadan önce makalenin kendisinden doğrulanmalı.
 - Her özetin sonundaki **Dikkat** bölümü, makalede tutarsız görünen noktaları listeler.
 
-## Hangi makaleden ne alındı
+## Yönteme bileşeni giren makaleler
 
 | Kod | Makale | Projede ne için kullanıldı |
 | --- | --- | --- |
@@ -18,6 +18,17 @@ Kodda ve belgelerde geçen `M39`, `M01` gibi adlar makale kodlarıdır. Bu belge
 | M45 | Delmas ve ark., 2024 — PoseScript: Linking 3D Human Poses and Natural Language | Pozdan kurallarla cümle üretme (sapma kodu fikri) |
 | E2 | Delmas ve ark., Belirtilmemiş — PoseFix: Correcting 3D Human Poses with Natural Language | Poz farkından düzeltme cümlesi üretme (sapma kodu fikri) |
 | E1 | Fieraru ve ark., 2021 — AIFit: Automatic 3D Human-Interpretable Feedback Models for Fitness Training | Referansa göre sapmayı doğal dilde söyleyen en yakın öncül |
+
+## Tasarım kararlarının gerekçesi olan makaleler
+
+Bunlardan koda bir formül ya da tanım girmedi; bir kararın nedenidirler (kararların günlüğü: `arsiv/ilerleme/KARARLAR.md`, `arsiv/docs/ARKA_PLAN.md`).
+
+| Kod | Makale | Hangi kararın gerekçesi |
+| --- | --- | --- |
+| M12 | Unger ve ark., 2025 — Using deep learning to detect upper limb compensation in individuals post-stroke using consumer-grade webcams—A feasibility study | Kişiye özel referansın gerekçesi: kişi içi modeller kişiler arası modellerden belirgin biçimde iyi |
+| M34 | Černek ve ark., 2025 — Pose estimation analysis and fine-tuning on the REHAB24-6 rehabilitation dataset | 3B yerine 2B koordinat kullanma kararı (M39 ile birlikte) |
+| M21 | Tang ve ark., 2025 — Rehabilitation Exercise Quality Assessment and Feedback Generation Using Large Language Models with Prompt Engineering | Geri bildirimi LLM'e değil kurala yazdırma kararı; arşivdeki LLM karşılaştırma deneyinin örneği |
+| M09 | Ullah ve ark., 2025 — A real time action scoring system for movement analysis and feedback in physical therapy using human pose estimation | Motivasyon: mevcut sistemler geri bildirimi tek bir puan olarak veriyor; ödev puan yerine ölçüm ve cümle istiyor |
 
 Yöntemin anlatımı: [`SISTEM.md`](SISTEM.md). Makalelerin kodda geçtiği yerler: `cekirdek/aci_bandi.py` (M39), `cekirdek/ozellikler.py` (M01, M33, M39), `cekirdek/hizalama.py` (M22).
 
@@ -33,18 +44,14 @@ DOI'ler makale listesinden (`makale_ozetleri.csv`) alındı; tam künyeler belge
 
 ## İncelenip yöntemde kullanılmayanlar
 
-Geniş özette olup buraya alınmayan sekiz makale. Okundular, ama uygulamanın yöntemine bir şey girmedi:
+Geniş özette olup buraya alınmayan dört makale. Okundular, ama projede bir rolleri olmadı:
 
 | Makale | Konusu | Neden kullanılmadı |
 | --- | --- | --- |
-| Pereira ve ark., 2024 | Evde omuz egzersizi için akıllı telefon uygulaması, optoelektronik sistemle doğrulama | Benzer bir uygulama; yöntemimize aktarılan bir bileşen yok |
-| Ullah ve ark., 2025 | Açı temelli hareket puanlama ve tekrar sayma | Tek bir puan veriyor; ödev puan yerine fiziksel ölçüm ve cümle istiyor |
+| Pereira ve ark., 2024 (M29) | Evde omuz egzersizi için akıllı telefon uygulaması, optoelektronik sistemle doğrulama | Benzer bir uygulama; yöntemimize aktarılan bir bileşen yok |
 | Francia ve ark., 2026 | MediaPipe'ın üst ekstremite açılarındaki doğruluğu (optoelektronik sisteme göre) | Yalnızca elenen "revize" az kaldırma puanının 10° alt sınırına gerekçeydi (kodda M42) |
 | Mercadal-Baudart ve ark., 2024 | Tek kameradan 3B pozla egzersiz ölçütleri | Aynı elenen alt sınırın gerekçesi (kodda M41); 3B poz kullanmıyoruz |
-| Gu ve ark., 2025 (ExeChecker) | Hataya yol açan eklemleri bulan derin ağ | Eğitilmiş model gerektiriyor; yöntemimiz kural tabanlı |
-| Černek ve ark., 2025 | REHAB24-6 veri seti ve poz modellerinin karşılaştırması | Başka veri seti; poz modeli eğitmiyoruz |
-| Tang ve ark., 2025 | Büyük dil modeliyle egzersiz değerlendirme ve geri bildirim | Cümleyi LLM'e yazdırmak denendi, üstünlük çıkmadı ([`DENEYLER.md`](DENEYLER.md), "Denenip işe yaramayanlar") |
-| Unger ve ark., 2025 | İnme sonrası telafi hareketlerinin web kamerasıyla tespiti | Gerçek hasta verisi ve derin öğrenme; bizim verimiz sağlıklı kişilerin taklit hataları |
+| Gu ve ark., 2025 (ExeChecker, M27) | Hataya yol açan eklemleri bulan derin ağ | Eğitilmiş model gerektiriyor; yöntemimiz kural tabanlı |
 
 Kodda geçen `M20` (Carlos ve ark., 2025, MediaPipe ölçümlerinin tekrarlanabilirliği; DOI 10.1177/10554181251399001) da yalnızca aynı elenen alt sınırın gerekçesidir ve geniş özette yer almaz.
 
@@ -60,6 +67,10 @@ Kodda geçen `M20` (Carlos ve ark., 2025, MediaPipe ölçümlerinin tekrarlanabi
 | Delmas ve ark., 2024 | Deneysel (veri seti ve yöntem önerisi) | 3B pozları doğal dil betimlemeleriyle eşleştirmek | AMASS'tan 100,000 poz; 6,283 insan betimlemesi; poz başına 3 otomatik betimleme | Kural tabanlı otomatik betimleme; ortak gömme ile erişim, koşullu VAE, otoregresif transformer | Otomatik betimlemelerle ön eğitim üç görevde performansı yaklaşık iki kat artırır (s. 12\) | Kendine temas eden ve baş aşağı pozlarda zayıf performans (s. 12\) |
 | Delmas ve ark., Belirtilmemiş | Deneysel | Doğal dil geri bildirimiyle 3B insan pozlarını düzeltmek | AMASS'tan 135k otomatik ve 6157 insan açıklamalı poz çifti | Koşullu VAE (poz düzenleme); otoregresif transformer (metin üretimi) | En iyi düzenleme modelinde MPJE 196 mm; metin üretiminde R@2 %71.35 (s. 15023, 15026\) | Standart NLP ölçütleri tek referans metinle model kalitesini güvenilir yansıtmıyor |
 | Fieraru ve ark., 2021 | Deneysel | Video ile 3B poz tabanlı otomatik fitness geri bildirim sistemi | Fit3D: 13 katılımcı, 37 egzersiz, 2,964,236 3B iskelet; CountixFitness (267 video) | MubyNet ile 3B poz; öz-ilinti ve eniyilemeyle tekrar bölütleme; aktif/pasif açı özellikleri; eşik tabanlı istatistiksel koç | Fit3D'de sayım OBO 0.140 (RepNet 0.520); δ \= 0.5'te geri bildirim doğruluğu yaklaşık %80 | Bölütleme ve geri bildirim doğruluğu poz kestirim kalitesine bağlı |
+| Unger ve ark., 2025 | Deneysel fizibilite çalışması | Web kamerasıyla inme sonrası üst ekstremite kompanzasyonunu tespit etmek | 20 inmeli birey (13'ü omuz kompanzasyonlu), içme görevi; 3 web kamerası \+ OMC | MediaPipe 2B anahtar noktalar; CNN, LSTM, Random Forest; katılımcılar arası ve katılımcı içi doğrulama | Katılımcı içi CNN doğruluğu 0.92–0.95; katılımcılar arası en fazla 0.70 (MediaPipe), 0.71 (OMC) (s. 7–8) | Küçük örneklem ve MediaPipe'ın sınırlı poz kestirim doğruluğu |
+| Černek ve ark., 2025 | Deneysel (veri seti ve karşılaştırmalı değerlendirme) | Rehabilitasyon egzersizlerinde poz tahmini yöntemlerini değerlendirmek ve iyileştirmek | REHAB24-6: 10 sağlıklı katılımcı, 6 egzersiz, 1072 etiketli tekrar, 2 RGB kamera, hareket yakalama referansı | 12 eklemli MPJPE (BestFit/BBox), 1-NN ve Silhouette; HRNet ve MHFormer ince ayarı | Derinlik tahmini ana darboğaz; MediaPipe Pose genelde en düşük 3B hata ve en hızlı; ince ayar hatayı belirgin azaltıyor | Yalnızca sağlıklı bireyler ve canlandırılmış egzersiz hataları |
+| Tang ve ark., 2025 | Deneysel | BDM'lerle egzersiz kalitesini değerlendirmek ve doğal dilde geri bildirim üretmek | UI-PRMD (10 katılımcı, 10 egzersiz, Kinect) ve REHAB24-6 (10 katılımcı, 6 egzersiz, ataletsel sensör) | Egzersize özgü öznitelikler \+ GPT-4o; k-atış, CoT, güven, olasılık, rol canlandırma istemleri | En iyi: 3 atış \+ güven istemi, doğruluk 0.76 (UI-PRMD) ve 0.70 (REHAB24-6); UI-PRMD'de LSTM/ST-GCN'nin altında (s. 11\) | Geri bildirimin nicel değerlendirilememesi; GPT-4o çıktılarının tekrarlanamaması |
+| Ullah ve ark., 2025 | Deneysel (sistem geliştirme ve doğrulama) | Fizyoterapide açı temelli, gerçek zamanlı hareket puanlama sistemi geliştirmek | 6 sağlıklı yetişkin (20–35 yaş) ve fizyoterapist referans videoları | MediaPipe, sabit sınırlayıcı kutu, eklem açıları, DTW, NCC; RepNet ile karşılaştırma | ROM sapması %1,6–3,2; tekrar sayma hatası \~%7,5; RepNet'ten daha doğru sayım (s. 13–15) | Küçük, hasta içermeyen örneklem; yalnızca RepNet ile karşılaştırma |
 
 ## Künye
 
@@ -73,6 +84,10 @@ Kodda geçen `M20` (Carlos ve ark., 2025, MediaPipe ölçümlerinin tekrarlanabi
 | Ginger Delmas, Philippe Weinzaepfel, Thomas Lucas, Francesc Moreno-Noguer, Grégory Rogez | 2024 | PoseScript: Linking 3D Human Poses and Natural Language | Belirtilmemiş (yalnızca DOI'de "TPAMI" kısaltması geçiyor) | Belirtilmemiş | Belirtilmemiş (ön baskı 25 sayfa) | 10.1109/TPAMI.2024.3407570 | arXiv ön baskısı (arXiv:2210.11795v3, 10 Eylül 2024), IEEE telif notuyla | Delmas, G., Weinzaepfel, P., Lucas, T., Moreno-Noguer, F., & Rogez, G. (2024). *PoseScript: Linking 3D human poses and natural language* (arXiv:2210.11795v3) \[Preprint\]. arXiv. https\://doi.org/10.1109/TPAMI.2024.3407570 |
 | Ginger Delmas, Philippe Weinzaepfel, Francesc Moreno-Noguer, Grégory Rogez | Belirtilmemiş | PoseFix: Correcting 3D Human Poses with Natural Language | ICCV (Computer Vision Foundation açık erişim sürümü) | Belirtilmemiş | 15018–15028 | Belirtilmemiş | Konferans bildirisi | Delmas, G., Weinzaepfel, P., Moreno-Noguer, F. ve Rogez, G. (t.y.). PoseFix: Correcting 3D human poses with natural language. *ICCV* içinde (ss. 15018–15028). Computer Vision Foundation. |
 | Mihai Fieraru, Mihai Zanfir, Silviu Cristian Pirlea, Vlad Olaru, Cristian Sminchisescu | 2021 | AIFit: Automatic 3D Human-Interpretable Feedback Models for Fitness Training | CVPR 2021 (Computer Vision Foundation Open Access sürümü) | Belirtilmemiş | 9919–9928 | Belirtilmemiş | Konferans bildirisi | Fieraru, M., Zanfir, M., Pirlea, S. C., Olaru, V., & Sminchisescu, C. (2021). AIFit: Automatic 3D human-interpretable feedback models for fitness training. In *CVPR 2021* (pp. 9919–9928). |
+| Unger T, Kühnis B, Sauerzopf L, Spiess MR, de Spindler A, Luft AR, Easthope Awai C, Schönhammer JG, Gavagnin E | 2025 | Using deep learning to detect upper limb compensation in individuals post-stroke using consumer-grade webcams—A feasibility study | Frontiers in Medicine | 12 (Belirtilmemiş) | Makale no. 1645369 | 10.3389/fmed.2025.1645369 | Özgün araştırma makalesi | Unger, T., Kühnis, B., Sauerzopf, L., Spiess, M. R., de Spindler, A., Luft, A. R., Easthope Awai, C., Schönhammer, J. G., & Gavagnin, E. (2025). Using deep learning to detect upper limb compensation in individuals post-stroke using consumer-grade webcams—A feasibility study. *Frontiers in Medicine, 12*, 1645369\. https\://doi.org/10.3389/fmed.2025.1645369 |
+| Andrej Černek, Jan Sedmidubsky, Petra Budikova | 2025 | Pose estimation analysis and fine-tuning on the REHAB24-6 rehabilitation dataset | Information Systems | 134 (Belirtilmemiş) | Makale no. 102579 (12 sayfa) | 10.1016/j.is.2025.102579 | Dergi makalesi (SISAP 2024 bildirisinin genişletilmiş sürümü) | Černek, A., Sedmidubsky, J., & Budikova, P. (2025). Pose estimation analysis and fine-tuning on the REHAB24-6 rehabilitation dataset. *Information Systems, 134*, Article 102579\. https\://doi.org/10.1016/j.is.2025.102579 |
+| Jessica Tang, Ali Abedi, Tracey J.F. Colella, Shehroz S. Khan | 2025 | Rehabilitation Exercise Quality Assessment and Feedback Generation Using Large Language Models with Prompt Engineering | Belirtilmemiş (arXiv:2505.18412v1 \[cs.CV\]) | Belirtilmemiş | 1–16 | Belirtilmemiş | Ön baskı (preprint) | Tang, J., Abedi, A., Colella, T. J. F., & Khan, S. S. (2025). *Rehabilitation exercise quality assessment and feedback generation using large language models with prompt engineering* (arXiv:2505.18412v1) \[Preprint\]. arXiv. |
+| Ullah, R., Asghar, I., Nawaz, R., Stacey, C., Akbar, S., Bishop, P. | 2025 | A real time action scoring system for movement analysis and feedback in physical therapy using human pose estimation | Scientific Reports | 15 (Belirtilmemiş) | Makale no. 44784 (19 s.) | 10.1038/s41598-025-29062-7 | Dergi makalesi (açık erişim) | Ullah, R., Asghar, I., Nawaz, R., Stacey, C., Akbar, S., & Bishop, P. (2025). A real time action scoring system for movement analysis and feedback in physical therapy using human pose estimation. *Scientific Reports, 15*, Article 44784\. https\://doi.org/10.1038/s41598-025-29062-7 |
 
 ---
 
@@ -420,3 +435,175 @@ Kodda geçen `M20` (Carlos ve ark., 2025, MediaPipe ölçümlerinin tekrarlanabi
 * Özet ve girişte 3 milyonu aşan görüntüden söz edilir (s. 9919); ancak veri seti 2,964,236 iskelet olarak verilir ve eğitim/doğrulama ile test görüntü sayılarının toplamı da bu sayıya eşittir (s. 9921).  
 * 2B ile 3B poz karşılaştırmasında OBO değerleri 3B, 2B sırasıyla (0.140 ve 0.920), MAE değerleri ise ters sırayla (2.250 ve 0.253) yazılmıştır; 3B'nin her iki ölçütte üstün olduğu iddiasıyla bu sıralama çelişir (s. 9925).  
 * δ simgesi hem tekrar bölütlemede ardışık zaman damgaları arasındaki alt sınır (s. 9922\) hem de istatistiksel koçun küresel eşik parametresi (s. 9924\) için kullanılmıştır.
+
+
+## M12 — Unger ve ark., 2025 — Using deep learning to detect upper limb compensation in individuals post-stroke using consumer-grade webcams—A feasibility study
+
+**Çalışma türü:** Deneysel fizibilite çalışması.
+
+**Amaç:** Tek bir RGB kamera ve derin öğrenmeyle, içme görevini yapan inmeli bireylerde kompanzatuvar üst ekstremite hareketlerinin tespit edilebilirliğini değerlendirmek ve tespit doğruluğunu etkileyen etkenleri sistematik olarak incelemek. Hipotez, daha şiddetli kompanzasyonların daha kolay tespit edileceğidir (s. 2).
+
+**Yöntem:**
+
+* Tek oturumluk ölçüm; 20 inmeli birey (14 kronik, 6 subakut; ort. yaş 72; FMA-UE ort. 51.7 (11.5)), az etkilenen ve daha etkilenen kolla 40'ar deneme (s. 3); omuz kompanzasyonu gösteren 13 katılımcı analize alındı (s. 4).  
+* Üç web kamerası (önden, 45° yakın, 45° uzak; 60 fps, 1080p) ve 100 Hz optik hareket yakalama (OMC) ile kayıt; terapistler beş görev fazını kompanzasyon açısından ikili etiketledi (s. 3–4).  
+* MediaPipe BlazePose 2B anahtar noktaları; ham zaman serileri için 1D CNN ve LSTM, özel kinematik özellikler (Standalone, Hybrid, OMC) için Random Forest (s. 5).  
+* Beş etken karşılaştırıldı: kompanzasyon şiddeti, katılımcılar arası/içi ayrım, kamera açısı ve veri kalitesi, girdi özellikleri, sınıflandırıcı; ölçütler test doğruluğu, duyarlılık ve kesinlik; katılımcılar arası 3 katlı gruplu çapraz doğrulama, katılımcı içi %80–20 ayrım (s. 5).
+
+**Ana bulgular:**
+
+* Katılımcılar arası sınıflandırma katılımcı içinden belirgin biçimde düşüktü: Standalone–merkez, hafif kompanzasyonda doğruluk 0.48 (± 0.10) ve 0.83; OMC özellikleriyle 0.65 (± 0.22)–0.71 (± 0.06) ve 0.92–0.94 (s. 6–7).  
+* Ham zaman serileriyle CNN katılımcı içinde 0.92–0.95 test doğruluğuna ulaştı; katılımcılar arası ayarda CNN ve LSTM yakınsamadı (doğruluk yaklaşık 0.50 veya altı), LSTM katılımcı içinde de yaklaşık 0.50'de kaldı (s. 7–8).  
+* Yakın kamera en iyisiydi: Hybrid, hafif, katılımcılar arası doğruluk yakın 0.70 (± 0.02), merkez 0.48 (± 0.12), uzak 0.58 (± 0.09); merkez–orta koşulunda doğruluk 0.42–0.43, duyarlılık 0.01–0.02 (s. 8).  
+* Veri kalitesi arttıkça başarı arttı: OMC en yüksek katılımcılar arası doğruluğu verdi; Hybrid, Standalone'a göre aynı ya da 0.07'ye kadar yüksek doğruluk sağladı (s. 7).  
+* Hipotezin aksine katılımcılar arası ayarda hafif kompanzasyonlar daha iyi sınıflandı (Hybrid–yakın doğruluk 0.70 (± 0.02) ve 0.58 (± 0.09), duyarlılık 0.64 (± 0.05) ve 0.30 (± 0.17)); katılımcı içinde orta kompanzasyonlar hafifçe üstündü (yakın kamera 0.88 ve 0.91) (s. 6).
+
+**Yazarların sonucu:** Mevcut bilgisayarlı görü teknolojileri uyarlanmış algoritmalarla kompanzatuvar hareketleri tespit edebilir; ancak genelleşen modeller için doğru hareket temsili ve daha büyük veri setleri kritiktir (s. 11). Genel modellerin doğruluğu sınırlı kalsa da kişiselleştirilmiş modeller ev tabanlı rehabilitasyonu destekleyebilir (s. 2).
+
+**Katkı:**
+
+* Tek web kamerasıyla içme görevinde kompanzasyon tespitinin fizibilitesini gösterir ve doğruluğu etkileyen beş etkeni sistematik olarak karşılaştırır (s. 8).  
+* Yalnızca katılımcı içi sonuç bildiren önceki bir çalışmaya katılımcılar arası değerlendirme ekler; katılımcı içi doğruluklar o çalışmanın 0.92 değeriyle uyumludur (s. 9).
+
+**Sınırlılıklar ve gelecek çalışma:**
+
+* Küçük örneklem (20 katılımcı, 13'ü kompanzasyonlu), ağır etkilenenlerin dışlanması, doğrulama verisi kullanılamaması ve az etkilenen tarafın sağlıklı vekil alınması; daha geniş kohortlar, veri artırma ve yaşça eşleştirilmiş sağlıklı katılımcılar önerilir (s. 10).  
+* MediaPipe'ın sınırlı doğruluğu ve kontrollü ortam; gelişmiş poz kestirim modelleriyle karşılaştırma ve gerçek yaşam koşullarında test önerilir (s. 10–11).  
+* İkili etiketleme ayrıntısızdır ve değerlendiriciler arası değişkenliğe açıktır (ICC uzanma, içme ve dönüş fazlarında 0.75–0.88, taşıma fazlarında 0.65–0.68); veri güdümlü etiketleme önerilir (s. 11).
+
+**Kısa özet:** Unger ve ark. (2025), hafif–orta üst ekstremite etkilenimi olan 20 inmeli bireyde içme görevi sırasında omuz kompanzasyonunun tek web kamerası, MediaPipe poz kestirimi ve makine öğrenmesiyle tespit edilebilirliğini incelemiştir. Katılımcı içi CNN modelleri 0.92–0.95 doğruluğa ulaşırken yeni katılımcılara genelleme sınırlı kalmış; ham anahtar noktalarla yaklaşık 0.50, özel kinematik özelliklerle en fazla 0.70 doğruluk elde edilmiştir (s. 1, 7–8). Yakın kamera açısı ve OMC gibi daha kaliteli hareket verisi sınıflandırmayı iyileştirmiştir. Yazarlar, genellenebilir modeller için poz kestirim doğruluğunun, veri çeşitliliğinin ve etiketleme tutarlılığının artırılması gerektiğini belirtmektedir.
+
+**Dikkat:**
+
+* Orta kompanzasyon grubunun hasta sayısı tutarsız: Şekil 2'de 8 hasta (178 deneme) verilirken (s. 6), tartışmada yalnızca beş hastanın yeterli orta kompanzasyon gösterdiği belirtiliyor (s. 9).  
+* Tartışmada özel özelliklerle katılımcı içi modellerin hafif grupta 0.70'e ulaştığı yazıyor (s. 9), oysa Tablo 2'de bu değer katılımcılar arası Hybrid–yakın sonucudur (s. 7); bulgularda katılımcı içi kesinlik diye verilen 0.72 ve 0.76 da tabloda katılımcılar arası sütunundadır (s. 6–7).  
+* Hafif (≥1 faz) ve orta (≥3 faz) tanımları örtüşüyor; hafif veri seti orta kompanzasyonları da içeriyor (s. 4–5), bu da iki grubun karşılaştırmasını belirsizleştiriyor.
+
+
+## M34 — Černek ve ark., 2025 — Pose estimation analysis and fine-tuning on the REHAB24-6 rehabilitation dataset
+
+**Çalışma türü:** Deneysel (veri seti sunumu ve karşılaştırmalı model değerlendirmesi).
+
+**Amaç:** Rehabilitasyon egzersizlerinde insan poz tahmini (HPE) yöntemlerinin uygunluğunu değerlendirmek için REHAB24-6 veri setini ve farklı iskelet formatlarını karşılaştırabilen bir değerlendirme protokolünü sunmak, ayrıca bu veri setinde ince ayarın kaliteyi artırdığını göstermek (s. 1).
+
+**Yöntem:**
+
+* Veri: 10 sağlıklı katılımcı (6 erkek, 4 kadın; 25–50 yaş), 6 egzersiz; 2 senkronize RGB kamera ve 16 kameralı hareket yakalama sistemi; 65 kayıt (184,825 kare, 30 FPS), iki kamerada 370 K kare, 26 eklemli 3B referans ve fizyoterapistçe doğru/yanlış etiketlenmiş 1072 tekrar (s. 3–4).  
+* Modeller: 2B için AlphaPose, HRNet, YOLOv7, MediaPipe Pose; 3B için MotionBERT (Lite/Full), MHFormer-351, STCFormer-81, MediaPipe Pose (Lite/Full/Heavy) (s. 8).  
+* Değerlendirme: Ortak 12 eklem üzerinden MPJPE; yanlış kişi tespitlerinin IoU ile ayıklanması; Procrustes temelli BestFit ve 2B ile derinlik hatasını ayıran önerilen BBox dönüşümü; 8 açılı zaman serilerinde DTW ile 1-NN doğruluğu ve Silhouette katsayısı (s. 5–7).  
+* İnce ayar: HRNet (2B) ve MHFormer (3B); çapraz-denek (2 test deneği, karelerin yaklaşık %22'si), çapraz-kamera (dikey kamera test) ve çapraz-egzersiz (Ex2 test, yaklaşık %25) bölmeleri (s. 8).
+
+**Ana bulgular:**
+
+* 2B hatada HRNet en iyi, MediaPipe Pose en kötü sonucu verdi (s. 8); tüm videolar üzerinden 3B MPJPE'de ise MediaPipe Pose daha düşük derinlik hatasıyla öne çıktı (MPP-full: BestFit 8.4 cm, BBox 3B 11.7 cm, derinlik 8.4 cm) (s. 8–9).  
+* Diğer 3B modellerde derinlik hatası 2B hatadan yüksekti (ör. MotionBERT-lite \+ HRNet: BBox 2B 6.0 cm, derinlik 11.1 cm); 2B girdi modelinin değişmesi 3B hatayı 1 cm'den az etkiledi, ideal GT2D girdisinde de derinlik hatası benzer kaldı (MotionBERT-lite: 10.0 cm) (s. 8–9).  
+* Çapraz-denek senaryosunda ince ayarlı HRNet'in 2B hatası tüm egzersizlerde iki kattan fazla düştü (ör. yatay kamera Ex1: 16'dan 7 piksele), ancak çapraz-kamera senaryosunda orijinal modelin gerisinde kaldı (ör. Ex3: 31'e karşı 56 piksel) (s. 9).  
+* Çapraz-denek senaryosunda HRNet-FT girdisiyle ince ayarlanan MHFormer'ın hatası BestFit 3B 3.9 cm, BBox derinlik 3.4 cm oldu; önceden eğitilmiş model HRNet girdisiyle 9.0 cm ve 12.1 cm idi (s. 10).  
+* 1-NN doğruluğu modeller ve referans iskelet arasında az farklılık gösterdi, Silhouette katsayısı birçok egzersizde MHFormer-351 \+ HRNet'i destekledi ve iki ölçüt de 3B hatayla ilişkili bulunmadı; gerçek zamanlı geri bildirim için gereken 10 FPS'yi yalnızca MediaPipe Pose karşıladı (MPP-lite: CPU'da 18.3 FPS) (s. 10).
+
+**Yazarların sonucu:** Derinlik tahmini HPE'nin temel zorluğudur; mümkünse 2B tahmin tercih edilmeli, 3B'de ise model seçimi 2B detektör seçiminden daha belirleyicidir (s. 11). MediaPipe Pose genel olarak en düşük 3B hatayı ve en iyi verimliliği sunarken ince ayar, derinlik iyileşmesiyle onu geçme potansiyeli taşır (s. 11).
+
+**Katkı:**
+
+* Doğru/yanlış tekrar etiketleri, zamansal bölütleme ve hareket yakalama referansı içeren REHAB24-6 veri seti (s. 2).  
+* Farklı iskelet formatlarındaki HPE yöntemlerini hem eklem konumu hatası hem de egzersiz doğruluğunu ayırt etme yararı açısından karşılaştıran değerlendirme yöntemi ve ince ayar için üç çapraz doğrulama bölmesi (s. 2, 8).
+
+**Sınırlılıklar ve gelecek çalışma:**
+
+* Veri seti yalnızca sağlıklı bireyleri ve fizyoterapist gözetiminde canlandırılan hataları içeriyor; gerçek hastalarla genişletme planlanıyor (s. 4).  
+* Egzersiz ve denek sayısı sınırlı, yalnızca ayakta egzersizler var; oturma/yatma egzersizleri ve üretken yapay zekâyla video varyasyonları eklenecek (s. 4, 11).  
+* İnce ayarda aynı siyah giysi gibi kayıt koşullarına aşırı uyum dışlanamıyor; 8 açılı temsil doğruluk ayrımı için yetersiz kalabiliyor (s. 9–10).
+
+**Kısa özet:** Černek ve ark. (2025), evde rehabilitasyon izleme bağlamında poz tahmini yöntemlerini değerlendirmek için 10 sağlıklı katılımcının 6 egzersizini hareket yakalama referansı ve 1072 etiketli tekrarla sunan REHAB24-6 veri setini tanıtmıştır (s. 3–4). Farklı iskelet formatlarını 12 ortak eklemle eşleştiren ve 2B ile derinlik hatasını ayıran protokolle yapılan karşılaştırmada derinlik tahmini temel darboğaz olarak belirlenmiş, MediaPipe Pose genelde en düşük 3B hatayı ve en yüksek hızı vermiştir (s. 8–10). Veri setiyle ince ayar hataları belirgin biçimde azaltmış, ancak 2B modelin farklı kamera görüşüne genellemesi zayıf kalmıştır (s. 9). Egzersiz doğruluğunu ayırt etme ölçütleri konum hatasıyla ilişkili bulunmamıştır (s. 10).
+
+**Dikkat:**
+
+* Tüm değerlendirmelerin 12 eklemlik alt kümede yapıldığı belirtilirken ince ayar sonuçlarında bu alt kümede olmayan parmak ucu ve omurga eklemlerinden söz ediliyor (s. 8–9).  
+* İnce ayarlı modellerin MPP-full'ü geçtiği ifadesi, farklı test kümelerinden (Tablo 5 tüm videolar, Tablo 9 çapraz-denek) gelen değerlerin karşılaştırılmasına dayanıyor (s. 8–10).  
+* 3B BestFit hatalarının modellerin kendi veri setlerinde bildirilenin iki katı olduğu söyleniyor, ancak karşılaştırılan değerler verilmemiş (s. 9).
+
+
+## M21 — Tang ve ark., 2025 — Rehabilitation Exercise Quality Assessment and Feedback Generation Using Large Language Models with Prompt Engineering
+
+**Çalışma türü:** Deneysel (yöntem önerisi ve deneysel değerlendirme).
+
+**Amaç:** Önceden eğitilmiş büyük dil modellerinin (BDM), iskelet eklem verisinden çıkarılan egzersize özgü öznitelikler ve istem mühendisliğiyle, ince ayar yapılmadan rehabilitasyon egzersiz kalitesini değerlendirip doğal dilde geri bildirim üretebileceğini göstermek. Araştırma sorusu veya hipotez belirtilmemiş.
+
+**Yöntem:**
+
+* Veri: İki açık veri kümesi; UI-PRMD (10 sağlıklı katılımcı, 10 egzersiz, her biri doğru ve yanlış olarak 10'ar tekrar, Kinect, 30 kare/sn, 22 eklem) ve REHAB24-6 (10 katılımcı, 6 egzersiz, giyilebilir ataletsel sensörler, 26 eklem); her örnek tek tekrar (s. 4, 8). Test örneği sayısı belirtilmemiş.  
+* Öznitelik çıkarımı: Klinisyen ölçütlerine dayanarak her egzersiz için kare bazında 3–5 öznitelik (ör. yan hamlede diz valgus açısı, uyluk açısı, pelvik stabilite); ham eklem verisiyle karşılaştırıldı.  
+* Model ve istemler: GPT-4o; 0–5 atışlı (k-shot) sınıflandırma, düşünce zinciri (CoT), güven (certainty), olasılık ve CoT+güven istemleri; geri bildirim için fizyoterapist rolü canlandırma (role-play) istemi.  
+* Değerlendirme: Doğruluk, kesinlik (precision), duyarlılık (recall), F1; olasılık isteminde AUC-ROC ve AUC-PR; LSTM ve ST-GCN ile karşılaştırma; geri bildirim yalnızca nitel değerlendirildi.
+
+**Ana bulgular:**
+
+* Öznitelik dizileriyle en iyi atış sayısı 3 oldu: UI-PRMD'de doğruluk 0.68, F1 0.76; REHAB24-6'da doğruluk 0.63, F1 0.70. Sıfır atış en düşük sonucu verdi, 3 atışın ötesinde performans tutarsızlaştı (ör. UI-PRMD 4 atış doğruluk 0.42); öznitelikler ham eklem verisinden iyi sonuç verdi (s. 8–10).  
+* 3 atış ve öznitelik koşulunda güven istemi en iyi sonucu verdi: UI-PRMD'de doğruluk 0.76, F1 0.79; REHAB24-6'da doğruluk 0.70, F1 0.73. CoT'nin doğruluğu 0.72 (UI-PRMD) ve 0.70 (REHAB24-6) olup kesinliği daha yüksek, duyarlılığı daha düşüktü; CoT+güven iyileşme sağlamadı (s. 9–11).  
+* UI-PRMD'de LSTM (doğruluk 0.87) ve ST-GCN (doğruluk 0.94) tüm istem tekniklerinden iyiydi; REHAB24-6'da LSTM 0.60, ST-GCN 0.63 doğrulukta kaldı (s. 11).  
+* Modelin güven ve olasılık puanları, değerlendirmenin doğru olup olmamasından bağımsız olarak çoğunlukla 0.8–1 aralığındaydı; CoT'de model zaman zaman kendi sınıflandırma eşiğini oluşturdu (s. 10).  
+* 3 atış, öznitelik ve güven istemi koşulunda squat iki veri kümesinde de iyi sonuç verdi (REHAB24-6 ex6 doğruluk 0.75; UI-PRMD m01 doğruluk 0.76); rol canlandırma geri bildirimleri hem öznitelik eğilimlerinden hem modelin ön bilgisinden öneriler içerdi (nitel değerlendirme, s. 12–13).
+
+**Yazarların sonucu:** Yazarlara göre istem teknikleri ile egzersize özgü özniteliklerin birleşimi, BDM'lerin egzersiz kalitesini değerlendirmesini ve anlamlı geri bildirim üretmesini sağlamış ve açıklanabilir sanal rehabilitasyon sistemleri için potansiyel göstermiştir; ancak model, kararı doğru olsun olmasın aşırı güvenli kalmıştır (s. 13).
+
+**Katkı:**
+
+* Önceden eğitilmiş BDM'lerin egzersize özgü öznitelikler ve istem mühendisliğiyle egzersiz kalitesini değerlendirmesini sağlayan yeni bir çerçeve (s. 2).  
+* İki açık veri kümesinde, maliyetli ince ayar olmadan kalite değerlendirmesi ve doğal dilde geri bildirim üretiminin uygulanabilirliğini gösteren deneyler (s. 2, 4).
+
+**Sınırlılıklar ve gelecek çalışma:**
+
+* Gerçek (ground-truth) metinsel geri bildirim içeren açık veri kümesi olmadığından geri bildirim nicel olarak değerlendirilemedi (s. 13).  
+* Yöntem önceden eğitilmiş BDM'nin bilgi tabanına dayanıyor; yazarlar geri bildirimle etiketlenmiş veri kümeleri toplayıp BDM'lere ince ayar yapmayı planlıyor (s. 13–14).  
+* GPT-4o'da rastgele tohum ayarlanamadığından çıktılar çalıştırmalar arasında değişebiliyor ve tekrarlanabilirlik etkileniyor (s. 13).
+
+**Kısa özet:** Tang ve ark. (2025), iskelet eklem verisinden klinik ölçütlere dayalı egzersize özgü öznitelikler çıkarıp bunları istem mühendisliğiyle GPT-4o'ya vererek rehabilitasyon egzersiz kalitesini ince ayar yapmadan sınıflandırmayı ve doğal dilde geri bildirim üretmeyi denemiştir. UI-PRMD ve REHAB24-6 veri kümelerinde en iyi sonuç 3 atışlı güven istemiyle alınmış, doğruluk sırasıyla 0.76 ve 0.70 olmuştur (s. 11). Model REHAB24-6'da LSTM ve ST-GCN'nin doğruluğunu aşmış, UI-PRMD'de bu modellerin gerisinde kalmış ve güven puanlarında aşırı güven göstermiştir (s. 10–11). Geri bildirim yalnızca nitel değerlendirilmiş; yazarlar metinsel geri bildirim içeren veri kümelerinin eksikliğini temel sınırlılık olarak belirtmiştir (s. 13).
+
+**Dikkat:**
+
+* Yazarlar REHAB24-6'da BDM'nin her istem tekniğiyle LSTM ve ST-GCN'den iyi olduğunu belirtiyor; ancak 3 atışlı temel istemin doğruluğu (0.63) ve F1'i (0.70) ST-GCN ile aynı, kesinliği (0.60) ST-GCN'ninkinden (0.61) düşük (s. 11).  
+* Test örneği sayısı, atış örneklerinin nasıl seçildiği ve kaç çalıştırma yapıldığı belirtilmemiş; oysa aynı konuşmadaki sonraki sınıflandırmaların modelin önceki çıktılarından etkilendiği bildiriliyor (s. 10).  
+* Sonuç bölümünde yaklaşımın yüksek doğruluk sağladığı söyleniyor (s. 13); en yüksek doğruluk 0.76 ve UI-PRMD'de temel modellerin altında (s. 11).
+
+
+## M09 — Ullah ve ark., 2025 — A real time action scoring system for movement analysis and feedback in physical therapy using human pose estimation
+
+**Çalışma türü:** Deneysel (sistem geliştirme ve doğrulama)
+
+**Amaç:** İnsan poz tahminindeki hareket bulanıklığı, örtüşme (oklüzyon) ve kamera açısı kaynaklı gürültüye karşı daha dayanıklı, açı temelli bir hareket puanlama ve tekrar sayma algoritması geliştirmek ve bunu fizyoterapi egzersizlerinde gerçek zamanlı geri bildirim için doğrulamak. Açık araştırma sorusu veya hipotez belirtilmemiş.
+
+**Yöntem:**
+
+* Veri: 20–35 yaş arası altı sağlıklı yetişkin (araştırma ekibi üyeleri) standart ve kasıtlı olarak bozulmuş egzersiz formlarını sergilemiş; kayıtlar 60 fps kamerayla tek açıdan (önden veya yandan) alınmış; referans hareketleri fizyoterapistler ve rehabilitasyon uzmanları yapmış (s. 4).  
+* Kilit noktalar MediaPipe Pose ile (kare başına 33 nokta) çıkarılmış (s. 5); sabit maksimum sınırlayıcı kutuya göre normalleştirilmiş; eklem açıları, hareket açıklığı (ROM) ve açısal hız türetilip ortalama çıkarma ve birim varyansa ölçekleme ile standartlaştırılmış.  
+* Tekrarlar açı eğrilerindeki tepe ve çukurlarla bölütlenmiş; kullanıcı ve referans dizileri Dinamik Zaman Bükme (DTW) ile hizalanıp tekrar bazında Normalleştirilmiş Çapraz Korelasyon (NCC) ile karşılaştırılmış; benzerlik ve tekrar doğruluğu tek bir Eylem Puanı'nda birleştirilmiş.  
+* Değerlendirme: elle işaretlenmiş kilit noktalara göre sapma, klinisyen gonyometrik ölçümlerine göre açı ve ROM hatası (ortalama mutlak hata), tekrar sayma hata yüzdesi ve RepNet modeliyle karşılaştırma.
+
+**Ana bulgular:**
+
+* Kilit nokta tespitinde, dört egzersizde elle işaretlenmiş verilere göre sapma %7 (dirsek bükme) ile %9 (vücut ağırlığıyla derin squat) arasında, ortalama %10'un altında bulunmuş (s. 11).  
+* DTW ve NCC karşılaştırmasında ideal modelden ortalama sapma %10'un altında, DTW hizalama doğruluğu %90'ın üzerinde ve egzersiz başına ortalama NCC 0,85'in üzerinde raporlanmış (s. 13).  
+* Tekrar sayma hatası dört egzersizde %5 (dirsek bükme, 20 tekrar) ile %10 (aktif omuz abdüksiyonu, 10 tekrar) arasında, ortalama yaklaşık %7,5 olmuş; değerlendirmedeki toplam gerçek tekrar sayısı 100'ün altındadır (s. 13).  
+* 23 videoluk karşılaştırmada açı temelli yöntemin sayımları gerçek tekrar sayılarıyla örtüşmüş; RepNet ise derin squat ve açılı yarım squat gibi birkaç egzersizde hiç tekrar saptayamamış, bazılarında eksik saymıştır (s. 14–15).  
+* Sagital düzlemde otomatik ROM ölçümleri klinisyen ölçümlerinden %1,6 (sol omuz) ile %3,2 (sol diz) arasında sapmış; açısal hızda klinisyen değerlendirmesine göre ortalama hata yaklaşık 0,1°/s bulunmuştur (s. 15–16).
+
+**Yazarların sonucu:** Yazarlar, MediaPipe tabanlı poz tahminini DTW ve NCC ile birleştiren sistemin hareket doğruluğunu, hizalamayı ve tekrarları güvenilir biçimde ölçtüğünü ve açı temelli tekrar saymanın RepNet'ten hem doğruluk hem hesaplama verimliliği açısından üstün olduğunu belirtmektedir (s. 17). Bu nedenle sistemi gerçek zamanlı ve uzaktan rehabilitasyon izlemeye uygun görmektedirler.
+
+**Katkı:**
+
+* Açısal hareket analizini sabit sınırlayıcı kutu normalleştirmesi, DTW ve NCC ile birleştiren ve mevcut poz tahmin sistemlerine eklenebilen yeni bir eylem puanlama algoritması (s. 1).  
+* Açı hesaplamalarına dayalı yeni bir tekrar sayma mekanizması (s. 1).
+
+**Sınırlılıklar ve gelecek çalışma:**
+
+* Değerlendirmedeki gerçek tekrar sayısı 100'ün altında olduğundan sonuçlar kesin ölçüt değil ön gösterge niteliğindedir; düzensiz hareketler ve örtüşmelerin olduğu gerçek klinik ortamda daha büyük ve çeşitli çalışmalarla test gerekir (s. 13–14, 18).  
+* Sistem karmaşık çok eklemli hareketlerde, ağır hareket kısıtlılığı olan hastalarda ve düşük kaliteli videolarda zorlanabilir; MediaPipe'ın basitleştirilmiş 33 noktalı iskeleti ve kontrollü gürültü ya da örtüşmeyle resmi bir sağlamlık testi yapılmamış olması da sınırlılık olarak belirtilmiştir (s. 17).  
+* Karşılaştırma yalnızca RepNet ile yapılmıştır; IMU, Kinect, HRNet ve OpenPose tabanlı sistemlerle karşılaştırma, optik hareket yakalama (OMC) ile doğrulama ve çok görüşlü ya da derinlik tabanlı yöntemlerle 3B kinematiğe genişletme planlanmaktadır (s. 17–18).
+
+**Kısa özet:** Ullah ve ark. (2025), fizyoterapi egzersizlerini değerlendirmek için MediaPipe ile çıkarılan kilit noktaları sabit sınırlayıcı kutuyla normalleştiren, eklem açılarına dayanan ve kullanıcı hareketini referansla DTW ve NCC aracılığıyla karşılaştıran bir eylem puanlama sistemi önermiştir. Altı sağlıklı yetişkinin kayıtlarıyla yapılan doğrulamada otomatik ROM ölçümleri klinisyen ölçümlerinden %1,6–3,2 sapmış (s. 15), tekrar sayma hatası ortalama yaklaşık %7,5 olmuştur (s. 13). Açı temelli tekrar sayma, RepNet'in bazı egzersizlerde hiç tekrar saptayamadığı videolarda gerçek sayıları vermiştir (s. 14–15). Yazarlar, sonuçların küçük ve hasta içermeyen bir örneklemden elde edildiği için ön nitelikte olduğunu vurgulamaktadır.
+
+**Dikkat:**
+
+* Deney düzeni bölümünde hasta videolarından söz edilirken (s. 11), veri toplama ve veri erişilebilirliği bölümlerinde hasta verisi kullanılmadığı belirtilmektedir (s. 4, 18).  
+* RepNet'e göre hesaplama verimliliği üstünlüğü ve gerçek zamanlı çalışma ileri sürülmekte, ancak işlem süresi veya gecikme ölçümü raporlanmamaktadır (s. 1, 14).  
+* Tablo 7'de açı temelli yöntem her egzersizde bir tekrar eksik sayarken Tablo 9'da tüm sayımlar doğrudur; ayrıca Tablo 5'te sol omuz ve sol dirsek satırları birebir aynı değerleri içermektedir (s. 13, 15).

@@ -1,9 +1,9 @@
-# Hocanın ödev tanımı — özet ve bizim karşılığımız
+# Ödev tanımı ve projedeki karşılıkları
 
 Kaynak: "Bilgisayarla Görü – Ara Sınav Projesi" Word dosyası. Sunum 16 Kasım 2026, 5 dakika. **Sunumdan sonra** 1 sayfalık rapor teslim edilir.
 
 ## Proje konusu
-Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıcıya anlamlı geri bildirim üretilmesi. Üç problemden en az birini çözen **çalışan bir uygulama** isteniyor; birden fazlası seçilebilir. **Biz üçünü birden kapsıyoruz.**
+Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıcıya anlamlı geri bildirim üretilmesi. Üç problemden en az birini çözen **çalışan bir uygulama** isteniyor; birden fazlası seçilebilir. **Proje üçünü de kapsıyor.**
 
 ## Problemler ve şartlar
 
@@ -14,7 +14,7 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
   - Örnek: "Sağ kolunu yaklaşık 90° kaldırman gerekiyordu; sen 80° kaldırdın…"
 - Doğru harekette olumlu geri bildirim verilir.
 - **Yeterli değil:** Sadece iskelet çizmek veya "%85 doğru" demek. AUC ve accuracy deneysel değerlendirmede kullanılabilir, ama kullanıcıya verilen ana çıktı fiziksel ölçüm ve doğal dil olmalı.
-- **Bizde:** 5 ölçü (`cekirdek/ozellikler.py`), hata türü (`cekirdek/hata_turu.py`), Türkçe cümle (`cekirdek/geribildirim.py`). Hasta cümlesinde derece ve düzeltme önerisi, uzman ayrıntısında "normalde X, sende Y"; doğru tekrarda olumlu cümle. Ölçüm: [`DENEYLER.md`](DENEYLER.md) Soru 2 ve 3.
+- **Projede:** 5 ölçü (`cekirdek/ozellikler.py`), hata türü (`cekirdek/hata_turu.py`), Türkçe cümle (`cekirdek/geribildirim.py`). Hasta cümlesinde derece ve düzeltme önerisi, uzman ayrıntısında "normalde X, sende Y"; doğru tekrarda olumlu cümle. Ölçüm: [`DENEYLER.md`](DENEYLER.md) Soru 2 ve 3.
 
 ### P2 — Omuz/skapula hareketlerinin hassas ölçümü
 - Standart pose çıktısının hangi durumda sınırlı kaldığı gösterilir.
@@ -22,8 +22,8 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
 - Yorumlanabilir ölçüm verilir: derece, normalize mesafe, asimetri, yörünge.
 - Mümkünse standart yöntemle iyileştirilmiş yöntem karşılaştırılır.
 - **Yeterli değil:** MediaPipe'ın omuz koordinatlarını doğrudan okuyup piksel farkını raporlamak.
-- **Hocanın önerdiği yöntemler:** shoulder ROI, optical flow, zamansal yumuşatma/Kalman, DeepLabCut ile özel noktalar, RGB-D, keypoint + lokal görüntü/özel geometrik ölçüm birleşimi. Ayrıca "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" ölçülebilecekler arasında sayılmış.
-- **Bizde:**
+- **Ödevde önerilen yöntemler:** shoulder ROI, optical flow, zamansal yumuşatma/Kalman, DeepLabCut ile özel noktalar, RGB-D, keypoint + lokal görüntü/özel geometrik ölçüm birleşimi. Ayrıca "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" ölçülebilecekler arasında sayılmış.
+- **Projede:**
   - **Sınırın gösterilmesi:** ham ölçüler silkmeyi zayıf ayırıyor (AUC 0,60–0,70); doğru harekette de omuz kalkıyor.
   - **İyileştirmeler:**
     1. kol açısına koşullu, kişiye özel bant (asıl katkı; AUC 0,70 → 0,95);
@@ -36,7 +36,7 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
 - **Geometrik hizalama:** öteleme, ölçek, döndürme veya Procrustes.
 - İki iskelet aynı video üzerinde farklı renklerle gösterilir; hatalı bölgeler görünür olur.
 - **Yeterli değil:** Videoları yan yana oynatmak veya aynı kare numaralarını üst üste çizmek.
-- **Bizde:** uygulamada her tekrar sonrası oynatım: referans (kişinin kalibrasyon tekrarı) DTW ile zamanda, kalça ortasına öteleme + gövde boyu oranıyla ölçek + gövde ekseniyle döndürme ile geometride hizalanır; banttan çıkan uzuv kırmızı. Kod: `cekirdek/bindirme.py`, `uygulama/panel.py`. Ayrıntı: [`SISTEM.md`](SISTEM.md) §7.
+- **Projede:** uygulamada her tekrar sonrası oynatım: referans (kişinin kalibrasyon tekrarı) DTW ile zamanda, kalça ortasına öteleme + gövde boyu oranıyla ölçek + gövde ekseniyle döndürme ile geometride hizalanır; banttan çıkan uzuv kırmızı. Kod: `cekirdek/bindirme.py`, `uygulama/panel.py`. Ayrıntı: [`SISTEM.md`](SISTEM.md) §7.
 
 ## 1 sayfalık rapor şablonu
 1. **Problem ve amaç:** 2–3 cümle.
@@ -61,8 +61,8 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
 - **Üretken yapay zekâ ile kod, hata ayıklama veya rapor desteği alındıysa, amacı kısa bir notla belirtilir.**
 - Son kontrol sorusu: "Bir başka öğrenci bu raporla uygulamanın temel sürümünü yeniden kurabilir mi?"
 
-## Hocanın kaynak rehberinde omuz için önerilenler
+## Ödevin kaynak rehberinde omuz için önerilenler
 Raporun sınırlılık veya kaynak kısmında anılabilir:
 - **Lefebvre vd. (2025):** DeepLabCut ile 20 anatomik omuz/üst ekstremite noktası.
 - **Ceglia vd. (2026):** RGB-D ve akromial küme ile omuz/skapula kinematiği.
-- **RGB-D omuz ROM sistematik derlemesi (2025):** Bizim M14'ümüz.
+- **RGB-D omuz ROM sistematik derlemesi (2025).**

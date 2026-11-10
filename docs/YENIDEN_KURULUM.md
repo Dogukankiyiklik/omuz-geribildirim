@@ -1,77 +1,75 @@
 # Yeniden kurulum
 
-Bu belge, başka bir öğrencinin sistemi sıfırdan kurup deneyleri yeniden üretebilmesi için yazıldı. Başlıklar hocanın rapor şablonundaki 7 başlığı izler. Komutlar Windows'ta Git Bash ya da PowerShell'de, proje kökünde çalıştırılır. Sistemin anlatımı: [`SISTEM.md`](SISTEM.md); sonuçların özeti: [`DENEYLER.md`](DENEYLER.md).
-
-> Belgedeki "Karar N" numaraları `arsiv/ilerleme/KARARLAR.md` dosyasındaki kararlar günlüğüne aittir.
+Bu belge, başka birinin sistemi sıfırdan kurup deneyleri yeniden üretebilmesi için yazıldı. Yöntemin anlatımı [`SISTEM.md`](SISTEM.md)'de, sonuçların özeti [`DENEYLER.md`](DENEYLER.md)'de. Komutlar proje kökünde çalıştırılır; Windows'ta Git Bash ya da PowerShell olabilir.
 
 ## 1. Ortam
-- Python **3.11** (sınandığı sürüm 3.11.9). Paket sürümleri: [`docs/SURUMLER.md`](SURUMLER.md).
+
+Python **3.11** gerekir (sınandığı sürüm 3.11.9). Tam paket listesi [`SURUMLER.md`](SURUMLER.md)'de.
+
 ```bash
 python -m venv .venv
-.venv\Scripts\activate            # Git Bash: source .venv/Scripts/activate · macOS/Linux: source .venv/bin/activate
+.venv\Scripts\activate            # Windows; macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-pytest -q                         # birkaç dakika; Deney 1 regresyonu dahil, hepsi geçmeli
+pytest -q                         # ~1 dk; veri yoksa veri gerektiren testler atlanır
 ```
-- GPU gerekmez. `numba` DTW'yi hızlandırır; yoksa aynı sonuç daha yavaş çıkar.
-- Uygulama için ek dosya: `modeller/pose_landmarker_full.task` (MediaPipe Pose Landmarker, Full). İlk çalıştırmada kendiliğinden indirilir.
 
-## 2. Girdi hazırlığı
-- **Veri seti:** REHAB26-ViewAngles, https://zenodo.org/records/23018128 (DOI 10.5281/zenodo.23018128, CC BY-NC 4.0). Dosyalar `veri/rehab26/` altına konur: `Segmentation.csv`, `Segmentation.txt`, `Error_types.csv`, `joint_names.txt`, `jointSequences-mediapipe.zip` (686 MB), `videos.zip` (8,4 GB; yalnızca görsel kontrol, galeri ve uygulamanın veri seti modu için). Ayrıntı: `veri/README.md`.
-- Zip'ler açılmaz; kod doğrudan zip'ten okur. `veri/` git'e girmez.
-- Kullanılan kısım: Ex1 (kolu yana kaldırma, sağ kol). Her tekrar `Segmentation.csv`'deki `first_frame…last_frame` aralığından, başına ve sonuna 10 kare pay eklenerek kesilir (`cekirdek/veri.py`).
-- En-boy: 2B koordinatlar görüntüye göre 0–1; videolar 1080×1920 olduğu için açı ve mesafeden önce `x *= 9/16`. Uygulamada gerçek kare boyutu kullanılır.
+- GPU gerekmez.
+- `numba` DTW'yi hızlandırır; yoksa aynı sonuç daha yavaş çıkar.
+- Uygulama MediaPipe modelini (`modeller/pose_landmarker_full.task`) ilk çalıştırmada kendiliğinden indirir.
 
-## 3. Pose çıkarımı
-- **Deneylerde:** veri setindeki hazır MediaPipe iskeletleri (v0.10.20, Full model; `_2d.npy`, `(kare, 33, 4)`). Deneyler MediaPipe'ı çalıştırmaz.
-- **Uygulamada ve kendi kayıtta:** MediaPipe Tasks `PoseLandmarker` 1.2.2, `pose_landmarker_full`, VIDEO modu (`uygulama/poz.py`). Sürüm farkı aynı Honza karelerinde ölçüldü: kol açısı farkı medyan 0,92°, %95 3,09° (`sonuclar/uygulama_saglik/`); YENI ölçütünün AUC'si iki sürümde 0,968 ve 0,969 (`arsiv/sonuclar/siluet/ozet.csv`).
-- Zamansal yumuşatma yok (denendi, etkisiz çıktı; `arsiv/`).
+## 2. Veri
 
-## 4. Ölçüm ve hizalama
-- Ölçütler (`cekirdek/ozellikler.py`): kol açısı (üst kolun aşağı dikeyle açısı), kulak–omuz dikey mesafesi / gövde boyu (YENI), baş–gövde açısı, kolun görünen boyu / gövde boyu, dirsek açısı. Uzunluklar dinlenme gövde boyuna bölünür.
-- **Kişiye özel açı bandı** (`cekirdek/aci_bandi.py`): kişinin doğru (kalibrasyon) tekrarlarından, kol açısının 5°'lik kutularında, kaldırma ve indirme fazı ayrı, "normal aralık" μ ± τ (M39'dan). Yani "kol θ°'deyken bu kişinin omzu normalde nerede?".
-- Puanlamada zaman hizalaması yok: her kare kendi kol açısı kutusuyla karşılaştırılır.
-- Bindirme (Problem 3): zamansal hizalama DTW ile, kol açısına göre (`cekirdek/hizalama.py`); geometrik hizalama kalça ortasına öteleme, dinlenme gövde boyu oranıyla ölçek, gövde ekseniyle döndürme (`cekirdek/bindirme.py`).
-- Adil model (Karar 7): değerlendirilen tekrar modele girmez; doğru ve hatalı tekrarlar aynı sayıda doğru tekrardan kurulan modellerle değerlendirilir.
+- **Veri seti:** REHAB26-ViewAngles, https://zenodo.org/records/23018128 (DOI 10.5281/zenodo.23018128, CC BY-NC 4.0).
+- **Nereye:** dosyalar `veri/rehab26/` altına konur. Hangi dosyanın ne olduğu [`veri/README.md`](../veri/README.md)'de. `videos.zip` (8,4 GB) yalnızca video gösteren işler için gerekir: görsel kontrol, galeriler, sunum şekilleri ve uygulamanın `--veri-seti` modu.
+- **Zip'ler:** açılmaz; kod doğrudan zip'ten okur. `veri/` git'e girmez.
+- **Deneyler MediaPipe çalıştırmaz:** veri setindeki hazır iskeletleri kullanırlar (MediaPipe 0.10.20). Uygulama ise MediaPipe 1.2.2 kullanır; aradaki fark [`SURUMLER.md`](SURUMLER.md)'de.
 
-## 5. Hata hesabı
-- Her ölçüt için bant dışı hata E; z ölçeği ve eşik T (`cekirdek/hata_turu.py`). Eşik ve ölçekleme kişi bazlı birini-dışarıda-bırak ile ayarlanır (4 kişide ayarla, 5.'de sına).
-- En fazla 2 hata söylenir; 2. hata yalnızca onun z'si de T'yi geçerse.
-- Az kaldırma: tepe açısının kalibrasyon tepelerinin medyanından sapması (Karar 17).
-- Uygulamanın parametreleri: beş kişinin hepsiyle aynı prosedür → `modeller/kural_ex1.json` (`python -m araclar.kural_disa_aktar`, Karar 24).
+## 3. Testler ve deneylerin yeniden üretimi
 
-## 6. Geri bildirim
-- Kural tabanlı Türkçe cümle (`cekirdek/geribildirim.py`), iki katman (Karar 28): **hasta cümlesi** (kısa; ne oldu + ne yapmalı; sayı yalnızca 5°'ye yuvarlanmış derece) ve **uzman ayrıntısı** (ölçülü; "normalde X, sende Y").
-- Cümleden hata listesini geri okuyan çıkarıcı: `cekirdek/metin_cozumleyici.py`.
-- LLM kullanılmaz. (LLM ile karşılaştırma deneyi `arsiv/` altında.)
+Önce `pytest -q`. Veri yerindeyken bütün testler geçmeli (1 tanesi bilerek `xfailed`; [`testler/README.md`](../testler/README.md)).
 
-## 7. Çıktı
-### Deneyler
-Her deney `sonuclar/<deney>/` altına CSV (ham), `ozet.csv` ve gerekirse PNG yazar. Hepsini temiz bir kopyada yeniden üretip kayıtlı sonuçlarla karşılaştırmak için:
+Bütün deneyleri temiz bir kopyada yeniden üretip kayıtlı sonuçlarla karşılaştırmak için:
+
 ```bash
-python -m deneyler.hepsi          # ~1 sa; özet: sonuclar/hepsi/ozet.md
-python -m deneyler.hepsi --hizli  # ~30 s; kurulum denemesi (Deney 1, kamera açısı, hız eşiği)
-python -m deneyler.hepsi --temizle   # bittikten sonra temiz kopyayı kaldırır
+python -m deneyler.hepsi            # ~8 dk; özet: sonuclar/hepsi/ozet.md
+python -m deneyler.hepsi --hizli    # ~1 dk; kurulum denemesi (Deney 1, kamera açısı, hız eşiği)
+python -m deneyler.hepsi --temizle  # bittikten sonra temiz kopyayı kaldırır
 ```
-`hepsi` son commit'in temiz bir kopyasını (git worktree) açar, `sonuclar/` olmadan bütün deneyleri sırayla çalıştırır ve her CSV'yi kayıtlı olanla karşılaştırır. Sonunda "aynı: N" ve "Yeniden üretim: N/N aynı" yazar.
 
-**Önbellekten üretilen adım.** Kendi kayıt adımı videonun MediaPipe noktalarını `veri/ara/kendi_kayit/` önbelleğinden okur; video yeniden işlenmez. Önbellek yoksa adım "üretilmedi" olur; baştan üretmek için kendi videon gerekir (aşağıya bak; kişisel videolar depoya girmez).
+`hepsi` son commit'in temiz bir kopyasını (git worktree) açar, `sonuclar/` olmadan bütün deneyleri sırayla çalıştırır ve her CSV'yi kayıtlı olanla karşılaştırır. Sonunda "Yeniden üretim: N/N aynı" yazar. Son çalıştırmanın raporu `sonuclar/hepsi/ozet.md`'de.
 
-### Uygulama
+Tek bir deneyi çalıştırıp sonucun değişmediğini görmek için:
+
 ```bash
-python -m uygulama.main --isim adin                                    # canlı kamera: 6 doğru tekrarla kalibrasyon + değerlendirme
-python -m uygulama.main --profil profiller/adin.npz --video test.mp4   # kayıtlı profille video dosyası (pencere)
-python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0  # veri setinden video, pencere modu
-python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4  # pencere açmadan, CSV
+python -m deneyler.deney1 --galeri-yok
+git status sonuclar/deney1          # CSV'ler "değişti" görünmüyorsa sonuç birebir aynı
 ```
-- Çıktılar: `oturumlar/<tarih>.csv` (tekrar başına karar, cümleler, z'ler) ve `profiller/<isim>.npz` (kalibrasyon). İkisi de git'e girmez.
-- Ayrıntılı demo sırası ve sorun çıkarsa ne yapılacağı: [`docs/DEMO.md`](DEMO.md).
 
-### Kendi videonla kullanım (Adım 7 protokolü)
-1. Kontrol listesi: [`arsiv/docs/CEKIM_LISTESI.md`](../arsiv/docs/CEKIM_LISTESI.md). Telefon sabit, göğüs hizasında, 2–2,5 m uzakta; kişi önden (en fazla 30° çapraz); baştan kalçaya ve yukarı kalkan sağ kol kadrajda; sade arka plan, ışık önden; 30 FPS.
-2. Çekim sırasında suflör sayfası: [`arsiv/docs/cekim_suflor.html`](../arsiv/docs/cekim_suflor.html) (tarayıcıda aç; hareketi sesli okur, kaldır/indir anlarında bip çalar). Bütün çekimde ekrandaki aynı noktaya bak.
-3. İki video: `kalibrasyon` (6 doğru tekrar) ve `test` (sırası önceden üretilmiş tekrarlar). Sıra ve etiket şablonu: `python -m deneyler.kendi_kayit --sablon veri/kendi_kayit/kisiN/etiketler.csv --tohum N`.
-4. Değerlendirme (MediaPipe ilk çalıştırmada birkaç dakika, sonra önbellekten):
+Betiklerin sırası ve her birinin ne ürettiği [`deneyler/README.md`](../deneyler/README.md)'de.
+
+**Kendi kayıt adımı** videonun MediaPipe noktalarını `veri/ara/kendi_kayit/` önbelleğinden okur. Kişisel videolar ve bu önbellek depoda olmadığı için bu adım başka bir bilgisayarda "üretilmedi" olur.
+
+## 4. Uygulama
+
 ```bash
-python -m deneyler.kendi_kayit --kisi kisi1 --kalibrasyon veri/kendi_kayit/kisi1/kalibrasyon.MOV --test veri/kendi_kayit/kisi1/test.MOV --etiketler veri/kendi_kayit/kisi1/etiketler.csv
+python -m uygulama.main --isim adin                                      # canlı kamera: 6 doğru tekrarla kalibrasyon + değerlendirme
+python -m uygulama.main --profil profiller/adin.npz --video test.mp4     # kayıtlı profille video dosyası
+python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0  # veri setinden video
+python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4    # pencere açmadan, CSV
 ```
-   Çıktı: `sonuclar/kendi_kayit/<kisi>/` (`ozet.csv`, `karisiklik.csv`, `cumle_etiket.csv`). iPhone `.MOV` dosyaları dönüştürülmeden okunur.
+
+Çıktılar `oturumlar/<tarih>.csv` ve `profiller/<isim>.npz` dosyalarıdır; ikisi de git'e girmez. Ayrıntı: [`uygulama/README.md`](../uygulama/README.md).
+
+## 5. Kendi videonla deneme
+
+1. **Çekim:** telefon sabit, göğüs hizasında, 2–2,5 m uzakta. Kişi önden ya da en fazla 30° çapraz durur. Baştan kalçaya kadar ve yukarı kalkan sağ kol kadrajda olmalı. Sade arka plan, ışık önden, 30 FPS. Bütün çekimde aynı noktaya bakılır. Ayrıntılı kontrol listesi: [`arsiv/docs/CEKIM_LISTESI.md`](../arsiv/docs/CEKIM_LISTESI.md).
+2. **İki video:** `kalibrasyon` (6 doğru tekrar) ve `test` (sırası önceden üretilmiş tekrarlar). Sıra ve etiket şablonu:
+   ```bash
+   python -m deneyler.kendi_kayit --sablon veri/kendi_kayit/kisiN/etiketler.csv --tohum N
+   ```
+3. **Değerlendirme:** MediaPipe ilk çalıştırmada birkaç dakika sürer, sonraki çalıştırmalar önbellekten gelir.
+   ```bash
+   python -m deneyler.kendi_kayit --kisi kisi1 --kalibrasyon veri/kendi_kayit/kisi1/kalibrasyon.MOV \
+       --test veri/kendi_kayit/kisi1/test.MOV --etiketler veri/kendi_kayit/kisi1/etiketler.csv
+   ```
+   Çıktı `sonuclar/kendi_kayit/<kisi>/` klasörüne yazılır (`ozet.csv`, `karisiklik.csv`, `cumle_etiket.csv`). iPhone `.MOV` dosyaları dönüştürülmeden okunur.

@@ -1,9 +1,6 @@
-# Sürümler (Karar 37, 54)
+# Sürümler
 
-Alındığı tarih: 9 Kasım 2026 (dondurma), `.venv`. 7 Kasım taslağıyla `pip freeze` birebir aynı.
-
-## Python
-`Python 3.11.9` (Windows 11).
+Ortam: `.venv`, Python **3.11.9**, Windows 11. Aşağıdaki liste 10 Kasım 2026'da `pip freeze` ile yeniden alındı ve 9 Kasım'daki dondurma listesiyle birebir aynı. `requirements.txt` kritik paketleri bu sürümlere sabitler.
 
 ## `pip freeze`
 ```text
@@ -40,14 +37,13 @@ sounddevice==0.5.6
 tzdata==2026.6
 ```
 
-## MediaPipe sürüm notu
-- **Veri seti:** REHAB26'nın iskeletleri MediaPipe **v0.10.20**, Full model ile üretildi (Zenodo sayfası).
-- **Uygulama:** MediaPipe **1.2.2**, `pose_landmarker_full`, VIDEO modu. 0.10.20 kurulmadı: numpy'yi 2.4.6'dan 1.26.4'e indirip OpenCV'yi değiştirecekti, bu da raporlanmış deneylerin ortamını bozardı (Karar 27; `arsiv/ilerleme/ADIM_06.md`).
-- **Ölçülen fark:** aynı Honza karelerinde (ex1_Honza, cam1, yönelim 0) kol açısı farkı medyan **0,92°**, %95 **3,09°** (`sonuclar/uygulama_saglik/ex1_Honza_cam1_o0_poz_farki.csv`). Sınırlılık olarak raporlanır.
-- Deneyler MediaPipe'ı çalıştırmaz; veri setinin hazır iskeletlerini kullanır. Bu yüzden deney sonuçları MediaPipe sürümüne bağlı değildir.
-- **Ölçütte etkisi (Karar 52):** arşivdeki siluet denemesinde (6b) aynı 1363 tekrarda YENI ölçütü 1.2.2 noktalarıyla AUC silkme/doğru 0,969, veri setinin 0.10.20 noktalarıyla 0,968 (`arsiv/sonuclar/siluet/ozet.csv`). Sürüm farkı bu ölçütü pratikte etkilemiyor; Karar 27'nin sınırlılık notu hafifler.
-- Kendi kayıt (Adım 7) ve arşivdeki siluet denemesi MediaPipe 1.2.2 ile çalıştırıldı; noktaları önbellekte (`veri/ara/`).
+## MediaPipe sürüm farkı
+- **Veri seti:** REHAB26'nın iskeletleri MediaPipe **v0.10.20**, Full modeliyle üretildi (Zenodo sayfası).
+- **Uygulama:** MediaPipe **1.2.2**, `pose_landmarker_full`, VIDEO modu. 0.10.20 kurulmadı, çünkü numpy'yi 2.4.6'dan 1.26.4'e indirip OpenCV'yi değiştirecekti; bu da deneylerin ortamını bozardı.
+- **Deneyler etkilenmez:** deneyler MediaPipe'ı çalıştırmaz, veri setinin hazır iskeletlerini kullanır.
+- **Ölçülen fark:** aynı Honza karelerinde (ex1_Honza, cam1, yönelim 0) kol açısı farkı medyan **0,92°**, %95 **3,09°** (`sonuclar/uygulama_saglik/ex1_Honza_cam1_o0_poz_farki.csv`).
+- **Silkme ölçüsüne etkisi:** aynı 1363 tekrarda kulak–omuz ölçüsünün AUC'si (silkme / doğru) 1.2.2 noktalarıyla 0,969, veri setinin 0.10.20 noktalarıyla 0,968 (`arsiv/sonuclar/siluet/ozet.csv`). Sürüm farkı bu ölçüyü pratikte etkilemiyor; yine de sınırlılık olarak raporlanır.
+- Kendi kayıt deneyi MediaPipe 1.2.2 ile çalıştırıldı; noktaları `veri/ara/kendi_kayit/` önbelleğinde.
 
-## Yapay zekâ modelleri
-- **Deney 4 (arşivde):** Google Gemini ücretsiz katmanı, `gemini-3.5-flash-lite`, temperature 0; 7 Kasım 2026. Ayrıntı: `arsiv/ilerleme/ADIM_08.md`. Uygulama LLM kullanmaz.
-- **Claude Code / Claude:** kod ve planlama için (`docs/LLM_KULLANIMI.md`); sonuçları üreten kodun parçası değil.
+## Yapay zekâ araçları
+Uygulama LLM kullanmaz. Geliştirmede kullanılan araçlar: [`LLM_KULLANIMI.md`](LLM_KULLANIMI.md).

@@ -35,7 +35,7 @@ Kulak–omuz ölçüsü (`YENI`), silkmeli tekrar ile doğru tekrar [`deney1b/oz
 | İki omzun ortalama kalkışı (Pavlikov ve ark. 2026) | 0,650 | 0,858 |
 
 - **En büyük kazanç ölçünün seçiminden değil, kişiye özel banttan geliyor.** Bütün ölçüler bantla 0,86–0,95'e çıkıyor.
-- Kulak–omuz en yüksek çıkıyor, ama farkı küçük. İlk sürüm bantta yapılan kişi bazlı bootstrap'te kulak–omuz ile F2 açısı arasındaki fark anlamlı değildi: +0,021, %95 GA −0,017 – +0,060 [`deney1/bootstrap.csv`]. Son sürümde ölçüler arası bu sınama ayrıca yapılmadı. Sunumda "en iyi ölçü bu" deme; "en yüksek çıkan ve iki omzun birlikte kalkmasını da yakalayabilen ölçüyü seçtik" de.
+- Kulak–omuz en yüksek çıkıyor, ama farkı küçük. İlk sürüm bantta yapılan kişi bazlı bootstrap'te kulak–omuz ile F2 açısı arasındaki fark anlamlı değildi: +0,021, %95 GA −0,017 – +0,060 [`deney1/bootstrap.csv`]. Son sürümde ölçüler arası bu sınama ayrıca yapılmadı. Bu yüzden kulak–omuz "en iyi ölçü" değil; en yüksek çıkan ve iki omzun birlikte kalkmasını da yakalayabilen ölçü olduğu için seçildi.
 - İki omzun ortalaması en kötüsü: tek taraflı silkmeyi yarı yarıya seyreltiyor.
 - Profil görüşte bant da zayıflıyor (kulak–omuz 0,842) [`deney1b/ozet.csv`].
 
@@ -88,17 +88,17 @@ Cümleye çevirme kayıpsız: cümlenin söylediği hata, karar kuralının buld
 
 ## Denenip işe yaramayanlar
 
-Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/README.md)). Sunumda birer cümleyle anılır; özellikle ilk ikisi hocanın Problem 2 için önerdiği yöntemlerdi.
+Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/README.md)); kaynak yolları `arsiv/sonuclar/` altına göre. İlk ikisi ödevin Problem 2 için önerdiği yöntemlerdi.
 
-| Deneme | Sonuç |
-| --- | --- |
-| **Zamansal yumuşatma** (One Euro, Savitzky–Golay; hocanın önerisi) | MediaPipe titremesi %38–87 azaldı, ama silkme tespiti değişmedi: AUC 0,947 → 0,943 ve 0,947. Kullanılmadı. |
-| **Görüntüden omuz silueti** (omuz bölgesinde segmentasyon maskesi; hocanın "pose + lokal görüntü" önerisi) | Önden çekimde silkmeyi ayırıyor (0,94), çapraz çekimde arama bölgesi başın üstüne düşüyor (0,55). Toplamda 0,72; kulak–omuz ölçüsü aynı tekrarlarda 0,97. |
-| Yetersiz kaldırma puanının "revize" hâli | Hata türü doğruluğunu düşürdü (makro-F1 0,631 → 0,568); ilk hâline dönüldü. |
-| Cümleyi bir LLM'e yazdırmak (Gemini, ücretsiz katman; 150 tekrar) | Karar kuraldan gelip LLM yalnızca cümleyi yazınca sonuç kural cümlesiyle aynı düzeyde (ilk söylenen doğru 61'e 61), üstünlük yok. Hatayı da LLM'e buldurunca 61'den 45'e düştü. Ürün kural tabanlı kaldı. |
-| Aynı sistemi başka bir harekette denemek (omuz ekstansiyonu, Ex7) | Silkme tespiti taşınıyor (AUC 0,89–0,94), ama hata türü zayıf (makro-F1 0,40). Ödevin kapsamı dışında. |
+| Deneme | Sonuç | Kaynak |
+| --- | --- | --- |
+| **Zamansal yumuşatma** (One Euro, Savitzky–Golay; ödevde önerilen) | MediaPipe titremesi %38–87 azaldı, ama silkme tespiti değişmedi: AUC 0,947 → 0,943 ve 0,947. Kullanılmadı. | `deney1c/ozet.csv`, `deney1c/titreme.csv` |
+| **Görüntüden omuz silueti** (omuz bölgesinde segmentasyon maskesi; ödevdeki "pose + lokal görüntü" önerisi) | Önden çekimde silkmeyi ayırıyor (0,94), çapraz çekimde arama bölgesi başın üstüne düşüyor (0,55). Toplamda 0,72; kulak–omuz ölçüsü aynı tekrarlarda 0,97. | `siluet/ozet.csv` |
+| Yetersiz kaldırma puanının "revize" hâli | Hata türü doğruluğunu düşürdü (makro-F1 0,631 → 0,568); ilk hâline dönüldü. | `deney2_revize/ozet.csv` |
+| Cümleyi bir LLM'e yazdırmak (Gemini, ücretsiz katman; 150 tekrar) | Karar kuraldan gelip LLM yalnızca cümleyi yazınca sonuç kural cümlesiyle aynı düzeyde (ilk söylenen doğru 61'e 61), üstünlük yok. Hatayı da LLM'e buldurunca 61'den 45'e düştü. Ürün kural tabanlı kaldı. | `deney4/ozet.csv` |
+| Aynı sistemi başka bir harekette denemek (omuz ekstansiyonu, Ex7) | Silkme tespiti taşınıyor (AUC 0,89–0,94), ama hata türü zayıf (makro-F1 0,40). Ödevin kapsamı dışında. | `ex7/ozet.csv` |
 
-## Sınırlılıklar (raporda en önemli üçü seçilir)
+## Sınırlılıklar
 
 1. **Veri:** 5 sağlıklı kişi; hatalar taklit, gerçek hasta yok.
 2. **Dar bant:** τ, ortalamanın güven aralığıdır, yeni bir tekrarın düşebileceği aralık değil. 6 tekrarla bant, yeni tekrar için gereken aralıktan yaklaşık 2,6 kat dar; küçük sapmalar da uyarıya dönüşebiliyor.
@@ -106,8 +106,8 @@ Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/READM
 4. **Kalibrasyon şart:** kişi her kurulumda 6 doğru tekrar yapmalı ve kamera aynı yerde durmalı.
 5. **Bakış ve hız:** başka yere bakmak ya da çok hızlı yapmak gereksiz uyarı üretebiliyor (kendi kayıt).
 
-## Sunumda söylenmemesi gerekenler
+## Sonuçları yorumlarken dikkat
 
-- "Kulak–omuz ölçüsü en iyisi": fark anlamlı değil (yukarıya bak).
-- "Cümleler %100 doğru": eski belgelerdeki "çıkarıcı uyumu 100/100", cümleyi kendi şablonlarıyla geri okuyan bir kontroldü, doğruluk ölçüsü değil. Cümlenin doğruluğu Soru 2'deki 56,6 / 67,4.
-- "Sistem her harekette çalışır": yalnızca kolu yana kaldırmada ölçüldü.
+- Kulak–omuz ölçüsünün diğer omuz ölçülerinden üstün olduğu gösterilmedi: fark anlamlı değil (Soru 1).
+- Deney 3'teki "çıkarıcı uyumu", cümleyi kendi şablonlarıyla geri okuyan bir kontroldür, doğruluk ölçüsü değildir. Cümlenin doğruluğu Soru 2'deki 56,6 / 67,4'tür.
+- Sistem yalnızca kolu yana kaldırma hareketinde ölçüldü.

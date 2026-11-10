@@ -1,33 +1,33 @@
 # Üretken yapay zekâ kullanımı
 
-Hocanın kuralı gereği projede üretken yapay zekânın nerede ve hangi amaçla kullanıldığı aşağıda. Rapor için kısa not en altta.
+Ödevin kuralı gereği projede üretken yapay zekânın nerede ve hangi amaçla kullanıldığı aşağıda. Rapor için kısa not en altta.
 
-## Claude Code (Anthropic) — kod
+## Claude Code (Anthropic): kod ve belgeler
 - `cekirdek/`, `deneyler/`, `uygulama/`, `araclar/` ve `testler/` altındaki kodun yazılması.
-- Hata ayıklama ve deney betikleri; kısa sınamalar (pytest ve hızlı kontroller).
-- Her adımın ilerleme kaydı (`arsiv/ilerleme/ADIM_XX.md`) ve eski sonuç özeti (`arsiv/sonuclar/OZET.md`). Bu kayıtlardaki sayılar terminal çıktısından ve sonuç dosyalarından kopyalandı; uzun deneyleri kullanıcı çalıştırdı.
-- Belgeler (`docs/YENIDEN_KURULUM.md`, `docs/SURUMLER.md`, `docs/DEMO.md`, `arsiv/docs/SUNUM_GIRDILERI.md`) ve sunum şekil adayları (`deneyler/sunum_sekilleri.py`).
+- Hata ayıklama, testler ve kısa sınamalar.
+- Deneylerin bir kısmının, kullanıcının isteğiyle çalıştırılması. Son yeniden üretimi (10 Kasım 2026, `sonuclar/hepsi/`) Claude Code çalıştırdı.
+- Geliştirme kayıtları (`arsiv/ilerleme/`), belgeler (`docs/`, klasörlerdeki README'ler) ve sunum şekilleri (`deneyler/sunum_sekilleri.py`). Belgelerdeki sayılar sonuç dosyalarından kopyalandı.
+- Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması, kalıntıların temizlenmesi ve belgelerin yeniden yazılması.
 
-## Claude (danışman sohbeti) — planlama ve yorum
+## Claude (ayrı sohbet): planlama ve yorum
 - Literatür taraması (`arsiv/docs/ARKA_PLAN.md`).
 - Planlama (`arsiv/PLAN.md`) ve güncellemeler (`arsiv/ilerleme/GUNCELLEME_XX.md`).
-- Sonuçların yorumu ve karar önerileri (`arsiv/ilerleme/KARARLAR.md`). Deneylerin ölçütleri ve yöntem ayrıntıları çoğunlukla sonuçtan önce yazılıp commit'lendi ("önceden kayıt"); sonradan yapılan analizler belgelerde öyle işaretlendi.
-- Çekim suflör sayfası (`arsiv/docs/cekim_suflor.html`).
-- Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması ve `docs/SISTEM.md`, `docs/DENEYLER.md`'nin koddan ve sonuç dosyalarından yazılması.
+- Sonuçların yorumu ve karar önerileri (`arsiv/ilerleme/KARARLAR.md`). Deneylerin ölçütleri ve yöntem ayrıntıları çoğunlukla sonuçtan önce yazılıp commit'lendi ("önceden kayıt"); sonradan yapılan analizler kayıtlarda öyle işaretlendi.
+- Çekim sırasında kullanılan suflör sayfası (`arsiv/docs/cekim_suflor.html`).
 
-## Gemini (Google, ücretsiz katman) — yalnızca Deney 4 (arşivde)
-- Deney 4'te karşılaştırma koşulu (B: sapma kodundan cümle; C: ham özetten hata ve cümle).
-- Model: `gemini-3.5-flash-lite` (ücretsiz katmanın günlük sınırı nedeniyle; düşünme ayarı varsayılan; temperature 0). İstekler 7 Kasım 2026'da atıldı. Ayrıntı: `arsiv/ilerleme/ADIM_08.md`, istemler `arsiv/deneyler/istemler/`.
+## Gemini (Google, ücretsiz katman): yalnızca arşivdeki bir yan deney
+- LLM karşılaştırma deneyinde (Deney 4) karşılaştırma koşulu olarak: sapma kodundan cümle yazdırmak ve ham özetten hem hatayı hem cümleyi buldurmak.
+- Model: `gemini-3.5-flash-lite`, temperature 0; istekler 7 Kasım 2026'da gönderildi. İstemler `arsiv/deneyler/istemler/` altında.
 - **Ürünün yöntemi değildir.** Uygulamadaki geri bildirim tamamen kural tabanlıdır (`cekirdek/geribildirim.py`).
 
 ## Kullanıcının kendi yaptıkları
-- Bütün uzun deneylerin çalıştırılması ve sonuçların okunması.
-- Galeri ve görsel kontrol (videolarda iskelet ve bantların izlenmesi; Adım 2b).
-- Örnek cümlelerin okunup yorumlanması (iki katmanlı geri bildirim önerisi buradan çıktı; Karar 28).
-- Uygulamanın canlı denemesi ve arayüz geri bildirimi (Adım 6).
-- Kendi kayıtlarının çekimi, etiketlenmesi ve videodan kontrolü (Adım 7).
-- Deney 4 (arşivde) cümlelerinin körlemesine elle etiketlenmesi (45 cümle ve Karar 42'de 342 cümle).
+- Deneylerin çalıştırılması (bir kısmı) ve sonuçların okunması.
+- Galeri ve görsel kontrol: videolarda iskelet ve bantların izlenmesi.
+- Örnek cümlelerin okunup yorumlanması. İki katmanlı geri bildirim (hasta cümlesi ve uzman ayrıntısı) önerisi buradan çıktı.
+- Uygulamanın canlı denemesi ve arayüz geri bildirimi.
+- Kendi kayıtlarının çekimi, etiketlenmesi ve videodan kontrolü.
+- LLM deneyindeki cümlelerin körlemesine elle etiketlenmesi.
 - Sunum ve rapor.
 
-## Rapor için not (doğrudan konabilir)
-> **Üretken yapay zekâ kullanımı.** Üretken yapay zekâ şu amaçlarla kullanıldı: kodun yazılması, hata ayıklama ve ilerleme kayıtları için Claude Code (Anthropic); literatür taraması, deney planlaması ve sonuçların yorumu için Claude (danışman sohbeti); raporda yer almayan bir yan deneyde yalnızca karşılaştırma koşulu olarak Gemini (`gemini-3.5-flash-lite`, ücretsiz katman). Sistemin geri bildirimi kural tabanlıdır, LLM kullanmaz. Deneyleri yazar çalıştırdı; raporlanan bütün sayılar sonuç dosyalarından alındı ve `python -m deneyler.hepsi` ile yeniden üretilebilir.
+## Rapor için not
+> **Üretken yapay zekâ kullanımı.** Kodun yazılması, hata ayıklama, deneylerin bir kısmının çalıştırılması ve belgeler için Claude Code (Anthropic); literatür taraması, deney planlaması ve sonuçların yorumu için Claude kullanıldı. Raporda yer almayan bir yan deneyde Gemini (`gemini-3.5-flash-lite`, ücretsiz katman) yalnızca karşılaştırma koşulu olarak kullanıldı. Sistemin geri bildirimi kural tabanlıdır, LLM kullanmaz. Raporlanan bütün sayılar sonuç dosyalarından alındı ve `python -m deneyler.hepsi` ile yeniden üretilebilir.

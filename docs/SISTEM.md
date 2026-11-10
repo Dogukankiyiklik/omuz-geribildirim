@@ -1,6 +1,6 @@
 # Sistem nasıl çalışıyor?
 
-Bu belge, uygulamanın bir videoyu alıp Türkçe cümleye çevirene kadar ne yaptığını **koddan** anlatır. Başlıklar hocanın 1 sayfalık rapor şablonundaki 7 adımı izler; rapor yazılırken buradan kısaltılır. Sayılar ve sabitler koddaki değerlerdir; her adımın yanında hangi dosyada olduğu yazılı.
+Bu belge, uygulamanın bir videoyu alıp Türkçe cümleye çevirene kadar ne yaptığını **koddan** anlatır. Başlıklar 1 sayfalık rapor şablonundaki 7 adımı izler. Sayılar ve sabitler koddaki değerlerdir; her adımın yanında hangi dosyada olduğu yazılı.
 
 ## Bir paragrafta
 
@@ -115,7 +115,7 @@ Bant fikri, μ ve τ'nun tanımı ve τ'ya alt sınır **Jánošová ve ark. (20
   - Baş eğme: *"Kolun yukarıdayken başını yaklaşık 30 derece yana eğdin. Başını dik tut, karşıya bak."*
   - Doğru tekrar: *"Hareketi doğru yaptın. Kolun yaklaşık 145 dereceye çıktı, omzun ve dirseğin yerindeydi."*
 - Silkme cümlesindeki "derece", omuz çizgisinin gövde eksenine göre eğiminin kişinin normaline göre farkıdır (`omuz_egim` ölçüsü; yalnızca anlatım için, karara girmez).
-- **Bilgi notları** (hata değil, karara girmez): tekrar çok hızlıysa hız notu, kamera açısı uyarısı (`cekirdek/bilgi_notlari.py`).
+- **Bilgi notları** (hata değil, karara girmez): tekrar çok hızlıysa hız notu, sol kol da kalktıysa "yalnızca sağ kolunu kaldır", kamera açısı uyarısı (`cekirdek/bilgi_notlari.py`).
 
 ## 7. Çıktının gösterilmesi ve kaydı
 
@@ -131,17 +131,17 @@ Bant fikri, μ ve τ'nun tanımı ve τ'ya alt sınır **Jánošová ve ark. (20
 
 ---
 
-## Hocanın sorabileceği sorular
+## Sık sorulan sorular
 
 **Neden MediaPipe'ın omuz noktası tek başına yetmiyor?** Doğru harekette de omuz noktası yukarı kayıyor. Sabit eşikli ham ölçü silkmeyi zayıf ayırıyor (AUC 0,70); kişinin kendi normaline göre değerlendirince 0,95 oluyor ([`DENEYLER.md`](DENEYLER.md), Soru 1).
 
-**Omuza özel iyileştirmen ne?** İki şey: (1) omzu kulağa göre ölçmek (omuz noktasını tek başına değil, kafaya göre); (2) asıl katkı olarak bu ölçüyü **kol açısına koşullu, kişiye özel** bir bantla değerlendirmek. Hocanın listesindeki "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" tam olarak bu. Hocanın önerdiği yumuşatma ve omuz bölgesi (siluet) de denendi, ikisi de bu yöntemden iyi çıkmadı.
+**Omuza özel iyileştirme ne?** İki şey: (1) omzu kulağa göre ölçmek (omuz noktasını tek başına değil, kafaya göre); (2) asıl katkı olarak bu ölçüyü **kol açısına koşullu, kişiye özel** bir bantla değerlendirmek. Ödevde sayılan "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" tam olarak bu. Ödevde önerilen yumuşatma ve omuz bölgesi (siluet) de denendi, ikisi de bu yöntemden iyi çıkmadı.
 
 **Referans video kimin?** Kişinin kendi kalibrasyon tekrarları. Başkasının tekrarlarından kurulan "genel" bant çok daha kötü çalıştı (0,62–0,67'ye karşı 0,95). Yani referans bilerek kişiye özel.
 
 **DTW nerede kullanılıyor?** Yalnızca bindirmede (iki tekrarı zamanda eşlemek için). Hata puanı kol açısına göre hesaplandığı için puanlamada zaman hizalamasına gerek kalmıyor.
 
-**Eşikleri nereden buldun?** Bant kişinin kendisinden. Ortak eşik T ve z ölçeği veri setinden; deneylerde test kişisi bu ayara hiç girmedi (4 kişide ayarla, 5. kişide sına).
+**Eşikler nereden geliyor?** Bant kişinin kendisinden. Ortak eşik T ve z ölçeği veri setinden; deneylerde test kişisi bu ayara hiç girmedi (4 kişide ayarla, 5. kişide sına).
 
 **Bindirmede referans aynı kişiyse geometrik hizalama ne işe yarıyor?** Kişi kalibrasyonda ve testte farklı yerde durabilir, kameraya yaklaşabilir; öteleme ve ölçek bunu düzeltir. Kod (`Bindirici`) iki farklı kişinin tekrarını da alacak şekilde yazıldı; arayüzde yalnızca kişinin kendi referansı seçiliyor.
 
@@ -149,7 +149,7 @@ Bant fikri, μ ve τ'nun tanımı ve τ'ya alt sınır **Jánošová ve ark. (20
 
 ## Literatürden alınanlar
 
-Kodda ve eski belgelerde makaleler M numarasıyla anılır. Bu tablo yalnızca yöntemde gerçekten kullanılanları ve 16 makalelik özetteki adlarını verir.
+Kodda makaleler M numarasıyla anılır (ör. `M39`). Bu tablo yalnızca yöntemde gerçekten kullanılanları verir.
 
 | Kodda | Makale | Ne alındı |
 | --- | --- | --- |

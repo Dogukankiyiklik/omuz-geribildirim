@@ -47,6 +47,8 @@ Sıfırdan kurulum, veri seti ve deneylerin yeniden üretimi: [`docs/YENIDEN_KUR
 
 ## Klasörler
 
+Kod ve sonuç klasörlerinin her birinde, içindeki dosyaları anlatan bir `README.md` var.
+
 | Klasör | İçerik |
 | --- | --- |
 | `uygulama/` | Uygulama: kamera/video, kalibrasyon, panel, bindirmeli oynatım (`main.py`), pencere açmadan CSV (`toplu.py`) |
@@ -57,9 +59,9 @@ Sıfırdan kurulum, veri seti ve deneylerin yeniden üretimi: [`docs/YENIDEN_KUR
 | `sonuclar/` | Deney çıktıları (CSV, `ozet.csv`, sunum şekilleri) |
 | `testler/` | pytest testleri |
 | `referans/` | Silkme tespitinin (Deney 1) beklenen sonuçları; kod değişince sonuçların bozulmadığını sınayan test bunu kullanır |
-| `docs/` | Belgeler |
+| `docs/` | Belgeler (yukarıdaki liste; ayrıca sunum demosu `DEMO.md`, paket sürümleri `SURUMLER.md`, yapay zekâ kullanımı `LLM_KULLANIMI.md`) |
 | `arsiv/` | Ödevin parçası olmayan her şey: bildiri deneyleri, geliştirme kayıtları. Neden orada olduklarını [`arsiv/README.md`](arsiv/README.md) anlatır |
-| `veri/` | Veri setleri (git'e **girmez**) |
+| `veri/` | Veri setleri (git'e **girmez**; indirme: [`veri/README.md`](veri/README.md)) |
 
 ## Veri seti ve lisans
 

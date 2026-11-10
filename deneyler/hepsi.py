@@ -8,12 +8,13 @@ Ne yapar?
   3. Deneyleri Karar 37'deki sırayla, aynı Python yorumlayıcısıyla, kopyanın içinde çalıştırır. Her adımın günlüğü
      <hedef>/hepsi_gunluk/ altına yazılır.
   4. Üretilen her CSV'yi ve modeller/*.json'u, bu klasördeki (proje) kayıtlı dosyayla karşılaştırır.
-     Regresyon özeti: sonuclar/hepsi/regresyon.csv, adimlar.csv, ozet.md.
-Karar 53: 6b (siluet), Deney 4 ve Adım 7 (kendi kayıt) kayıtlı ara çıktılardan (önbellekten) üretilir; segmentasyon,
-LLM isteği ve video üzerinde MediaPipe yeniden çalıştırılmaz. Önbellek yoksa adım başarısız olur ("üretilmedi").
+     Regresyon özeti: sonuclar/hepsi/regresyon.csv (çalıştırınca oluşur), adimlar.csv, ozet.md.
+Kendi kayıt (Adım 7) kayıtlı ara çıktılardan (önbellekten) üretilir; video üzerinde MediaPipe yeniden
+çalıştırılmaz. Önbellek yoksa adım başarısız olur ("üretilmedi").
+Arşivlenen deneyler (Deney 1c, Ex7, siluet, Deney 4) burada yok; bkz. arsiv/README.md.
 
 Kullanım:
-    python -m deneyler.hepsi                 # tam çalıştırma, ~1–1,5 sa (kullanıcı çalıştırır)
+    python -m deneyler.hepsi                 # tam çalıştırma (kullanıcı çalıştırır; arşivlenen adımlar olmadan ~1 sa)
     python -m deneyler.hepsi --hizli         # küçük alt küme (deney 1, kamera açısı, hız eşiği), ~1 dk
     python -m deneyler.hepsi --adimlar deney2 deney3   # yalnızca seçilen adımlar (bağımlılıklar kullanıcının işi)
     python -m deneyler.hepsi --temizle       # temiz kopyayı (git worktree) kaldırır
@@ -62,54 +63,32 @@ class Adim(NamedTuple):
     kaynak: str = ""
 
 
-DENEY4_MODEL = "gemini-3.5-flash-lite"   # Karar 41: Deney 4'ün raporlanan modeli
 ADIMLAR = [
     Adim("deney1", ["deneyler.deney1", "--galeri-yok"], ["deney1"], []),
     Adim("deney1_v2", ["deneyler.deney1_v2", "--sekilsiz"], ["deney1_v2"], []),
     Adim("deney1b", ["deneyler.deney1b"], ["deney1b"], []),
-    Adim("deney1c", ["deneyler.deney1c"], ["deney1c"], []),
     Adim("deney2", ["deneyler.deney2"], ["deney2"], []),
-    Adim("ex7", ["deneyler.ex7"], ["ex7"], []),
     Adim("deney3", ["deneyler.deney3"], ["deney3"], []),
     Adim("deney3_saglam", ["deneyler.deney3", "--olcu-surumu", "saglam"], ["deney3"], []),
     Adim("tekrar_ayirma", ["deneyler.tekrar_ayirma"], ["tekrar_ayirma"], []),
     Adim("kamera_acisi", ["deneyler.kamera_acisi"], ["kamera_acisi"], ["kamera_esigi.json"]),
     Adim("hiz_esigi", ["deneyler.hiz_esigi"], ["hiz_esigi"], ["hiz_esigi.json"]),
     Adim("kural_disa_aktar", ["araclar.kural_disa_aktar"], ["kural_disa_aktar"], ["kural_ex1.json"]),
-    # ---- Karar 53: önbellekten (ağ, video ya da segmentasyon yeniden çalıştırılmaz)
-    Adim("siluet", ["deneyler.siluet", "--sinirlar", "{HEDEF}/hepsi_ara/siluet_sinirlar.npz"], ["siluet"], [],
-         kaynak="önbellekten: veri/ara/siluet/ (segmentasyon yeniden çalıştırılmadı)"),
-    Adim("deney4_orneklem", ["deneyler.deney4_orneklem"], ["deney4"], [],
-         dosyalar={"deney4": ["orneklem.csv", "orneklem_ozet.csv"]}),
-    Adim("deney4", ["deneyler.deney4", "onbellekten", "--model", DENEY4_MODEL,
-                    "--onbellek", "{PROJE}/sonuclar/deney4/onbellek.jsonl"], ["deney4"], [],
-         dosyalar={"deney4": ["girdiler.csv", "yanitlar.csv", "cumleler.csv", "ozet.csv", "sinif.csv", "kisi.csv",
-                              "bootstrap.csv"]},
-         yok_sutun={"deney4/yanitlar.csv": ["onbellekten"]},
-         kaynak="önbellekten: sonuclar/deney4/onbellek.jsonl (LLM'e istek gitmez)"),
-    Adim("deney4_kaldirma", ["deneyler.deney4", "kaldirma-degerlendir"], ["deney4"], [],
-         girdiler=("sonuclar/deney4/elle_kaldirma.xlsx", "sonuclar/deney4/elle_kaldirma_anahtar.csv"),
-         dosyalar={"deney4": ["kaldirma_ozet.csv", "kaldirma_uyum.csv", "kaldirma_bootstrap.csv",
-                              "kaldirma_cumleler.csv"]},
-         kaynak="kayıtlı yanıtlar + kullanıcı etiketleri (elle_kaldirma.xlsx girdi olarak kopyalanır)"),
+    # önbellekten: video üzerinde MediaPipe yeniden çalıştırılmaz
     Adim("kendi_kayit", ["deneyler.kendi_kayit", "--kisi", "kisi1",
                          "--kalibrasyon", "{VERI}/kendi_kayit/kisi1/kalibrasyon.MOV",
                          "--test", "{VERI}/kendi_kayit/kisi1/test.MOV",
                          "--etiketler", "{VERI}/kendi_kayit/kisi1/etiketler.csv", "--yalniz-onbellek"],
          ["kendi_kayit"], [], kaynak="önbellekten: veri/ara/kendi_kayit/ (MediaPipe noktaları)"),
 ]
+# Ödev sadeleştirmesi (odev-sade dalı): Deney 1c, Ex7, 6b (siluet) ve Deney 4 arsiv/ altına taşındı;
+# onların yeniden üretimi v-sunum etiketindeki hepsi.py ile yapılır.
 HIZLI = ["deney1", "kamera_acisi", "hiz_esigi"]
 URETILEN_MODELLER = sorted({m for a in ADIMLAR for m in a.modeller})
 # Yeniden üretilmeyen, yalnızca listelenen kayıtlı çıktılar
-LISTELENEN = {"deney4": "Adım 8: pilot, API çalıştırması (onbellek.jsonl), elle_etiket/elle_uyum ve "
-                        "kullanıcı etiket dosyaları yeniden üretilmez (tablolar önbellekten üretilir)",
-              "siluet": "6b: segmentasyon (veri/ara/siluet/, ~1,5 sa) ve görsel örnekler yeniden üretilmez",
-              "siluet_sure": "Karar 45: süre ölçümü (makineye bağlı)",
-              "deney2_revize": "Karar 17: başarısız deneme, kayıtlı", "deney2_ilk": "Karar 13 öncesi ilk sürüm, kayıtlı",
-              "deney1_v2_atla_rastgele": "Karar 7 öncesi, kayıtlı", "adim0": "Adım 0 veri tanıtımı",
-              "adim2b": "Adım 2b senkron kontrolü", "gorsel_kontrol": "görsel kontrol aracı çıktıları",
-              "bant_genisligi": "Güncelleme 08 tanısı", "uygulama_saglik": "uygulama sağlık kontrolü (MediaPipe)",
-              "sunum": "sunum şekil adayları (Karar 38, 56)"}
+LISTELENEN = {"gorsel_kontrol": "görsel kontrol aracı çıktıları",
+              "uygulama_saglik": "uygulama sağlık kontrolü (MediaPipe sürüm farkı)",
+              "sunum": "sunum şekil adayları"}
 YOK_SAYILAN_ANAHTARLAR = {"bilgi", "tarih"}   # JSON'larda sürüm/tarih bilgisi
 
 

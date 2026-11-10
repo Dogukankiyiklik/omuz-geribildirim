@@ -396,7 +396,7 @@ def geri_bildirim(kodlar: list[SapmaKodu], tepe: float, sira: int, tohum: int = 
 # ---------------------------------------------------------------- Karar 28: hasta cümlesi
 # Kısa: ne oldu (fazıyla) + ne yapmalı. Yüzde, "gövde boyu" ve şiddet kelimesi yok. Sayı yalnızca derece,
 # 5°'ye yuvarlanmış; söylenen fark yuvarlanmış iki değerin farkı. Fark 0 ise (ya da işareti cümlenin
-# yönüyle çelişiyorsa) sayı söylenmez. Öne kaçmada sayı yok (GELECEK_CALISMA madde 5).
+# yönüyle çelişiyorsa) sayı söylenmez. Öne kaçmada sayı yok (arsiv/docs/GELECEK_CALISMA.md madde 5).
 HASTA_FAZ = {KALDIRIRKEN: "Kolunu kaldırırken", USTTE: "Kolun yukarıdayken", INDIRIRKEN: "Kolunu indirirken"}
 HASTA_ADIM = 5
 

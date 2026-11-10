@@ -50,24 +50,13 @@ def test_karsilastir_eksik_ve_yeni(tmp_path):
     assert r["ortak.csv"] == "aynı" and r["yalniz_yeni.csv"] == "yeni" and r["yalniz_eski.csv"] == "üretilmedi"
 
 
-def test_adim_sirasi_karar37():
+def test_adim_sirasi():
     adlar = [a[0] for a in hepsi.ADIMLAR]
-    assert adlar[:12] == ["deney1", "deney1_v2", "deney1b", "deney1c", "deney2", "ex7", "deney3", "deney3_saglam",
-                          "tekrar_ayirma", "kamera_acisi", "hiz_esigi", "kural_disa_aktar"]
-    assert adlar.index("deney2") < adlar.index("deney3") < adlar.index("kural_disa_aktar")
-
-
-def test_karar53_onbellekli_adimlar():
+    assert adlar == ["deney1", "deney1_v2", "deney1b", "deney2", "deney3", "deney3_saglam", "tekrar_ayirma",
+                     "kamera_acisi", "hiz_esigi", "kural_disa_aktar", "kendi_kayit"]
+    assert adlar.index("deney2") < adlar.index("deney3") < adlar.index("kural_disa_aktar") < adlar.index("kendi_kayit")
     ad = {a.ad: a for a in hepsi.ADIMLAR}
-    sira = [a.ad for a in hepsi.ADIMLAR]
-    assert sira[-5:] == ["siluet", "deney4_orneklem", "deney4", "deney4_kaldirma", "kendi_kayit"]
-    # bağımlılıklar: siluet deney1_v2'den, deney4 deney3'ten (sağlam), kendi_kayit modeller/*.json'dan sonra
-    assert sira.index("deney1_v2") < sira.index("siluet")
-    assert sira.index("deney3_saglam") < sira.index("deney4_orneklem") < sira.index("deney4") < sira.index("deney4_kaldirma")
-    assert sira.index("kural_disa_aktar") < sira.index("kendi_kayit")
-    # ağ / video / segmentasyon yok
-    assert "onbellekten" in ad["deney4"].komut and "--yalniz-onbellek" in ad["kendi_kayit"].komut
-    assert all(ad[k].kaynak for k in ("siluet", "deney4", "kendi_kayit"))
+    assert "--yalniz-onbellek" in ad["kendi_kayit"].komut and ad["kendi_kayit"].kaynak
     assert "kendi_kayit" not in hepsi.LISTELENEN
 
 

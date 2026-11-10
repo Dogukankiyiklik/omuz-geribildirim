@@ -13,7 +13,7 @@ Son eksen: x, y (görüntüye göre 0–1, y aşağı doğru), z (MediaPipe gör
 görünürlük. npz kaynağında tutulmayan 20 eklem NaN olur. Böylece ölçüt kodu her
 iki kaynakta da MediaPipe indeksleriyle (11 sol omuz, 12 sağ omuz, ...) çalışır.
 
-Adım 0'da doğrulanan bilgiler (bkz. ilerleme/ADIM_00.md):
+Adım 0'da doğrulanan bilgiler (bkz. arsiv/ilerleme/ADIM_00.md):
   * 2B x, y piksel değil, görüntü boyutuna bölünmüş (0–1) değerlerdir.
   * Videolar 1080 x 1920 (dikey). Açı/mesafe için x *= 1080/1920 = 9/16 yapılır.
 """

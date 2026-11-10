@@ -1,5 +1,5 @@
 """
-Deney 1 v2 — yöntem düzeltmelerinin ablasyonu (Adım 2c, ilerleme/GUNCELLEME_02.md).
+Deney 1 v2 — yöntem düzeltmelerinin ablasyonu (Adım 2c, arsiv/ilerleme/GUNCELLEME_02.md).
 
 Koşullar (birikimli; hepsinde 5 omuz ölçütü, yönsüz bant):
   v1  : zaman bandı (M39), pay dahil, tek rastgele referans  = Deney 1 aynen (temel çizgi)

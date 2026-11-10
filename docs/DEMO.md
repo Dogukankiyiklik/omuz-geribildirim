@@ -1,4 +1,4 @@
-# Sunum demosu (Karar 56)
+# Sunum demosu
 
 Üç yol var; sırayla denenir. Birincisi çalışmazsa beklemeden ikincisine geç. Komutlar proje kökünde, sanal ortam açıkken (`.venv\Scripts\activate`) çalıştırılır. **Sunumdan önce üçünü de bir kez dene** (aynı bilgisayarda, aynı ekran çözünürlüğünde).
 
@@ -57,9 +57,9 @@ python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/ki
   ```bash
   python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
   ```
-  Kalibrasyon aynı videonun ilk doğru tekrarlarından kurulur; o tekrarların kararı adil bir sınama değildir (Karar 40).
+  Kalibrasyon aynı videonun ilk doğru tekrarlarından kurulur; o tekrarların kararı adil bir sınama değildir.
 - Hiçbiri olmazsa: `sonuclar/sunum/4_geri_bildirim.png` ve `5_bindirme.png` (veri seti) ya da `4b_` / `5b_` (kişi 1) ekran görüntüleriyle anlat.
 
 ## Anlatım için tek cümleler
 - "Sistem kişinin kendi doğru tekrarlarından, kolun her açısı için omzun normal yerini öğreniyor; yeni tekrarda omuz bu aralığın dışına çıkınca söylüyor."
-- "Kendi videomda 11 hatalı tekrarın 11'inde doğru hata cümlede geçti, 9'unda ilk söylenen oydu; 5 normal doğru tekrarın hiçbirinde uyarı çıkmadı." (Karar 51; tek kişi, bir işaret.)
+- "Kendi videomda 11 hatalı tekrarın 11'inde doğru hata cümlede geçti, 9'unda ilk söylenen oydu; 5 normal doğru tekrarın hiçbirinde uyarı çıkmadı." (tek kişi; bir işaret.)

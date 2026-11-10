@@ -15,7 +15,7 @@ Sistemin ölçüldüğü betikler. Her betik çekirdeği (`cekirdek/`) içe akta
 | --- | --- | --- | --- | --- |
 | `deney1.py` | Soru 1 | Omuz silkmesini ayırma (AUC): dört omuz ölçüsü × üç puanlama (ham ölçü / genel bant / kişiye özel açı bandı). `docs/DENEYLER.md` Soru 1 tablolarının kaynağı; regresyon testi bu sonucu karşılaştırır. | ~20 sn | `sonuclar/deney1/` |
 | `deney2.py` | Soru 2 | Hata türü kararı: doğru mu, değilse hangi hata? Uygulamanın yöntemi (kişiye özel açı bandı, yönlü; karar kuralı `cekirdek/hata_turu.py`). Karışıklık matrisleri, makro-F1, "ilk iki", görüş grupları, kişiler. | ~15 sn | `sonuclar/deney2/` |
-| `deney3.py` | Soru 2 | Kararın Türkçe cümleye çevrilmesi: cümle doğru hatayı söylüyor mu, doğru tekrara gereksiz uyarı veriyor mu? `--olcu-surumu saglam` uygulamanın kullandığı sağlam ölçü çıktılarını ekler. Önce `deney2` çalışmış olmalı. | ~1 dk | `sonuclar/deney3/` |
+| `deney3.py` | Soru 2 | Kararın Türkçe cümleye çevrilmesi: cümle doğru hatayı söylüyor mu, doğru tekrara gereksiz uyarı veriyor mu? Cümle uygulamanın kullandığı sağlam ölçüyle yazılır, sonra kararı bilmeyen bir okuyucuyla (`cekirdek/metin_cozumleyici.py`) geri okunur. Önce `deney2` çalışmış olmalı. | ~30 sn | `sonuclar/deney3/` |
 | `kendi_kayit.py` | Soru 3 | Kendi çektiğimiz videoda (6 kalibrasyon + 21 test tekrarı) uygulamanın yığın moduyla aynı değerlendirme. | ~3 sn (önbellekten) | `sonuclar/kendi_kayit/` |
 
 \* Süreler son yeniden üretimden alındı (`python -m deneyler.hepsi`, `sonuclar/hepsi/adimlar.csv`).
@@ -55,6 +55,6 @@ python -m deneyler.hepsi --temizle  # temiz kopyayı kaldırır
 
 Bazı betikler öncekinin çıktısını okur. Baştan çalıştırma sırası (`hepsi.py` ile aynı):
 
-`deney1` → `deney2` → `deney3` (+ `--olcu-surumu saglam`) → `tekrar_ayirma` → `kamera_acisi` → `hiz_esigi` → `araclar.kural_disa_aktar` → `kendi_kayit`
+`deney1` → `deney2` → `deney3` → `tekrar_ayirma` → `kamera_acisi` → `hiz_esigi` → `araclar.kural_disa_aktar` → `kendi_kayit`
 
 Bütün betikler proje kökünden `python -m deneyler.<ad>` ile çalışır ve `veri/rehab26/` gerektirir. Kendi kayıt deneyi `veri/kendi_kayit/` ve `veri/ara/kendi_kayit/` (önbellek) ister; bunlar kişisel olduğu için depoda yoktur.

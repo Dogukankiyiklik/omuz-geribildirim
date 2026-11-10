@@ -67,7 +67,6 @@ ADIMLAR = [
     Adim("deney1", ["deneyler.deney1"], ["deney1"], []),
     Adim("deney2", ["deneyler.deney2"], ["deney2"], []),
     Adim("deney3", ["deneyler.deney3"], ["deney3"], []),
-    Adim("deney3_saglam", ["deneyler.deney3", "--olcu-surumu", "saglam"], ["deney3"], []),
     Adim("tekrar_ayirma", ["deneyler.tekrar_ayirma"], ["tekrar_ayirma"], []),
     Adim("kamera_acisi", ["deneyler.kamera_acisi"], ["kamera_acisi"], ["kamera_esigi.json"]),
     Adim("hiz_esigi", ["deneyler.hiz_esigi"], ["hiz_esigi"], ["hiz_esigi.json"]),

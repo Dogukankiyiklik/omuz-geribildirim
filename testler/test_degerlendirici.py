@@ -37,7 +37,7 @@ def test_uygulama_deney3_ile_ayni():
         sid = {h: (q1, q2) for h, q1, q2 in zip(es.hata, es["q1 (%33,3)"], es["q2 (%66,7)"])}
         kal = [dg.tekrar_ozellikleri(u.dizi, u.etiketli, veri.EN_BOY)[0] for u in dogrular if u is not t]
         f, gor = dg.tekrar_ozellikleri(t.dizi, t.etiketli, veri.EN_BOY)
-        s = dg.degerlendir(dg.Profil(kal), kurallar[kisi], sid, f, gor, sira=t.satir, olcu_surumu="tek_kare")
+        s = dg.degerlendir(dg.Profil(kal), kurallar[kisi], sid, f, gor, sira=t.satir, olcu_surumu=deney3.OLCU_SURUMU)
         r = c[(c.video == t.video) & (c.kamera == t.kamera) & (c.yonelim == t.yonelim) & (c.satir == t.satir)].iloc[0]
         assert s.karar == r.tahmin
         assert s.uzman_ayrintisi == r.uzman_ayrintisi

@@ -14,7 +14,7 @@ Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyle
 | --- | --- | --- |
 | `deney1/` | Omuz silkmesini ayırma: dört omuz ölçüsü × üç puanlama (`ham`, `genel`, `kisiye_ozel`) | `ozet.csv` (AUC'ler; `docs/DENEYLER.md` Soru 1; regresyon testi bunu `referans/beklenen_deney1_ozet.csv` ile karşılaştırır), `kisi_auc.csv` (kişi başına AUC) |
 | `deney2/` | Hata türü kararı (açı bandı, yönlü) | `ozet.csv` (makro-F1, hatalılarda tür doğru, gereksiz uyarı…), `ilk_iki.csv`, `tahminler.csv` (her tekrarın kararı), `puanlar.csv` (her tekrarın ölçü puanları; Deney 3 ve kural dosyası bunu okur), `karisiklik_*` (karışıklık matrisleri), `esikler.csv` (her test kişisi için seçilen T) |
-| `deney3/` | Kararın Türkçe cümleye çevrilmesi | `ozet.csv`, `cumleler.csv` (her tekrarın cümlesi), `ornek_cumleler_saglam.md` (okunabilir örnekler), `siddet_esikleri.csv` |
+| `deney3/` | Kararın Türkçe cümleye çevrilmesi | `ozet.csv`, `cumleler.csv` (her tekrarın cümlesi), `ornek_cumleler.md` (okunabilir örnekler), `metin.csv` (cümlelerin uzunluğu, sayı içerme oranı), `siddet_esikleri.csv` |
 | `kendi_kayit/` | Kendi çektiğimiz videoda değerlendirme (kişi 1) | `kisi1/ozet.csv` (`docs/DENEYLER.md` Soru 3), `kisi1/cumle_etiket.csv` (her tekrarın etiketi ve cümlesi) |
 | `tekrar_ayirma/` | Otomatik tekrar ayırmanın veri setinin etiketlerine karşı sınanması | `ozet.csv` |
 | `kamera_acisi/` | Kamera açısı uyarısının eşiği (`modeller/kamera_esigi.json`) | `dagilim.csv` |

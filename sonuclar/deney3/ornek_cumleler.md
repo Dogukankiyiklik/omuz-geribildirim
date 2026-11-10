@@ -1,8 +1,8 @@
 # Deney 3 — örnek geri bildirim cümleleri
 
 Önden + çapraz, tohum 0. Her gerçek sınıftan 3 tekrar ve sistemin iki hata söylediği 2 tekrar.
-Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişinin kendi kalibrasyonuna göre.
-Ölçü sürümü: `tek_kare`. Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), altında **uzman ayrıntısı**.
+Sistem: kişiye özel açı bandı (yönlü), Deney 2'nin karar kuralı. Ölçüler kişinin kendi kalibrasyonuna göre.
+Ölçü sürümü: `saglam`. Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), altında **uzman ayrıntısı**.
 
 ## 1. (doğru) ex1_Petra · cam2 · yönelim 60° · görüş -15° · tekrar 2
 
@@ -36,27 +36,27 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 - **Gerçek etiket:** omuz · **ek hatalar:** –
 - **Sistemin söylediği:** omuz · çıkarıcının bulduğu: omuz
 
-**Hasta cümlesi:** Kolunu indirirken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut.
+**Hasta cümlesi:** Kolunu indirirken sağ omzunu kulağına doğru kaldırdın. Omzunu aşağıda ve gevşek tut.
 
-<sub>Uzman ayrıntısı: Kolunu indirirken sağ omzunu kulağına doğru belirgin şekilde kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %47'si iken %41'e indi. Omuz çizgin normaline göre yaklaşık 5 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut.</sub>
+<sub>Uzman ayrıntısı: Kolunu indirirken sağ omzunu kulağına doğru belirgin şekilde kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %41'i iken %38'e indi. Omuz çizgin normaline göre yaklaşık 2 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut.</sub>
 
 ## 5. (omuz) ex1_Honza · cam1 · yönelim 45° · görüş -45° · tekrar 5
 
 - **Gerçek etiket:** omuz · **ek hatalar:** –
 - **Sistemin söylediği:** omuz + öne kaçma · çıkarıcının bulduğu: omuz, öne kaçma
 
-**Hasta cümlesi:** Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 15 derece kaldırdın. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
+**Hasta cümlesi:** Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 10 derece kaldırdın. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
 
-<sub>Uzman ayrıntısı: Kolunu kaldırırken sağ omzunu kulağına doğru çok kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %42'si iken %31'e indi. Omuz çizgin normaline göre yaklaşık 15 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun belirgin şekilde öne kaçıyor: kolun kamerada normalde gövde boyunun %84'ü kadar görünürken %67'ye kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolunu kaldırırken sağ omzunu kulağına doğru çok kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %45'i iken %36'ya indi. Omuz çizgin normaline göre yaklaşık 11 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun belirgin şekilde öne kaçıyor: kolun kamerada normalde gövde boyunun %84'ü kadar görünürken %75'e kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
 
 ## 6. (omuz) ex1_Honza · cam2 · yönelim 20° · görüş 25° · tekrar 5
 
 - **Gerçek etiket:** omuz · **ek hatalar:** –
 - **Sistemin söylediği:** omuz · çıkarıcının bulduğu: omuz
 
-**Hasta cümlesi:** Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut.
+**Hasta cümlesi:** Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 10 derece kaldırdın. Omzunu aşağıda ve gevşek tut.
 
-<sub>Uzman ayrıntısı: Kolunu kaldırırken sağ omzunu kulağına doğru çok kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %45'i iken %40'a indi. Omuz çizgin normaline göre yaklaşık 6 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut.</sub>
+<sub>Uzman ayrıntısı: Kolunu kaldırırken sağ omzunu kulağına doğru çok kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %44'ü iken %39'a indi. Omuz çizgin normaline göre yaklaşık 6 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut.</sub>
 
 ## 7. (baş) ex1_Petra · cam2 · yönelim 40° · görüş 5° · tekrar 6
 
@@ -65,16 +65,16 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 
 **Hasta cümlesi:** Kolun yukarıdayken başını yaklaşık 20 derece yana eğdin. Başını dik tut, karşıya bak. Ayrıca kolunu 150 dereceye kadar kaldırdın; normalde 170 dereceye çıkıyorsun. Kolunu yaklaşık 20 derece daha yukarı kaldır.
 
-<sub>Uzman ayrıntısı: Kolun en üstteyken başını çok yana eğiyorsun: başın ile gövden arasındaki açı normalde 4 derece iken 24 dereceye çıktı. Başını dik tut, karşıya bak. Ayrıca kolunu biraz az kaldırdın: en fazla 151 dereceye çıktı, normalde 170 dereceye kadar çıkıyordun. Kolunu yaklaşık 19 derece daha yukarı kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolun en üstteyken başını çok yana eğiyorsun: başın ile gövden arasındaki açı normalde 4 derece iken 23 dereceye çıktı. Başını dik tut, karşıya bak. Ayrıca kolunu biraz az kaldırdın: en fazla 151 dereceye çıktı, normalde 170 dereceye kadar çıkıyordun. Kolunu yaklaşık 19 derece daha yukarı kaldır.</sub>
 
 ## 8. (baş) ex1_Terka · cam1 · yönelim 40° · görüş -40° · tekrar 6
 
 - **Gerçek etiket:** baş · **ek hatalar:** –
 - **Sistemin söylediği:** baş · çıkarıcının bulduğu: baş
 
-**Hasta cümlesi:** Kolun yukarıdayken başını yaklaşık 15 derece yana eğdin. Başını dik tut, karşıya bak.
+**Hasta cümlesi:** Kolun yukarıdayken başını yaklaşık 10 derece yana eğdin. Başını dik tut, karşıya bak.
 
-<sub>Uzman ayrıntısı: Kolun en üstteyken başını belirgin şekilde yana eğiyorsun: başın ile gövden arasındaki açı normalde 8 derece iken 23 dereceye çıktı. Başını dik tut, karşıya bak.</sub>
+<sub>Uzman ayrıntısı: Kolun en üstteyken başını belirgin şekilde yana eğiyorsun: başın ile gövden arasındaki açı normalde 9 derece iken 21 dereceye çıktı. Başını dik tut, karşıya bak.</sub>
 
 ## 9. (baş) ex1_Vasil · cam2 · yönelim 50° · görüş -5° · tekrar 6
 
@@ -92,7 +92,7 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 
 **Hasta cümlesi:** Kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
 
-<sub>Uzman ayrıntısı: Kolunu kaldırırken kolun çok öne kaçıyor: kolun kamerada normalde gövde boyunun %112'si kadar görünürken %11'e kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolunu kaldırırken kolun çok öne kaçıyor: kolun kamerada normalde gövde boyunun %109'u kadar görünürken %60'a kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
 
 ## 11. (öne kaçma) ex1_Terka · cam1 · yönelim 40° · görüş -40° · tekrar 4
 
@@ -117,9 +117,9 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 - **Gerçek etiket:** dirsek · **ek hatalar:** –
 - **Sistemin söylediği:** omuz + öne kaçma · çıkarıcının bulduğu: omuz, öne kaçma
 
-**Hasta cümlesi:** Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 10 derece kaldırdın. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
+**Hasta cümlesi:** Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
 
-<sub>Uzman ayrıntısı: Kolunu kaldırırken sağ omzunu kulağına doğru çok kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %38'i iken %24'e indi. Omuz çizgin normaline göre yaklaşık 8 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun çok öne kaçıyor: kolun kamerada normalde gövde boyunun %99'u kadar görünürken %69'a kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolunu kaldırırken sağ omzunu kulağına doğru çok kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %39'u iken %26'ya indi. Omuz çizgin normaline göre yaklaşık 4 derece yukarı eğildi. Omzunu aşağıda ve gevşek tut. Ayrıca kolunu kaldırırken kolun çok öne kaçıyor: kolun kamerada normalde gövde boyunun %99'u kadar görünürken %82'ye kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
 
 ## 14. (dirsek) ex1_Terka · cam2 · yönelim 0° · görüş 45° · tekrar 8
 
@@ -128,7 +128,7 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 
 **Hasta cümlesi:** Kolun yukarıdayken dirseğini yaklaşık 25 derece büktün. Kolunu düz tut. Ayrıca kolunu 160 dereceye kadar kaldırdın; normalde 175 dereceye çıkıyorsun. Kolunu yaklaşık 15 derece daha yukarı kaldır.
 
-<sub>Uzman ayrıntısı: Kolun en üstteyken dirseğini belirgin şekilde büküyorsun: dirsek açın normalde 177 derece iken 151 dereceye indi. Kolunu dirsekten bükmeden düz tut. Ayrıca kolunu biraz az kaldırdın: en fazla 158 dereceye çıktı, normalde 175 dereceye kadar çıkıyordun. Kolunu yaklaşık 17 derece daha yukarı kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolun en üstteyken dirseğini belirgin şekilde büküyorsun: dirsek açın normalde 175 derece iken 152 dereceye indi. Kolunu dirsekten bükmeden düz tut. Ayrıca kolunu biraz az kaldırdın: en fazla 158 dereceye çıktı, normalde 175 dereceye kadar çıkıyordun. Kolunu yaklaşık 17 derece daha yukarı kaldır.</sub>
 
 ## 15. (dirsek) ex1_Vasil · cam1 · yönelim 0° · görüş 0° · tekrar 10
 
@@ -137,7 +137,7 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 
 **Hasta cümlesi:** Kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
 
-<sub>Uzman ayrıntısı: Kolunu kaldırırken kolun belirgin şekilde öne kaçıyor: kolun kamerada normalde gövde boyunun %104'ü kadar görünürken %87'ye kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolunu kaldırırken kolun belirgin şekilde öne kaçıyor: kolun kamerada normalde gövde boyunun %102'si kadar görünürken %90'a kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
 
 ## 16. (az kaldırma) ex1_Honza · cam1 · yönelim 40° · görüş -40° · tekrar 7
 
@@ -155,7 +155,7 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 
 **Hasta cümlesi:** Kolunu 100 dereceye kadar kaldırdın; normalde 180 dereceye çıkıyorsun. Kolunu yaklaşık 80 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken kolun öne kaçtı. Kolunu tam yana, vücudunla aynı hizada kaldır.
 
-<sub>Uzman ayrıntısı: Kolunu çok az kaldırdın: en fazla 100 dereceye çıktı, normalde 178 dereceye kadar çıkıyordun. Kolunu yaklaşık 78 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken kolun belirgin şekilde öne kaçıyor: kolun kamerada normalde gövde boyunun %87'si kadar görünürken %61'e kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
+<sub>Uzman ayrıntısı: Kolunu çok az kaldırdın: en fazla 100 dereceye çıktı, normalde 178 dereceye kadar çıkıyordun. Kolunu yaklaşık 78 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken kolun belirgin şekilde öne kaçıyor: kolun kamerada normalde gövde boyunun %90'ı kadar görünürken %75'e kısaldı. Kolunu vücudunla aynı hizada, tam yana kaldır.</sub>
 
 ## 18. (az kaldırma) ex1_Vasil · cam1 · yönelim 50° · görüş -50° · tekrar 7
 
@@ -171,9 +171,9 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 - **Gerçek etiket:** az kaldırma · **ek hatalar:** –
 - **Sistemin söylediği:** az kaldırma + omuz · çıkarıcının bulduğu: az kaldırma, omuz
 
-**Hasta cümlesi:** Kolunu 95 dereceye kadar kaldırdın; normalde 135 dereceye çıkıyorsun. Kolunu yaklaşık 40 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru kaldırdın. Omzunu aşağıda ve gevşek tut.
+**Hasta cümlesi:** Kolunu 95 dereceye kadar kaldırdın; normalde 135 dereceye çıkıyorsun. Kolunu yaklaşık 40 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut.
 
-<sub>Uzman ayrıntısı: Kolunu belirgin şekilde az kaldırdın: en fazla 97 dereceye çıktı, normalde 133 dereceye kadar çıkıyordun. Kolunu yaklaşık 36 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru belirgin şekilde kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %40'ı iken %35'e indi. Omzunu aşağıda ve gevşek tut.</sub>
+<sub>Uzman ayrıntısı: Kolunu belirgin şekilde az kaldırdın: en fazla 97 dereceye çıktı, normalde 133 dereceye kadar çıkıyordun. Kolunu yaklaşık 36 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru belirgin şekilde kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %39'u iken %35'e indi. Omzunu aşağıda ve gevşek tut.</sub>
 
 ## 20. (iki hata söylendi) ex1_Terka · cam2 · yönelim 60° · görüş -15° · tekrar 5
 
@@ -182,7 +182,7 @@ Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişin
 
 **Hasta cümlesi:** Kolunu 145 dereceye kadar kaldırdın; normalde 165 dereceye çıkıyorsun. Kolunu yaklaşık 20 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut.
 
-<sub>Uzman ayrıntısı: Kolunu biraz az kaldırdın: en fazla 147 dereceye çıktı, normalde 167 dereceye kadar çıkıyordun. Kolunu yaklaşık 20 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru belirgin şekilde kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %42'si iken %35'e indi. Omzunu aşağıda ve gevşek tut.</sub>
+<sub>Uzman ayrıntısı: Kolunu biraz az kaldırdın: en fazla 147 dereceye çıktı, normalde 167 dereceye kadar çıkıyordun. Kolunu yaklaşık 20 derece daha yukarı kaldır. Ayrıca kolunu kaldırırken sağ omzunu kulağına doğru belirgin şekilde kaldırıyorsun: kulak ile omzunun arası normalde gövde boyunun %45'i iken %37'ye indi. Omzunu aşağıda ve gevşek tut.</sub>
 
 ## Okurken
 - Hasta cümlesi anlaşılır mı? Ne yapman gerektiğini söylüyor mu?

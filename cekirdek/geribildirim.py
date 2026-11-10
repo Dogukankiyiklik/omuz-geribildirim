@@ -17,7 +17,7 @@ bir "sapma kodu"na ve oradan ölçü içeren bir cümleye çevirir. Tanımlar, k
 Sağlam ölçü (olcu_surumu = "saglam"): ölçü tek kare yerine seçilen fazdaki K karelerinin medyanı.
   K = beklenen yönde fazlalığı > 0 olan ve ölçütün eklemlerinin hepsinin görünürlüğü ≥ 0,5 olan kareler;
   |K| < 3 ise görünürlük koşulu kalkar; yine < 3 ise tek kare kuralı. Tespit, faz ve faz seçimi değişmez.
-  Uygulamanın varsayılanı "saglam"; Deney 3'ün birincil sonucu "tek_kare".
+  Uygulamanın ve Deney 3'ün kullandığı "saglam"; "tek_kare" yalnızca testlerde karşılaştırma için.
 İki katmanlı geri bildirim: aynı SapmaKodu'ndan hasta_cumlesi (kısa; yüzde ve şiddet kelimesi yok;
   yalnızca 5°'ye yuvarlanmış derece) ve uzman ayrıntısı (hata_cumlesi, ölçülü cümle).
 """
@@ -43,7 +43,7 @@ TARAF = "sağ"                            # Ex1'de sağ kol
 
 # sağlam ölçü
 OLCU_SURUMLERI = ("tek_kare", "saglam")
-VARSAYILAN_OLCU = "saglam"               # uygulamanın varsayılanı; Deney 3'ün birincil sonucu "tek_kare" ile
+VARSAYILAN_OLCU = "saglam"               # uygulamanın ve Deney 3'ün kullandığı ölçü; "tek_kare" ile
 GORUNURLUK_ESIGI = 0.5                   # MediaPipe'ın varsayılan görünürlük eşiği (veriye bakılmadan)
 EN_AZ_KARE = 3
 # Ölçütün kare başına kullandığı eklemler (MediaPipe indeksleri). YENI ve kol_boyu'nun böldüğü dinlenme

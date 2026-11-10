@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from cekirdek.bindirme import Bindirici, banttan_cikan_kemikler, kare_eslemesi
+from cekirdek.bindirme import Bindirici, kare_eslemesi
 from cekirdek.veri import EN_BOY
 
 
@@ -71,10 +71,3 @@ def test_kare_eslemesi_yavas_tekrar():
     e = kare_eslemesi(ref, yavas)
     assert len(e) == 100 and e[0] == 0 and e[-1] == 49
     assert (np.diff(e) >= 0).all()                # zamanda geri gitmez
-
-
-def test_banttan_cikan_kemikler():
-    kh = {"YENI": np.array([0, 0.5]), "M01": np.array([0.2, 0])}
-    assert banttan_cikan_kemikler(kh, 0, ["YENI"]) == set()
-    assert banttan_cikan_kemikler(kh, 1, ["YENI"]) == {(8, 12)}
-    assert banttan_cikan_kemikler(kh, 0, ["YENI", "M01"]) == {(11, 12)}

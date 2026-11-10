@@ -1,11 +1,10 @@
-"""Açı bandı ve çoklu referans testleri."""
+"""Açı bandı testleri."""
 import numpy as np
 import pandas as pd
 import pytest
 
 from cekirdek import aci_bandi as ab
 from cekirdek import veri
-from cekirdek.bant import bant_hatasi, bant_modeli, bant_modeli_ref, coklu_referans_hatasi
 
 
 def _tekrar(rng, n=60, tepe=150.0, silkme=0.0, gurultu=0.003):
@@ -87,23 +86,6 @@ def test_aci_eslemesi_ayni_faz():
     ref = np.array([0, 30, 60, 90, 60, 30, 0.0])
     kul = np.array([0, 60, 90, 30.0])
     assert ab.aci_eslemesi(ref, kul).tolist() == [0, 2, 3, 5]
-
-
-def test_bant_modeli_ref_ayni():
-    rng = np.random.default_rng(5)
-    d = [_tekrar(rng, n=int(rng.integers(50, 70))) for _ in range(4)]
-    r1 = np.random.default_rng(9)
-    m = bant_modeli(d, r1, ["Y"])
-    m2 = bant_modeli_ref(d, m["ref_indeks"], ["Y"])
-    assert np.array_equal(m["Y"][0], m2["Y"][0]) and np.array_equal(m["Y"][1], m2["Y"][1])
-
-
-def test_coklu_referans_ortalama():
-    rng = np.random.default_rng(6)
-    d = [_tekrar(rng, n=int(rng.integers(50, 70))) for _ in range(4)]
-    t = _tekrar(rng, silkme=0.03)
-    beklenen = np.mean([bant_hatasi(bant_modeli_ref(d, r, ["Y"]), t, ["Y"])["Y"] for r in range(4)])
-    assert coklu_referans_hatasi(d, t, ["Y"])["Y"] == pytest.approx(beklenen)
 
 
 @pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")

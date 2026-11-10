@@ -62,18 +62,3 @@ def dtw_yol(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     a, b = _znorm(np.asarray(a, np.float64)), _znorm(np.asarray(b, np.float64))
     maliyet = np.abs(a[:, None] - b[None, :])
     return _geri_iz(_dtw_birikimli(maliyet))
-
-
-def hizala(ref_kol: np.ndarray, tekrar: dict[str, np.ndarray], olcutler) -> dict[str, np.ndarray]:
-    """
-    Tekrarın her ölçütünü referans karelerine eşler. Aynı referans karesine birden çok kare
-    düşerse ortalamaları alınır. Dönüş: her ölçüt için len(ref_kol) uzunluğunda dizi.
-    """
-    yol = dtw_yol(ref_kol, tekrar["kol"])
-    n = len(ref_kol)
-    say = np.bincount(yol[:, 0], minlength=n).astype(np.float64)
-    cikti = {}
-    for k in olcutler:
-        top = np.bincount(yol[:, 0], weights=tekrar[k][yol[:, 1]], minlength=n)
-        cikti[k] = top / np.maximum(say, 1)
-    return cikti

@@ -87,13 +87,6 @@ def m01(s: Iskelet) -> np.ndarray:
     return (np.median(ort_y[:DINLENME_KARE]) - ort_y) / s.g0
 
 
-@olcut("M01_tek")
-def m01_tek(s: Iskelet) -> np.ndarray:
-    """Aynı ölçüt, yalnızca egzersiz yapan (sağ) omuz."""
-    sR = s.p(12)
-    return (np.median(sR[:DINLENME_KARE, 1]) - sR[:, 1]) / s.g0
-
-
 @olcut("M39_F2")
 def m39_f2(s: Iskelet) -> np.ndarray:
     """Sağ omuzdaki açı: sol omuz – sağ omuz – sağ kalça (M39, Tablo 1, F2)."""
@@ -110,9 +103,6 @@ def m33(s: Iskelet) -> np.ndarray:
 def yeni(s: Iskelet) -> np.ndarray:
     """Sağ kulak ile sağ omuz arasındaki dikey mesafe / gövde. Küçülürse omuz kulağa yaklaşıyor."""
     return (s.p(12)[:, 1] - s.p(8)[:, 1]) / s.g0
-
-
-DENEY1_OLCUTLERI = ["M01", "M01_tek", "M39_F2", "M33", "YENI"]
 
 
 # ---------------------------------------------------------------- Deney 2: hata türü ölçütleri
@@ -162,7 +152,7 @@ def omuz_egim(s: Iskelet) -> np.ndarray:
 DENEY2_OLCUTLERI = ["YENI", "bas", "on_kacma", "kol_boyu", "dirsek"]
 
 
-def ozellikler(dizi: np.ndarray, olcutler=DENEY1_OLCUTLERI, en_boy: float = EN_BOY) -> dict[str, np.ndarray]:
+def ozellikler(dizi: np.ndarray, olcutler, en_boy: float = EN_BOY) -> dict[str, np.ndarray]:
     """Bir tekrar dizisinden kare başına kol açısı ("kol") ve istenen ölçütler."""
     s = Iskelet(dizi, en_boy)
     f = {"kol": OLCUTLER["kol"](s)}

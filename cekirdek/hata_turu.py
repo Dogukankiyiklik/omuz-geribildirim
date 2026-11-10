@@ -12,7 +12,7 @@ Her hata türünün bir ölçütü vardır:
                           "revize" (denenip elenen; yalnızca karşılaştırma için): tek kutulu tepe bandı, E 0–1.
 
 Karar kuralı (basit ve açıklanabilir):
-  1. Her ölçüt için tekrarın puanı: duruş ölçütlerinde açı/zaman bandı hatası E (yönsüz ya da yönlü),
+  1. Her ölçüt için tekrarın puanı: duruş ölçütlerinde açı bandı hatası E (yönsüz ya da yönlü),
      kaldırmada ilk sürümde tepe açısı sapması d (kaldirma_sapmasi), revizede tepe bandı E'si.
   2. Puan, EĞİTİM kişilerinin doğru tekrarlarındaki dağılımla ölçeklenir:
      z = (puan − medyan) / (çeyrekler arası açıklık + ε).
@@ -277,25 +277,6 @@ def ilk_iki(z: pd.DataFrame, T: float) -> pd.DataFrame:
     return pd.DataFrame({"z1_hata": ad[sira[:, 0]], "z2_hata": ad[sira[:, 1]], "z1": z1, "z2": z2,
                          "soylenen1": np.where(z1 >= T, ad[sira[:, 0]], DOGRU),
                          "soylenen2": np.where((z1 >= T) & (z2 >= T), ad[sira[:, 1]], "")}, index=z.index)
-
-
-# ---------------------------------------------------------------- temel çizgi
-def toplam_hata(z: pd.DataFrame) -> pd.Series:
-    """Temel çizgi: tek bir toplam hata = z'lerin ortalaması (NaN'lar atlanır)."""
-    return z.mean(axis=1, skipna=True)
-
-
-def ikili_esik_sec(toplam: pd.Series, yanlis: pd.Series) -> float:
-    """Temel çizgi için eşik: eğitimde dengeli doğruluğu (duyarlılık + özgüllük)/2 en yükseğe çıkaran."""
-    v = toplam.to_numpy(float)
-    y = yanlis.to_numpy(bool)
-    en_iyi = (-1.0, np.inf)
-    for T in np.unique(np.percentile(v[~np.isnan(v)], ESIK_IZGARASI)):
-        p = v >= T
-        dd = 0.5 * (p[y].mean() + (~p[~y]).mean())
-        if dd > en_iyi[0] + 1e-12:
-            en_iyi = (dd, float(T))
-    return en_iyi[1]
 
 
 # ---------------------------------------------------------------- esnek değerlendirme

@@ -2,7 +2,7 @@
 Açı bandı: kol açısına koşullu kişiye özel tolerans bandı.
 
 Soru: "Kol θ derecedeyken bu kişinin omzu normalde nerede?"
-Zaman bandı (M39, cekirdek/bant.py) tekrarları DTW ile zamanda hizalar; kol farklı yüksekliğe
+M39'un zaman bandı tekrarları DTW ile zamanda hizalar; kol farklı yüksekliğe
 kalkınca omuz farklı kol açılarında karşılaştırılır. Açı bandında zaman
 ekseni yoktur: her kare, kolun o anki açısına ve hareketin fazına göre karşılaştırılır. Referans
 tekrar gerekmez, bu yüzden rastgelelik de yoktur.
@@ -35,7 +35,6 @@ import numpy as np
 from scipy import stats
 from scipy.ndimage import median_filter
 
-from cekirdek.bant import kare_hatasi
 
 KUTU_GENISLIGI = 5.0      # derece
 KUTU_SAYISI = 36          # 0–180°
@@ -45,6 +44,21 @@ ARALIK_PAYI = 5.0         # aralik_disi: kalibrasyonun en yüksek açısının b
 ARALIK_ORANI = 0.20       # aralik_disi: bu orandan fazla kare
 KALDIRMA, INDIRME = 0, 1
 FAZ_ADLARI = {KALDIRMA: "kaldırma", INDIRME: "indirme"}
+
+
+def kare_hatasi(h: np.ndarray, mu: np.ndarray, tau: np.ndarray, yon: int = 0) -> np.ndarray:
+    """
+    Kare başına bant dışı hata, 0–1 arası: bant içinde 0; dışında (sapma − τ)/τ, en fazla 1.
+
+    yon = 0  : yönsüz — iki yöndeki sapma da sayılır (M39'daki kare hatası).
+    yon = +1 : yalnızca bandın ÜSTÜNE çıkış sayılır.
+    yon = −1 : yalnızca bandın ALTINA iniş sayılır.
+    """
+    if yon == 0:
+        sapma = np.abs(h - mu)
+    else:
+        sapma = np.maximum(np.sign(yon) * (h - mu), 0.0)
+    return np.where(sapma <= tau, 0, np.minimum(1, (sapma - tau) / tau))
 
 
 def yumusak_kol(kol: np.ndarray) -> np.ndarray:
@@ -74,10 +88,6 @@ def kutular(kol: np.ndarray) -> np.ndarray:
 def _tq(n: int) -> float:
     """t(0,975; n−1)."""
     return float(stats.t.ppf(0.975, n - 1))
-
-
-def kutu_merkezleri() -> np.ndarray:
-    return (np.arange(KUTU_SAYISI) + 0.5) * KUTU_GENISLIGI
 
 
 @dataclass

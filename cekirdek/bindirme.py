@@ -38,7 +38,6 @@ KEMIKLER = [
 OLCUT_UZUVLARI: dict[str, list[tuple[int, int]]] = {
     "YENI": [(8, 12)],
     "M01": [(11, 12)],
-    "M01_tek": [(11, 12), (12, 24)],
     "M33": [(11, 12)],
     "M39_F2": [(11, 12), (12, 24)],
     "bas": [(7, 2), (2, 0), (0, 5), (5, 8)],
@@ -101,12 +100,3 @@ class Bindirici:
 
     def kullanici_noktalari(self, j: int) -> np.ndarray:
         return self.P_kul[j]
-
-
-def banttan_cikan_kemikler(kare_hatasi: dict[str, np.ndarray], i: int, olcutler) -> set[tuple[int, int]]:
-    """Referans karesi i'de bandın dışında olan ölçütlerin kemikleri."""
-    kemikler = set()
-    for k in olcutler:
-        if k in kare_hatasi and kare_hatasi[k][i] > 0:
-            kemikler.update(OLCUT_UZUVLARI.get(k, []))
-    return kemikler

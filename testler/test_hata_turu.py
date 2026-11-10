@@ -5,7 +5,6 @@ import pytest
 
 from cekirdek import aci_bandi as ab
 from cekirdek import hata_turu as ht
-from cekirdek.bant import coklu_model_hatasi, coklu_model_puanlari, coklu_referans_modelleri
 from cekirdek.degerlendirme import karisiklik, makro_f1, sinif_metrikleri
 from cekirdek.ozellikler import OLCUTLER, Iskelet
 
@@ -66,18 +65,6 @@ def test_aci_bandi_puanlari_ayni_hesap():
     assert np.all(ay["bant_disi"]["Y"][g] <= 0)
     assert np.array_equal(ay["kol"], x["kol"]) and np.array_equal(ay["deger"]["Y"], x["Y"])
     assert np.isnan(ay["fark"]["Y"][~g]).all()
-
-
-def test_coklu_model_puanlari_ayni_hesap():
-    rng = np.random.default_rng(1)
-    modeller = coklu_referans_modelleri([_tekrar(rng, n=int(rng.integers(50, 70))) for _ in range(4)], ["Y", "Z"])
-    x = _tekrar(rng, kayma=0.02)
-    E, fark = coklu_model_puanlari(modeller, x, ["Y", "Z"])
-    for y in (0, 1, -1):
-        E2 = coklu_model_hatasi(modeller, x, ["Y", "Z"], yon={"Y": y, "Z": y})
-        for k in ("Y", "Z"):
-            assert E[(k, y)] == pytest.approx(E2[k], abs=1e-12)
-    assert fark["Y"] > 0
 
 
 def test_tepe_bandi():

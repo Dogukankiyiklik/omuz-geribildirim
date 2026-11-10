@@ -2,10 +2,10 @@
 import numpy as np
 import pytest
 
-from cekirdek.bant import bant_hatasi, bant_modeli, kare_hatasi
+from cekirdek.aci_bandi import kare_hatasi
 from cekirdek.degerlendirme import auc, guven_araligi
 from cekirdek.geometri import aci, nokta
-from cekirdek.hizalama import dtw_yol, hizala
+from cekirdek.hizalama import dtw_yol
 from cekirdek.ozellikler import OLCUTLER, olcut, ozellikler
 
 
@@ -43,14 +43,6 @@ def test_dtw_esitlikte_ayni():
     assert [tuple(x) for x in dtw_yol(a, b)] == dtw_yol_referans(a, b)
 
 
-def test_hizala_ortalama():
-    ref = np.array([0.0, 1.0, 2.0, 1.0, 0.0])
-    tekrar = {"kol": np.array([0.0, 1.0, 1.0, 2.0, 1.0, 0.0]), "X": np.arange(6.0)}
-    h = hizala(ref, tekrar, ["X"])
-    assert h["X"].shape == (5,)
-    assert h["X"][1] == pytest.approx(1.5)  # ref karesi 1'e tekrar kare 1 ve 2 düşer
-
-
 def test_aci_ve_nokta():
     u = np.array([[1.0, 0.0], [1.0, 1.0]])
     v = np.array([[0.0, 1.0], [1.0, 0.0]])
@@ -68,23 +60,6 @@ def test_kare_hatasi_yonsuz_ve_yonlu():
     assert kare_hatasi(h, mu, tau, -1).tolist() == [0, 0, 0.5, 0]
 
 
-def _yapay_tekrar(rng, n, silkme=0.0):
-    t = np.linspace(0, np.pi, n)
-    return {"kol": 90 * np.sin(t) + rng.normal(0, 1, n),
-            "Y": 0.3 - silkme * np.sin(t) + rng.normal(0, 0.005, n)}
-
-
-def test_bant_silkmeyi_ayirir():
-    rng = np.random.default_rng(0)
-    dogrular = [_yapay_tekrar(rng, rng.integers(50, 70)) for _ in range(5)]
-    model = bant_modeli(dogrular, rng, ["Y"])
-    e_dogru = bant_hatasi(model, _yapay_tekrar(rng, 60), ["Y"])["Y"]
-    e_silkme = bant_hatasi(model, _yapay_tekrar(rng, 60, silkme=0.08), ["Y"])["Y"]
-    e_yukari = bant_hatasi(model, _yapay_tekrar(rng, 60, silkme=0.08), ["Y"], yon={"Y": +1})["Y"]
-    assert e_silkme > e_dogru
-    assert e_yukari < e_silkme  # silkme Y'yi düşürür; yalnızca yukarı sapma sayılırsa hata küçük
-
-
 def test_auc():
     assert auc([3, 4, 5], [0, 1, 2]) == 1.0
     assert auc([0, 1], [0, 1]) == 0.5
@@ -93,7 +68,7 @@ def test_auc():
 
 
 def test_olcut_kaydi():
-    assert {"kol", "M01", "M01_tek", "M39_F2", "M33", "YENI"} <= set(OLCUTLER)
+    assert {"kol", "M01", "M39_F2", "M33", "YENI"} <= set(OLCUTLER)
 
     @olcut("_deneme_olcutu")
     def _d(s):

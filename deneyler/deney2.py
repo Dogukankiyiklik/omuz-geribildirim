@@ -22,7 +22,7 @@ Bu, uygulamanın kullandığı yöntemdir; modeller/kural_ex1.json aynı yöntem
 kurulur (araclar/kural_disa_aktar.py).
 
 Kullanım:
-    python -m deneyler.deney2                 # ~1–2 dk
+    python -m deneyler.deney2                 # ~15 sn
     python -m deneyler.deney2 --puan-hazir    # puanlar sonuclar/deney2/puanlar.csv'den okunur
 Çıktı: sonuclar/deney2/
 """

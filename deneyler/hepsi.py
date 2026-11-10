@@ -64,9 +64,7 @@ class Adim(NamedTuple):
 
 
 ADIMLAR = [
-    Adim("deney1", ["deneyler.deney1", "--galeri-yok"], ["deney1"], []),
-    Adim("deney1_v2", ["deneyler.deney1_v2", "--sekilsiz"], ["deney1_v2"], []),
-    Adim("deney1b", ["deneyler.deney1b"], ["deney1b"], []),
+    Adim("deney1", ["deneyler.deney1"], ["deney1"], []),
     Adim("deney2", ["deneyler.deney2"], ["deney2"], []),
     Adim("deney3", ["deneyler.deney3"], ["deney3"], []),
     Adim("deney3_saglam", ["deneyler.deney3", "--olcu-surumu", "saglam"], ["deney3"], []),

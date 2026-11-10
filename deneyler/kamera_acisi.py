@@ -19,7 +19,7 @@ import pandas as pd
 from cekirdek import kamera_acisi as ka
 from cekirdek import veri
 from cekirdek.konsol import sonuclari_yaz, utf8_cikti
-from deneyler.deney1 import GORUS_GRUPLARI
+from deneyler.tablolar import GORUS_GRUPLARI
 
 CIKTI = veri.KOK / "sonuclar" / "kamera_acisi"
 CAPRAZ = "çapraz (30–60°)"

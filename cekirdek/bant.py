@@ -87,7 +87,7 @@ def coklu_referans_hatasi(dogrular: list[dict], tekrar: dict, olcutler,
 
 def coklu_referans_modelleri(dogrular: list[dict], olcutler) -> list[dict]:
     """Çoklu referansın bantları: her doğru tekrar sırayla referans (n model). Aynı model kümesiyle
-    birçok tekrar değerlendirilecekse (ör. genel bant, Deney 1b) bir kez kurulup yeniden kullanılır."""
+    birçok tekrar değerlendirilecekse (ör. Deney 1'in genel bandı) bir kez kurulup yeniden kullanılır."""
     return [bant_modeli_ref(dogrular, r, olcutler) for r in range(len(dogrular))]
 
 

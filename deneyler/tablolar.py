@@ -15,12 +15,22 @@ import pandas as pd
 
 from cekirdek import veri
 from cekirdek.degerlendirme import guven_araligi, kisi_bootstrap, psi
-from deneyler.deney1 import GORUS_GRUPLARI, SILKME, maskeler
 
+SILKME = "ERR_ELEVATED_SHOULDER"
+GORUS_GRUPLARI = ["önden (0–20°)", "çapraz (30–60°)", "profil (70–90°)"]
 TEKRAR_ANAHTARI = ["video", "kamera", "yonelim", "satir", "kisi", "hata", "ek_hata", "gorus"]
 ONDEN_CAPRAZ = "önden+çapraz"
 TUMU = "tüm görüşler"
 ONDEN_CAPRAZ_SINIR = 60
+
+
+def maskeler(df: pd.DataFrame):
+    """silkme / doğru / diğer hatalar. Ek hatası silkme olan tekrarlar doğru ve diğer gruplarına girmez."""
+    silkme = df.hata == SILKME
+    ek_silkme = df.ek_hata.str.contains("ELEVATED")
+    dogru = (df.hata == "DOGRU") & ~ek_silkme
+    diger = (df.hata != "DOGRU") & ~silkme & ~ek_silkme
+    return silkme, dogru, diger
 
 
 def gorus_maskesi(df: pd.DataFrame, gorus: str) -> pd.Series:

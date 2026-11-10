@@ -22,7 +22,7 @@ Beklenen çıktı: **hepsi geçer, 1 tane `xfailed`**. `xfailed`, "bilerek başa
 | `test_deney2_regresyon.py` | **Regresyon:** karar kuralı yeniden kurulunca kayıtlı Deney 2 kararları (`sonuclar/deney2/tahminler.csv`) birebir çıkıyor mu? | Kayıtlı sonuçlar |
 | `test_degerlendirici.py` | Uygulamanın değerlendiricisi Deney 3 ile aynı kararı ve cümleyi veriyor mu? (Uygulama ile deneyin aynı koddan geldiğinin kanıtı) | Evet |
 | `test_cekirdek.py` | Geometri, ölçüler, DTW (numba'lı ve saf Python aynı sonucu veriyor mu), zaman bandı | Hayır |
-| `test_aci_bandi.py` | Açı bandı: kutular, fazlar, μ ve τ, adil model (sonuç tohumdan bağımsız mı) | Kısmen |
+| `test_aci_bandi.py` | Açı bandı: kutular, fazlar, μ ve τ, adil model; Deney 1'in genel bandına test kişisinin tekrarı giriyor mu | Kısmen |
 | `test_hata_turu.py` | Hata ölçüleri, puanlar, karar kuralı (z, T, "ilk iki"), az kaldırmanın iki sürümü | Hayır |
 | `test_geribildirim.py` | Türkçe sayı ekleri (%30'u, %30'a), faz ve an seçimi, şiddet, cümle şablonları, anahtar kelime çıkarıcı (`elle_cumleler.py`) | Hayır |
 | `test_bindirme.py` | Referans iskelet kullanıcının üstüne doğru çakıştırılıyor mu (öteleme, ölçek, döndürme) | Hayır |

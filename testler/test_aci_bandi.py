@@ -107,20 +107,6 @@ def test_coklu_referans_ortalama():
 
 
 @pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")
-def test_v1_deney1_ile_ayni():
-    """Deney 1 v2'deki v1 koşulu, Deney 1'i birebir yeniden üretmeli (temel çizgi korunur)."""
-    from deneyler import deney1, deney1_v2
-    ts = veri.tekrarlari_yukle(1)
-    v1 = deney1_v2.skor_tablosu(ts, "v1", 0)
-    ref = pd.DataFrame([{"satir": d["t"].satir, "kamera": d["t"].kamera, **{f"r_{k}": d["E"][k] for k in deney1.OLCUTLER}}
-                        for d in deney1.tekrar_degerlendirmeleri(tekrarlar=ts)])
-    m = v1.merge(ref, on=["satir", "kamera"])
-    assert len(m) == len(v1) == len(ref)
-    for k in deney1.OLCUTLER:
-        assert np.array_equal(m[f"bant_{k}"].values, m[f"r_{k}"].values)
-
-
-@pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")
 def test_etiketli_kareler():
     seg = veri.segmentasyon_oku()
     ts = veri.tekrarlari_yukle(1)
@@ -143,40 +129,20 @@ def test_adil_ortalama_hata():
 
 
 @pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")
-def test_v1b_v2_tohumdan_bagimsiz():
-    """Adil model kabul ölçütü: v1b ve v2'de tohum 0 ile 1 arasında |ΔE| = 0 (hatalı tekrarlar dahil)."""
-    from deneyler import deney1_v2
-    ts = [t for t in veri.tekrarlari_yukle(1) if t.video in ("ex1_Petra", "ex1_Honza")]
-    ozl = deney1_v2.ozellik_tablosu(ts)
-    for kosul in ("v1b", "v2"):
-        a = deney1_v2.skor_tablosu(ts, kosul, 0, ozl)
-        b = deney1_v2.skor_tablosu(ts, kosul, 1, ozl)
-        assert (a.hata != "DOGRU").any()
-        for k in deney1_v2.OLCUTLER:
-            assert np.array_equal(a[f"bant_{k}"].values, b[f"bant_{k}"].values, equal_nan=True)
-
-
-def test_genel_bant_test_kisisini_icermez():
-    """Deney 1b: genel bantta test kişisinin hiçbir tekrarı modele girmez (aynı kamera/yönelim, diğer kişiler)."""
-    from deneyler import deney1b
-    import deneyler.deney1b as m
+def test_genel_bant_test_kisisini_icermez(monkeypatch):
+    """Deney 1: genel bant, test kişisi hariç aynı kamera/yönelimdeki diğer kişilerin doğru tekrarlarından kurulur."""
+    from deneyler import deney1
     gorulen = []
-    eski = m._Model.__init__
+    eski = deney1.aci_bandi_modeli
 
-    def kaydet(self, bant, fl):
-        gorulen.append([id(f["kol"]) for f in fl])
-        eski(self, bant, fl)
+    def kaydet(fl, olcutler):
+        gorulen.append(len(fl))
+        return eski(fl, olcutler)
 
     ts = [t for t in veri.tekrarlari_yukle(1) if t.kamera == "cam1" and t.yonelim == 0]
-    ozl = deney1b.d2.ozellik_tablosu(ts)
-    m._Model.__init__ = kaydet
-    try:
-        deney1b.genel_skorlar(ts, "v2", ozl)
-    finally:
-        m._Model.__init__ = eski
-    # modeller etiketli dilimin kopyalarını alır; kişi kontrolünü tekrar sayısıyla yap
-    dogru_say = {k: sum(t.dogru for t in ts if t.kisi == k) for k in {t.kisi for t in ts}}
-    tum_modeller = [g for g in gorulen if len(g) > max(dogru_say.values())]
-    assert len(tum_modeller) == len(dogru_say)
-    for g, kisi in zip(tum_modeller, sorted(dogru_say)):
-        assert len(g) == sum(v for k, v in dogru_say.items() if k != kisi)
+    ozl = deney1.ozellik_tablosu(ts)
+    monkeypatch.setattr(deney1, "aci_bandi_modeli", kaydet)
+    deney1.genel_puanlar(ts, ozl)
+    dogru_say = {g[0]: sum(t.dogru for t in grup) for g, grup in veri.gruplara_ayir(ts).items()}
+    beklenen = [sum(v for vid, v in dogru_say.items() if vid != g[0]) for g in deney1._cekimler(ts)]
+    assert len(beklenen) >= 2 and gorulen == beklenen

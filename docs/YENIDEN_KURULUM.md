@@ -41,7 +41,7 @@ python -m deneyler.hepsi --temizle  # bittikten sonra temiz kopyayı kaldırır
 Tek bir deneyi çalıştırıp sonucun değişmediğini görmek için:
 
 ```bash
-python -m deneyler.deney1 --galeri-yok
+python -m deneyler.deney1
 git status sonuclar/deney1          # CSV'ler "değişti" görünmüyorsa sonuç birebir aynı
 ```
 

@@ -13,33 +13,37 @@
 
 ## Soru 1 (Problem 2): Kişiye özel açı bandı, ham ölçüye göre omuz silkmesini daha iyi buluyor mu?
 
-**Cevap: evet, belirgin biçimde.** Ham ölçü (sabit kural) silkmeyi zayıf ayırıyor. Kişinin kendi doğru tekrarlarından kurulan açı bandıyla AUC 0,70'ten 0,95'e çıkıyor. Başkalarının tekrarlarından kurulan "genel" bant işe yaramıyor; yani kalibrasyon kişiye özel olmalı.
+**Cevap: evet, belirgin biçimde.** Ham ölçü silkmeyi zayıf ayırıyor. Kişinin kendi doğru tekrarlarından kurulan açı bandıyla AUC 0,70'ten 0,95'e çıkıyor. Başkalarının tekrarlarından kurulan "genel" bant ham ölçüyle aynı düzeyde kalıyor; yani kalibrasyon kişiye özel olmalı.
 
-Kulak–omuz ölçüsü (`YENI`), silkmeli tekrar ile doğru tekrar [`deney1b/ozet.csv`]:
+**Nasıl ölçüldü** (`deneyler/deney1.py`): Dört omuz ölçüsünün her biri üç yolla puanlandı.
+
+- **Ham:** tekrar kendi başlangıcıyla (kol aşağıdayken) karşılaştırılır; omuz başlangıca göre ne kadar uzaklaştı?
+- **Genel bant:** açı bandı, ama aynı kamera ve yönelimdeki diğer 4 kişinin bütün doğru tekrarlarından kurulur.
+- **Kişiye özel açı bandı:** kişinin kendi doğru tekrarlarından kurulur. Değerlendirilen tekrar banda girmez.
+
+Kulak–omuz ölçüsü (`YENI`), silkmeli tekrar ile doğru tekrar [`deney1/ozet.csv`]:
 
 | Değerlendirme | Bütün görüşler | Önden + çapraz | Silkme / diğer hatalar |
 | --- | --- | --- | --- |
-| Bant yok (ham ölçü) | 0,704 | 0,761 | 0,699 |
-| Genel bant: diğer 4 kişinin bütün doğru tekrarları | 0,666 | 0,683 | 0,649 |
-| Genel bant: başka tek bir kişinin kalibrasyonu | 0,618 | 0,634 | 0,603 |
+| Ham ölçü (bant yok) | 0,704 | 0,761 | 0,699 |
+| Genel bant (diğer 4 kişinin doğru tekrarları) | 0,666 | 0,683 | 0,649 |
 | **Kişiye özel açı bandı** | **0,947** | **0,968** | **0,829** |
 
-**Hangi omuz ölçüsü?** Literatürden dört ölçü ile kendi önerimiz (kulak–omuz) aynı veride karşılaştırıldı (bütün görüşler) [`deney1b/ozet.csv`]:
+**Hangi omuz ölçüsü?** Literatürden üç ölçü ile kendi önerimiz (kulak–omuz) aynı veride karşılaştırıldı (bütün görüşler, silkme / doğru) [`deney1/ozet.csv`]:
 
-| Ölçü | Ham | Kişiye özel bant |
-| --- | --- | --- |
-| Kulak–omuz dikey mesafesi (bizim önerimiz) | 0,704 | 0,947 |
-| Sağ omzun iki omuz ortasına göre yüksekliği (Cóias ve ark. 2022'den uyarlama) | 0,638 | 0,924 |
-| Sol omuz – sağ omuz – sağ kalça açısı (Jánošová ve ark. 2026, F2) | 0,600 | 0,909 |
-| Yalnızca sağ omzun kalkışı (Pavlikov ve ark. 2026'nın tek omuz hâli) | 0,658 | 0,889 |
-| İki omzun ortalama kalkışı (Pavlikov ve ark. 2026) | 0,650 | 0,858 |
+| Ölçü | Ham | Genel bant | Kişiye özel bant |
+| --- | --- | --- | --- |
+| Kulak–omuz dikey mesafesi (bizim önerimiz) | 0,704 | 0,666 | 0,947 |
+| Sağ omzun iki omuz ortasına göre yüksekliği (Cóias ve ark. 2022'den uyarlama) | 0,638 | 0,709 | 0,924 |
+| Sol omuz – sağ omuz – sağ kalça açısı (Jánošová ve ark. 2026, F2) | 0,600 | 0,663 | 0,909 |
+| İki omzun ortalama kalkışı (Pavlikov ve ark. 2026) | 0,650 | 0,700 | 0,858 |
 
-- **En büyük kazanç ölçünün seçiminden değil, kişiye özel banttan geliyor.** Bütün ölçüler bantla 0,86–0,95'e çıkıyor.
-- Kulak–omuz en yüksek çıkıyor, ama farkı küçük. İlk sürüm bantta yapılan kişi bazlı bootstrap'te kulak–omuz ile F2 açısı arasındaki fark anlamlı değildi: +0,021, %95 GA −0,017 – +0,060 [`deney1/bootstrap.csv`]. Son sürümde ölçüler arası bu sınama ayrıca yapılmadı. Bu yüzden kulak–omuz "en iyi ölçü" değil; en yüksek çıkan ve iki omzun birlikte kalkmasını da yakalayabilen ölçü olduğu için seçildi.
-- İki omzun ortalaması en kötüsü: tek taraflı silkmeyi yarı yarıya seyreltiyor.
-- Profil görüşte bant da zayıflıyor (kulak–omuz 0,842) [`deney1b/ozet.csv`].
+- **En büyük kazanç ölçünün seçiminden değil, kişiye özel banttan geliyor.** Bütün ölçüler kişiye özel bantla 0,86–0,95'e çıkıyor; genel bantla 0,66–0,71'de kalıyor.
+- Kulak–omuz en yüksek çıkan ölçü, ama ölçüler arasındaki farklar küçük. Yalnızca 5 kişiyle bir ölçünün diğerlerinden üstün olduğunu iddia etmiyoruz. Kulak–omuz, en yüksek çıktığı ve iki omzun birlikte kalkmasını da yakalayabildiği için seçildi.
+- Profil görüşte bant da zayıflıyor (kulak–omuz 0,842) [`deney1/ozet.csv`].
+- Kişi başına bakıldığında kişiye özel bant her kişide 0,84 ile 0,98 arasında [`deney1/ozet.csv`, "kişi özeti"; kişi kişi değerler `deney1/kisi_auc.csv`].
 
-Şekil: `sonuclar/sunum/1_problem.png` (ham → bant, kişi başına nokta) ve `2_fikir_aci_bandi.png` (bir doğru ve bir silkmeli tekrar bandla birlikte).
+Şekil: `sonuclar/sunum/1_problem.png` (ham → bant, kişi başına nokta), `2_fikir_aci_bandi.png` (bir doğru ve bir silkmeli tekrar bandla birlikte) ve `3_kalibrasyon.png` (genel bant ile kişiye özel bant).
 
 ## Soru 2 (Problem 1): Sistem hatanın türünü doğru söylüyor mu?
 
@@ -94,6 +98,7 @@ Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/READM
 | --- | --- | --- |
 | **Zamansal yumuşatma** (One Euro, Savitzky–Golay; ödevde önerilen) | MediaPipe titremesi %38–87 azaldı, ama silkme tespiti değişmedi: AUC 0,947 → 0,943 ve 0,947. Kullanılmadı. | `deney1c/ozet.csv`, `deney1c/titreme.csv` |
 | **Görüntüden omuz silueti** (omuz bölgesinde segmentasyon maskesi; ödevdeki "pose + lokal görüntü" önerisi) | Önden çekimde silkmeyi ayırıyor (0,94), çapraz çekimde arama bölgesi başın üstüne düşüyor (0,55). Toplamda 0,72; kulak–omuz ölçüsü aynı tekrarlarda 0,97. | `siluet/ozet.csv` |
+| **Zaman bandı** (literatürdeki yöntem: tekrarlar DTW ile zamanda hizalanır, bant zamana göre kurulur). Açı bandından önce bunu kullandık. | Kulak–omuz silkme / doğru 0,909 (açı bandında 0,947); asıl fark silkmeyi diğer hatalardan ayırmada: 0,705 (açı bandında 0,829). Kol az kaldırılınca omuz yanlış kol açısıyla karşılaştırılıyordu. Açı bandına geçildi. | `sonuclar/deney1_v2/ozet.csv` (`v1` ve `v2` satırları, `YENI`); dosya `ecd69a9` commit'inde, Deney 1 sadeleştirilince depodan çıkarıldı |
 | Yetersiz kaldırma puanının "revize" hâli | Hata türü doğruluğunu düşürdü (makro-F1 0,631 → 0,568); ilk hâline dönüldü. | `deney2_revize/ozet.csv` |
 | Cümleyi bir LLM'e yazdırmak (Gemini, ücretsiz katman; 150 tekrar) | Karar kuraldan gelip LLM yalnızca cümleyi yazınca sonuç kural cümlesiyle aynı düzeyde (ilk söylenen doğru 61'e 61), üstünlük yok. Hatayı da LLM'e buldurunca 61'den 45'e düştü. Ürün kural tabanlı kaldı. | `deney4/ozet.csv` |
 | Aynı sistemi başka bir harekette denemek (omuz ekstansiyonu, Ex7) | Silkme tespiti taşınıyor (AUC 0,89–0,94), ama hata türü zayıf (makro-F1 0,40). Ödevin kapsamı dışında. | `ex7/ozet.csv` |
@@ -108,6 +113,6 @@ Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/READM
 
 ## Sonuçları yorumlarken dikkat
 
-- Kulak–omuz ölçüsünün diğer omuz ölçülerinden üstün olduğu gösterilmedi: fark anlamlı değil (Soru 1).
+- Kulak–omuz ölçüsünün diğer omuz ölçülerinden üstün olduğu iddia edilmiyor: en yüksek çıkıyor, ama farklar küçük ve yalnızca 5 kişi var (Soru 1).
 - Deney 3'teki "çıkarıcı uyumu", cümleyi kendi şablonlarıyla geri okuyan bir kontroldür, doğruluk ölçüsü değildir. Cümlenin doğruluğu Soru 2'deki 56,6 / 67,4'tür.
 - Sistem yalnızca kolu yana kaldırma hareketinde ölçüldü.

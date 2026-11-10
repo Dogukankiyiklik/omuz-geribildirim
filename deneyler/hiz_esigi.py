@@ -21,7 +21,7 @@ import pandas as pd
 from cekirdek import bilgi_notlari as bn
 from cekirdek import veri
 from cekirdek.konsol import sonuclari_yaz, utf8_cikti
-from deneyler.deney1 import GORUS_GRUPLARI
+from deneyler.tablolar import GORUS_GRUPLARI
 
 CIKTI = veri.KOK / "sonuclar" / "hiz_esigi"
 FPS = 30.0

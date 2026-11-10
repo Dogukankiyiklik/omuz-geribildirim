@@ -41,7 +41,7 @@ from cekirdek.konsol import sonuclari_yaz, utf8_cikti
 from cekirdek.metin_cozumleyici import cozumle
 from cekirdek.ozellikler import DENEY2_OLCUTLERI, ozellikler
 from deneyler import deney2
-from deneyler.deney1 import GORUS_GRUPLARI
+from deneyler.tablolar import GORUS_GRUPLARI
 from deneyler.tablolar import ONDEN_CAPRAZ, TUMU, gorus_maskesi
 
 CIKTI = veri.KOK / "sonuclar" / "deney3"

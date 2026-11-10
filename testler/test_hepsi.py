@@ -52,7 +52,7 @@ def test_karsilastir_eksik_ve_yeni(tmp_path):
 
 def test_adim_sirasi():
     adlar = [a[0] for a in hepsi.ADIMLAR]
-    assert adlar == ["deney1", "deney1_v2", "deney1b", "deney2", "deney3", "deney3_saglam", "tekrar_ayirma",
+    assert adlar == ["deney1", "deney2", "deney3", "deney3_saglam", "tekrar_ayirma",
                      "kamera_acisi", "hiz_esigi", "kural_disa_aktar", "kendi_kayit"]
     assert adlar.index("deney2") < adlar.index("deney3") < adlar.index("kural_disa_aktar") < adlar.index("kendi_kayit")
     ad = {a.ad: a for a in hepsi.ADIMLAR}

@@ -11,7 +11,7 @@ Soru: Sistem bir tekrarın doğru olup olmadığını, yanlışsa HANGİ hatayı
      revize (başarısız deneme): tek kutulu tepe bandı, E 0–1 → sonuclar/deney2_revize/
    Adillik: doğru tekrar birini-dışarıda-bırak; hatalı tekrar tüm (n−1)'li modellerin ortalaması.
    Bir gruptaki n alt küme modeli bir kez kurulur: doğru tekrar i, i'nci alt kümeyle (kendisi dışarıda)
-   değerlendirilir; bu, Deney 1 v2'deki birini-dışarıda-bırak ile aynı modeldir.
+   değerlendirilir; bu, Deney 1'deki birini-dışarıda-bırak ile aynı modeldir.
 2) Karar kuralı (cekirdek/hata_turu.py), kişi bazlı birini-dışarıda-bırak: 4 kişide ölçekleme, yön,
    öne kaçma ölçütü ve T seçilir; 5. kişide test edilir. Ayar yalnızca eğitim kişilerinin
    önden + çapraz (|görüş| ≤ 60°) tekrarlarıyla yapılır (uygulama senaryosu).
@@ -47,7 +47,7 @@ from cekirdek.bant import coklu_model_puanlari, coklu_referans_modelleri
 from cekirdek.degerlendirme import guven_araligi, karisiklik, kisi_bootstrap, makro_f1, sinif_metrikleri
 from cekirdek.konsol import sonuclari_yaz, utf8_cikti
 from cekirdek.ozellikler import DENEY2_OLCUTLERI, ozellikler
-from deneyler.deney1 import GORUS_GRUPLARI
+from deneyler.tablolar import GORUS_GRUPLARI
 from deneyler.tablolar import ONDEN_CAPRAZ, TUMU, gorus_maskesi
 
 OLCUTLER = DENEY2_OLCUTLERI

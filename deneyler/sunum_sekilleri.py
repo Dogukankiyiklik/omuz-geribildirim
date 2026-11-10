@@ -2,11 +2,11 @@
 Sunum şekilleri → sonuclar/sunum/.
 
 Sayılar yalnızca kayıtlı sonuç dosyalarından okunur; hiçbir deney yeniden çalıştırılmaz.
-  1_problem.png        : bantsız (ham ölçü) ile kişiye özel açı bandı, omuz silkme tespiti (Ex1, YENI; Deney 1, 1b)
+  1_problem.png        : bantsız (ham ölçü) ile kişiye özel açı bandı, omuz silkme tespiti (Ex1, YENI; Deney 1)
   2_fikir_aci_bandi.png: açı bandı görseli, Petra cam1 yönelim 0: doğru tekrar bandın içinde, silkmeli tekrar 5 dışında
                          (bant, çekirdekteki aci_bandi_modeli ile o grubun doğru tekrarlarından çizilir; gösterilen
                          doğru tekrar modele girmez)
-  3_kalibrasyon.png    : genel bant ile kişiye özel bant (Deney 1b, v2, YENI)
+  3_kalibrasyon.png    : genel bant ile kişiye özel bant (Deney 1, açı bandı, YENI)
   4_geri_bildirim.png  : uygulamanın ekranı, Honza sağlık kontrolü tekrar 5 (omuz) oynatımında: hasta cümlesi,
                          bindirme, kırmızı uzuv
   5_bindirme.png       : aynı tekrarın 3 karesi (kaldırırken, tepede, indirirken): turkuaz referans + kullanıcı iskeleti
@@ -98,46 +98,45 @@ def auc_cubuklari(ax, cubuklar: list[tuple[str, float, list[float], str]], basli
     ax.legend(loc="upper left", frameon=False, fontsize=15)
 
 
-def onden_capraz_notu(oz1b: pd.DataFrame) -> str:
-    """Altyazıya önden + çapraz değerleri (deney1b/ozet.csv, v2, YENI)."""
+def onden_capraz_notu(oz1: pd.DataFrame) -> str:
+    """Altyazıya önden + çapraz değerleri (deney1/ozet.csv, YENI)."""
     def v(kosul):
-        x = float(_satir(oz1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru (önden+çapraz)"])
+        x = float(_satir(oz1, kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru (önden+çapraz)"])
         return f"{x:.2f}".replace(".", ",")
-    return f"Önden + çapraz: ham {v('bant_yok')} → bant {v('kisiye_ozel')}."
+    return f"Önden + çapraz: ham {v('ham')} → bant {v('kisiye_ozel')}."
 
 
 def sekil_problem(klasor: Path) -> Path:
-    oz1b, k1b = _oku(S / "deney1b" / "ozet.csv"), _oku(S / "deney1b" / "kisi_auc.csv")
+    oz1, k1 = _oku(S / "deney1" / "ozet.csv"), _oku(S / "deney1" / "kisi_auc.csv")
     c = []
-    for kosul, ad, renk in [("bant_yok", "Ham ölçü\n(bant yok)", GRI), ("kisiye_ozel", "Kişiye özel\naçı bandı", MAVI)]:
-        v = float(_satir(oz1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru"])
-        kisi = [float(_satir(k1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})[p]) for p in KISILER]
+    for kosul, ad, renk in [("ham", "Ham ölçü\n(bant yok)", GRI), ("kisiye_ozel", "Kişiye özel\naçı bandı", MAVI)]:
+        v = float(_satir(oz1, kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru"])
+        kisi = [float(_satir(k1, kosul=kosul, **{"ölçüt": "YENI"})[p]) for p in KISILER]
         c.append((ad, v, kisi, renk))
     _stil()
     fig, ax = plt.subplots(figsize=BOYUT)
     auc_cubuklari(ax, c, "Omuz silkmesi: ham ölçü yetmiyor, kişiye özel bant yetiyor")
     fig.subplots_adjust(bottom=0.19)
     fig.text(0.01, 0.015, "Ex1, kulak–omuz dikey mesafesi / gövde boyu, 5 kişi, tüm görüşler. "
-             f"{onden_capraz_notu(oz1b)}\nKaynak: sonuclar/deney1b/ozet.csv, kisi_auc.csv (v2).",
+             f"{onden_capraz_notu(oz1)}\nKaynak: sonuclar/deney1/ozet.csv, kisi_auc.csv.",
              fontsize=12, color=METIN2)
     return _kaydet(fig, klasor / "1_problem.png")
 
 
 def sekil_kalibrasyon(klasor: Path) -> Path:
-    oz1b, k1b = _oku(S / "deney1b" / "ozet.csv"), _oku(S / "deney1b" / "kisi_auc.csv")
+    oz1, k1 = _oku(S / "deney1" / "ozet.csv"), _oku(S / "deney1" / "kisi_auc.csv")
     c = []
-    for kosul, ad, renk in [("genel_tum", "Genel bant\n(diğer 4 kişinin\ndoğru tekrarları)", GRI),
-                            ("genel_tek", "Genel bant\n(başka bir kişinin\nkalibrasyonu)", GRI),
+    for kosul, ad, renk in [("genel", "Genel bant\n(diğer 4 kişinin\ndoğru tekrarları)", GRI),
                             ("kisiye_ozel", "Kişiye özel bant\n(kendi\nkalibrasyonu)", MAVI)]:
-        v = float(_satir(oz1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru"])
-        kisi = [float(_satir(k1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})[p]) for p in KISILER]
+        v = float(_satir(oz1, kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru"])
+        kisi = [float(_satir(k1, kosul=kosul, **{"ölçüt": "YENI"})[p]) for p in KISILER]
         c.append((ad, v, kisi, renk))
     _stil()
     fig, ax = plt.subplots(figsize=BOYUT)
     auc_cubuklari(ax, c, "Kalibrasyon kişiye özel olmalı", deger_ustte=True)
     fig.subplots_adjust(bottom=0.2)
-    fig.text(0.01, 0.015, "Ex1, açı bandı (v2), kulak–omuz ölçütü, tüm görüşler. "
-             f"{onden_capraz_notu(oz1b)} Kaynak: sonuclar/deney1b/ozet.csv, kisi_auc.csv.",
+    fig.text(0.01, 0.015, "Ex1, açı bandı, kulak–omuz ölçütü, tüm görüşler. "
+             f"{onden_capraz_notu(oz1)} Kaynak: sonuclar/deney1/ozet.csv, kisi_auc.csv.",
              fontsize=12, color=METIN2)
     return _kaydet(fig, klasor / "3_kalibrasyon.png")
 

@@ -17,4 +17,10 @@ Zip'leri açmak zorunlu değil; kod doğrudan zip'ten okuyabilir.
 
 ## Yardımcı dosya
 
-`rehab26_kucuk.npz`: Danışmana gönderilebilsin diye küçültülmüş kopya. Ex1 ve Ex7, yalnızca tekrar kareleri, 13 eklem, 2B, float16. Danışmanın Deney 1 sonuçları bundan üretildi. Varsa `veri/` klasörüne koy; regresyon karşılaştırmasında kullanılır.
+`rehab26_kucuk.npz`: Veri setinin küçültülmüş kopyası (yalnızca tekrar kareleri, 13 eklem, 2B, float16). Silkme tespitinin ilk sonuçları (`referans/beklenen_deney1_ozet.csv`) bu dosyadan üretildi. Varsa `veri/` klasörüne konur; test, aynı sonucun hem bu dosyadan hem orijinal zip'ten yeniden üretildiğini kontrol eder. Yoksa ilgili test atlanır.
+
+## Kendi kayıt
+
+`kendi_kayit/kisi1/`: Projenin kendi çekimi (kalibrasyon ve test videosu, tekrar etiketleri). Kişisel görüntü olduğu için depoya girmez.
+
+`ara/`: Programların oluşturduğu ara dosyalar. `ara/videolar/` veri setinden çıkarılmış videolar, `ara/kendi_kayit/` kendi kaydın MediaPipe iskelet noktaları (önbellek). Depoya girmez.

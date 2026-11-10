@@ -1,4 +1,4 @@
-"""deneyler/hepsi.py karşılaştırma fonksiyonları (Karar 37); deney çalıştırmaz."""
+"""deneyler/hepsi.py karşılaştırma fonksiyonları; deney çalıştırmaz."""
 import json
 
 import pandas as pd
@@ -93,7 +93,7 @@ def test_girdileri_kopyala(tmp_path):
 
 
 def test_bos_csv(tmp_path):
-    (tmp_path / "a.csv").write_text("\r\n", encoding="utf-8-sig")   # sonuclar/siluet/nan_nedenleri.csv gibi
+    (tmp_path / "a.csv").write_text("\r\n", encoding="utf-8-sig")   # boş (sütunsuz) bir sonuç dosyası
     (tmp_path / "b.csv").write_text("\r\n", encoding="utf-8-sig")
     assert hepsi.csv_karsilastir(tmp_path / "a.csv", tmp_path / "b.csv", 1e-9)["durum"] == "aynı"
     _yaz(tmp_path / "b.csv", pd.DataFrame({"x": [1]}))

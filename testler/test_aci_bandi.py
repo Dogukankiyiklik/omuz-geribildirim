@@ -1,4 +1,4 @@
-"""Açı bandı ve çoklu referans testleri (Adım 2c)."""
+"""Açı bandı ve çoklu referans testleri."""
 import numpy as np
 import pandas as pd
 import pytest
@@ -132,7 +132,7 @@ def test_etiketli_kareler():
 
 
 def test_adil_ortalama_hata():
-    """Karar 7: her doğru tekrar sırayla dışarıda, E'lerin ortalaması; NaN'lar atlanır."""
+    """Adil model: her doğru tekrar sırayla dışarıda, E'lerin ortalaması; NaN'lar atlanır."""
     from cekirdek.adil_model import adil_ortalama_hata, birini_disarida_alt_kumeler, ortalama_E
     alt = birini_disarida_alt_kumeler([1, 2, 3, 4])
     assert alt == [[2, 3, 4], [1, 3, 4], [1, 2, 4], [1, 2, 3]]
@@ -144,7 +144,7 @@ def test_adil_ortalama_hata():
 
 @pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")
 def test_v1b_v2_tohumdan_bagimsiz():
-    """Karar 7 kabul ölçütü: v1b ve v2'de tohum 0 ile 1 arasında |ΔE| = 0 (hatalı tekrarlar dahil)."""
+    """Adil model kabul ölçütü: v1b ve v2'de tohum 0 ile 1 arasında |ΔE| = 0 (hatalı tekrarlar dahil)."""
     from deneyler import deney1_v2
     ts = [t for t in veri.tekrarlari_yukle(1) if t.video in ("ex1_Petra", "ex1_Honza")]
     ozl = deney1_v2.ozellik_tablosu(ts)

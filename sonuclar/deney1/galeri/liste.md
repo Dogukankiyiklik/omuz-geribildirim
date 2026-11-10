@@ -1,6 +1,6 @@
-# Deney 1 galerisi (YENI, geçici eşik)
+# Deney 1 galerisi (YENI, basit eşik)
 
-Geçici karar: E > eşik ise "şüpheli". Eşik = test kişisi hariç diğer 4 kişinin doğru tekrarlarındaki E'nin %90'lık dilimi. Gerçek karar kuralı Adım 4'te gelecek.
+Basit eşik (yalnızca bu galeri için): E > eşik ise "şüpheli". Eşik = test kişisi hariç diğer 4 kişinin doğru tekrarlarındaki E'nin %90'lık dilimi. Sistemin asıl karar kuralı Deney 2'dedir (cekirdek/hata_turu.py).
 
 Grup büyüklükleri (3 kamera dahil): yakalanan_silkme = 124, kacirilan_silkme = 41, yanlis_alarm = 84
 

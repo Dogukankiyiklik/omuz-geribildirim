@@ -1,5 +1,5 @@
 """
-Görsel kontrol aracı (Adım 2b): bir tekrarı videoda izleyip sistemin ne gördüğünü ve neden o puanı
+Görsel kontrol aracı: bir tekrarı videoda izleyip sistemin ne gördüğünü ve neden o puanı
 verdiğini kontrol etmek için.
 
 Kullanım:
@@ -12,12 +12,13 @@ Ekran:
              + referans iskelet (kişinin kendi doğru tekrarı; DTW ile zamanda, kalça ortası / gövde boyu /
              gövde ekseniyle geometride hizalı; yarı saydam turkuaz)
   Sağ üst  : seçilen ölçütün eğrisi, kişiye özel bant ve hareketli zaman imleci
-  Sağ alt  : gerçek etiket, E değerleri, geçici karar, o anki ölçüm
+  Sağ alt  : gerçek etiket, E değerleri, basit eşik kararı, o anki ölçüm
 
 Bant ve E, Deney 1'deki ile AYNI hesaptır (deneyler.deney1.tekrar_degerlendirmeleri); sayılar
 sonuclar/deney1/tekrarlar.csv ile birebir tutar.
 
-Geçici karar (Adım 4'e kadar): E > eşik ise "şüpheli". Eşik = DİĞER 4 kişinin doğru tekrarlarındaki
+Basit eşik (yalnızca bu araç ve Deney 1 galerisi için; sistemin asıl kararı Deney 2'dedir):
+E > eşik ise "şüpheli". Eşik = DİĞER 4 kişinin doğru tekrarlarındaki
 E'nin %90'lık dilimi (test kişisinin verisi eşiğe girmez).
 """
 from __future__ import annotations
@@ -170,9 +171,9 @@ class TekrarGorseli:
                              14, o == k, M_METIN))
         karar = "OMUZ SİLKMESİ ŞÜPHESİ" if self.supheli else "normal görünüyor"
         satirlar += [("", 6, False, M_METIN),
-                     (f"Geçici karar ({k}): {karar}", 18, True, "#c62828" if self.supheli else "#2e7d32"),
+                     (f"Basit eşik kararı ({k}): {karar}", 18, True, "#c62828" if self.supheli else "#2e7d32"),
                      ("Eşik: diğer 4 kişinin doğru tekrarlarındaki E'nin %90'lık dilimi.", 12, False, M_METIN2),
-                     ("Gerçek karar kuralı Adım 4'te; Türkçe cümle Adım 5'te eklenecek.", 12, False, M_METIN2)]
+                     ("Sistemin asıl kararı ve cümlesi bu araçta yok (Deney 2 ve 3).", 12, False, M_METIN2)]
         self._satirlar = satirlar
 
     # ---- bir kareyi oluştur
@@ -250,7 +251,7 @@ class TekrarGorseli:
 
 class AciBandiGorseli(TekrarGorseli):
     """
-    Açı bandı görünümü (Adım 2c, v2). Sağ üst: x = kol açısı, y = ölçüt; kaldırma (mavi) ve indirme
+    Açı bandı görünümü (v2). Sağ üst: x = kol açısı, y = ölçüt; kaldırma (mavi) ve indirme
     (turuncu) bantları, tekrarın kareleri ve hareketli imleç. Bant ve E, Deney 1 v2'deki (v2) ile aynı hesap.
 
     Referans iskelet (yalnızca görsel): modeldeki doğru tekrarlardan, tepe açısı bu tekrara en yakın olan;
@@ -269,7 +270,7 @@ class AciBandiGorseli(TekrarGorseli):
             assert all((np.isnan(E0[k]) and np.isnan(d["E"][k])) or abs(E0[k] - d["E"][k]) < 1e-12
                        for k in self.olcutler)
         else:
-            # Hatalı tekrar (Karar 7): E, n adet (n−1)'li modelin ortalaması; çizilen bant ve kare
+            # Hatalı tekrar (adil model): E, n adet (n−1)'li modelin ortalaması; çizilen bant ve kare
             # renkleri bunların ilkinden. Gösterilen E ve kapsam deneydeki (ortalama) değerdir.
             self.ek["kapsam"] = d["ek"]["kapsam"]
         self.E = d["E"]
@@ -442,9 +443,10 @@ def galeri(klasor: Path | None = None, n: int = 3, olcut: str = "YENI", tohum: i
     }
     rng = np.random.default_rng(tohum)
     baslik_ek = f", yalnızca {GORUS_SECENEKLERI[gorus]}" if gorus else ""
-    md = [f"# Deney 1 galerisi ({olcut}, geçici eşik{baslik_ek})", "",
-          "Geçici karar: E > eşik ise \"şüpheli\". Eşik = test kişisi hariç diğer 4 kişinin doğru tekrarlarındaki "
-          f"E'nin %{ESIK_YUZDELIK}'lık dilimi. Gerçek karar kuralı Adım 4'te gelecek.", "",
+    md = [f"# Deney 1 galerisi ({olcut}, basit eşik{baslik_ek})", "",
+          "Basit eşik (yalnızca bu galeri için): E > eşik ise \"şüpheli\". Eşik = test kişisi hariç diğer 4 kişinin "
+          f"doğru tekrarlarındaki E'nin %{ESIK_YUZDELIK}'lık dilimi. Sistemin asıl karar kuralı Deney 2'dedir "
+          "(cekirdek/hata_turu.py).", "",
           "Grup büyüklükleri (3 kamera dahil): " + ", ".join(f"{a} = {int(m.sum())}" for a, m in maske.items()), ""]
     with tempfile.TemporaryDirectory() as td:
         for ad, m in maske.items():
@@ -476,7 +478,7 @@ def galeri(klasor: Path | None = None, n: int = 3, olcut: str = "YENI", tohum: i
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Görsel kontrol aracı (Adım 2b)")
+    ap = argparse.ArgumentParser(description="Görsel kontrol aracı")
     ap.add_argument("--video", help="ör. ex1_Honza")
     ap.add_argument("--kamera", default="cam1", choices=list(veri.KAMERALAR))
     ap.add_argument("--yonelim", type=int, default=0)

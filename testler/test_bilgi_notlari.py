@@ -1,4 +1,4 @@
-"""Bilgi notları (Güncelleme 08, Karar 30–31): hız, sol kol, kamera. Hata türü değildir."""
+"""Bilgi notları: hız, sol kol, kamera. Hata türü değildir."""
 import json
 
 import numpy as np

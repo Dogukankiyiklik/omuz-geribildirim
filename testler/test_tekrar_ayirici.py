@@ -1,4 +1,4 @@
-"""Karar 25 tekrar ayırıcı ve Karar 24 kural dosyası testleri."""
+"""Tekrar ayırıcı ve kural dosyası testleri."""
 import numpy as np
 import pandas as pd
 

@@ -1,4 +1,4 @@
-"""Adım 5 (Deney 3) testleri: sayı ekleri, faz/an seçimi, şiddet, şablonlar ve anahtar kelime çıkarıcı."""
+"""Geri bildirim (Deney 3) testleri: sayı ekleri, faz/an seçimi, şiddet, şablonlar ve anahtar kelime çıkarıcı."""
 import itertools
 
 import numpy as np
@@ -136,7 +136,7 @@ def test_cikarici_olumlu_sablonlar():
     assert gb.olumlu_cumle(151.4, 1, tohum=3) == gb.OLUMLU[0].format(t=151)
 
 
-# ---------------------------------------------------------------- Karar 21: sağlam ölçü
+# ---------------------------------------------------------------- sağlam ölçü
 def _saglam_durum():
     kol = _kol()
     faz = gb.anlatim_fazlari(kol)
@@ -212,7 +212,7 @@ def test_olcut_gorunurlugu():
     assert list(gb.olcut_gorunurlugu(dizi, "YENI")) == [1, 1, 1, 1]
 
 
-# ---------------------------------------------------------------- Karar 28: hasta cümlesi
+# ---------------------------------------------------------------- hasta cümlesi
 def test_yuvarla5():
     assert [gb.yuvarla5(x) for x in (0, 2.4, 2.5, 7.4, 7.5, 168.0, 172.6)] == [0, 0, 5, 5, 10, 170, 175]
     assert gb.yuvarla5(None) is None and gb.yuvarla5(np.nan) is None

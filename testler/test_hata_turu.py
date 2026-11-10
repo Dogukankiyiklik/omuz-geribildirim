@@ -1,4 +1,4 @@
-"""Adım 4 (Deney 2) testleri: yeni ölçütler, tek geçişli puanlar, karar kuralı."""
+"""Hata türü (Deney 2) testleri: yeni ölçütler, tek geçişli puanlar, karar kuralı."""
 import numpy as np
 import pandas as pd
 import pytest
@@ -59,7 +59,7 @@ def test_aci_bandi_puanlari_ayni_hesap():
         for k in ("Y", "Z"):
             assert E[(k, y)] == pytest.approx(E2[k], abs=1e-12)
     assert fark["Y"] < 0 and E[("Y", -1)] > 0 and E[("Y", 1)] == 0
-    # ayrıntı: imzalı fark ve bant dışı, Adım 5 için
+    # ayrıntı: imzalı fark ve bant dışı, geri bildirim için
     _, ay = ab.aci_bandi_hatasi(m, x, ["Y"], ayrinti=True)
     g = ay["gecerli"]
     assert np.allclose(ay["fark"]["Y"][g], x["Y"][g] - ay["mu"]["Y"][g])
@@ -105,7 +105,7 @@ def test_kaldirma_puanlari():
 
 
 def test_kaldirma_sapmasi_ilk_surum():
-    """İlk sürüm (Karar 17): d = (medyan − tepe) / max(IQR, 5°)."""
+    """İlk sürüm: d = (medyan − tepe) / max(IQR, 5°)."""
     t = [160.0, 170.0, 180.0, 190.0]                                  # medyan 175, IQR 15
     assert ht.kaldirma_sapmasi(145.0, t) == pytest.approx(2.0)
     assert ht.kaldirma_sapmasi(175.0, [175.0] * 4) == 0.0

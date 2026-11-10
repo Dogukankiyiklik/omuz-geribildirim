@@ -1,5 +1,5 @@
 """
-Anahtar kelime çıkarıcı için elle yazılmış cümleler (ADIM_05, önceden belirlenenler madde 8).
+Anahtar kelime çıkarıcı için elle yazılmış cümleler (önceden belirlendi).
 Deney 3 çalıştırılmadan önce yazıldı; şablonlardan farklı ifadeler, iki hatalı ve olumlu cümleler.
 Beklenen: söz edilen hata türleri, metindeki ilk geçiş sırasıyla.
 """

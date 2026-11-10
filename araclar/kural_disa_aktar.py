@@ -1,10 +1,10 @@
 """
-Uygulamanın karar kuralını dışa aktarır (Güncelleme 07, Karar 24).
+Uygulamanın karar kuralını dışa aktarır.
 
 Kural beş kişinin hepsinin önden + çapraz tekrarlarıyla kurulur. Prosedür LOSO'daki eğitim adımıyla
 birebir aynıdır (deneyler/deney3.kararlar ile aynı çağrılar): ölçekleme (medyan, IQR), yönler,
-on_kacma/kol_boyu seçimi, T ve şiddet eşikleri. Ana sistem (Karar 18): v2 açı bandı + yönlü + ilk sürüm
-kaldırma. Değerler LOSO'daki beş değerle yan yana yazdırılır (ADIM_06 için).
+on_kacma/kol_boyu seçimi, T ve şiddet eşikleri. Ana sistem (dondurulmuş): v2 açı bandı + yönlü + ilk sürüm
+kaldırma. Değerler LOSO'daki beş değerle yan yana yazdırılır (sonuclar/kural_disa_aktar/loso_karsilastirma.csv).
 
 Kullanım:
     python -m araclar.kural_disa_aktar        # birkaç saniye; önce python -m deneyler.deney2 çalışmış olmalı
@@ -73,7 +73,7 @@ def karsilastirma(kural, esik, loso_esik: pd.DataFrame, loso_siddet: pd.DataFram
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Uygulamanın karar kuralını dışa aktar (Karar 24)")
+    ap = argparse.ArgumentParser(description="Uygulamanın karar kuralını dışa aktar")
     ap.add_argument("--model", default=str(MODEL))
     args = ap.parse_args()
     utf8_cikti()

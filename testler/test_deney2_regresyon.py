@@ -1,8 +1,7 @@
 """
 Dondurulmuş Ex1 yöntemi (v2 yönlü + ilk sürüm kaldırma) kayıtlı Deney 2 kararlarını birebir üretmeli.
 Puanlar sonuclar/deney2/puanlar.csv'den okunur; karar kuralı kişi bazlı birini-dışarıda-bırak ile yeniden
-kurulur ve tahminler sonuclar/deney2/tahminler.csv ile karşılaştırılır. (Bu dosya, arşivdeki
-sonuclar/deney2_ilk/tahminler.csv ile v2 yönlü satırlarda birebir aynıdır; sadeleştirmede doğrulandı.)
+kurulur ve tahminler sonuclar/deney2/tahminler.csv ile karşılaştırılır.
 Dosyalar yoksa (ör. temiz klon) test atlanır.
 """
 import pandas as pd

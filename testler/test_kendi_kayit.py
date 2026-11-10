@@ -1,4 +1,4 @@
-"""Adım 7 betiği (deneyler/kendi_kayit.py): sıra, etiket okuma, eşleştirme ve önceden belirlenen metrikler."""
+"""Kendi kayıt betiği (deneyler/kendi_kayit.py): sıra, etiket okuma, eşleştirme ve önceden belirlenen metrikler."""
 import pandas as pd
 import pytest
 

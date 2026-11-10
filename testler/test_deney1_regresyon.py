@@ -2,8 +2,7 @@
 Deney 1 regresyon testi: kod değiştikten sonra Deney 1'in AUC tablosu (referans/beklenen_deney1_ozet.csv)
 ±0,01 içinde yeniden üretilmeli.
 
-Beklenen dosya, Deney 1 tek deneye indirildiğinde (ham / genel bant / kişiye özel açı bandı) üretildi.
-Sayıları, eski deney1b betiğinin açı bandı (v2) satırlarıyla birebir aynıydı (en büyük fark 0).
+Beklenen dosya Deney 1'in üç puanlama yolunu içerir: ham / genel bant / kişiye özel açı bandı.
 
   * test_sonuc_dosyasi : sonuclar/deney1/ozet.csv varsa onu karşılaştırır.
   * test_yeniden_uret  : deneyi orijinal veriyle (zip) geçici klasörde yeniden çalıştırıp

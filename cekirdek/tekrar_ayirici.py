@@ -49,10 +49,6 @@ class AyrilanTekrar:
     s: int            # 30° geçişi
     e: int            # 20° geçişi
 
-    @property
-    def dilim(self) -> slice:
-        return slice(self.bas, self.son + 1)
-
 
 def _nanmedyan(v) -> float:
     with warnings.catch_warnings():

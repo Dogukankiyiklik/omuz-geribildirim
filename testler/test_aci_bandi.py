@@ -1,6 +1,5 @@
 """Açı bandı testleri."""
 import numpy as np
-import pandas as pd
 import pytest
 
 from cekirdek import aci_bandi as ab
@@ -80,12 +79,6 @@ def test_yonlu():
     m = ab.aci_bandi_modeli([_tekrar(rng) for _ in range(5)], ["Y"])
     s = _tekrar(rng, silkme=0.05)  # Y düşer
     assert ab.aci_bandi_hatasi(m, s, ["Y"], yon={"Y": +1})[0]["Y"] < ab.aci_bandi_hatasi(m, s, ["Y"], yon={"Y": -1})[0]["Y"]
-
-
-def test_aci_eslemesi_ayni_faz():
-    ref = np.array([0, 30, 60, 90, 60, 30, 0.0])
-    kul = np.array([0, 60, 90, 30.0])
-    assert ab.aci_eslemesi(ref, kul).tolist() == [0, 2, 3, 5]
 
 
 @pytest.mark.skipif(not veri.ISKELET_ZIP.exists(), reason="orijinal zip yok")

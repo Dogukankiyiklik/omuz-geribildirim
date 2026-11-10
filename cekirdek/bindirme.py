@@ -37,9 +37,6 @@ KEMIKLER = [
 # Hangi ölçüt banttan çıkınca hangi kemik kırmızı olur (ve hangi eklem vurgulanır).
 OLCUT_UZUVLARI: dict[str, list[tuple[int, int]]] = {
     "YENI": [(8, 12)],
-    "M01": [(11, 12)],
-    "M33": [(11, 12)],
-    "M39_F2": [(11, 12), (12, 24)],
     "bas": [(7, 2), (2, 0), (0, 5), (5, 8)],
     "on_kacma": [(12, 14), (14, 16)],
     "kol_boyu": [(12, 14), (14, 16)],
@@ -72,16 +69,14 @@ class Bindirici:
     """Bir referans tekrarı bir kullanıcı tekrarına zamanda ve geometride çakıştırır."""
 
     def __init__(self, ref_dizi: np.ndarray, kul_dizi: np.ndarray, en_boy: float = EN_BOY,
-                 ref_kol: np.ndarray | None = None, kul_kol: np.ndarray | None = None,
-                 esleme: np.ndarray | None = None):
-        """esleme verilirse DTW yerine o kullanılır (ör. açı bandında aci_bandi.aci_eslemesi)."""
+                 ref_kol: np.ndarray | None = None, kul_kol: np.ndarray | None = None):
         self.P_ref = tum_noktalar(ref_dizi, en_boy)
         self.P_kul = tum_noktalar(kul_dizi, en_boy)
         s_ref, s_kul = Iskelet(ref_dizi, en_boy), Iskelet(kul_dizi, en_boy)
         ref_kol = OLCUTLER["kol"](s_ref) if ref_kol is None else ref_kol
         kul_kol = OLCUTLER["kol"](s_kul) if kul_kol is None else kul_kol
         # kullanıcı karesi -> referans karesi
-        self.esleme = kare_eslemesi(ref_kol, kul_kol) if esleme is None else np.asarray(esleme, dtype=int)
+        self.esleme = kare_eslemesi(ref_kol, kul_kol)
         self.kalca_ref, aci_ref = _govde(self.P_ref)
         self.kalca_kul, aci_kul = _govde(self.P_kul)
         self.olcek = s_kul.g0 / s_ref.g0

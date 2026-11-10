@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from cekirdek.aci_bandi import kare_hatasi
-from cekirdek.degerlendirme import auc, guven_araligi
+from cekirdek.degerlendirme import auc
 from cekirdek.geometri import aci, nokta
 from cekirdek.hizalama import dtw_yol
 from cekirdek.ozellikler import OLCUTLER, olcut, ozellikler
@@ -64,7 +64,6 @@ def test_auc():
     assert auc([3, 4, 5], [0, 1, 2]) == 1.0
     assert auc([0, 1], [0, 1]) == 0.5
     assert np.isnan(auc([], [1]))
-    assert guven_araligi(np.arange(101)) == (2.5, 97.5)
 
 
 def test_olcut_kaydi():

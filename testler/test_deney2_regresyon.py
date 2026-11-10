@@ -1,5 +1,5 @@
 """
-Dondurulmuş Ex1 yöntemi (v2 yönlü + ilk sürüm kaldırma) kayıtlı Deney 2 kararlarını birebir üretmeli.
+Dondurulmuş yöntem (açı bandı, yönlü) kayıtlı Deney 2 kararlarını birebir üretmeli.
 Puanlar sonuclar/deney2/puanlar.csv'den okunur; karar kuralı kişi bazlı birini-dışarıda-bırak ile yeniden
 kurulur ve tahminler sonuclar/deney2/tahminler.csv ile karşılaştırılır.
 Dosyalar yoksa (ör. temiz klon) test atlanır.

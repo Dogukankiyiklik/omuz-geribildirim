@@ -36,7 +36,7 @@ Uygulamanın karar kuralı dosyası `modeller/kural_ex1.json` ise `araclar/kural
 
 | Dosya | Görevi |
 | --- | --- |
-| `tablolar.py` | Deneylerin ortak tabloları: görüş grubu maskesi, AUC, kişi bazlı AUC, bootstrap güven aralığı. |
+| `tablolar.py` | Deneylerin ortak tabloları: görüş grubu maskesi, AUC, kişi bazlı AUC. |
 | `hepsi.py` | **Bütün deneyleri temiz bir kopyada yeniden çalıştırır** ve çıkan her CSV'yi kayıtlı sonuçla karşılaştırır. Son commit'in kopyasını açar (`git worktree`), veriyi yalnızca okur ve özeti `sonuclar/hepsi/ozet.md`'ye yazar. |
 
 ```bash

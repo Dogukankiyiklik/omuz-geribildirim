@@ -10,11 +10,9 @@ __pycache__/
 # Claude Code'un yerel proje notu (depoya girmez)
 CLAUDE.local.md
 
-# Veri seti (Zenodo'dan indirilir); yalnızca açıklama ve etiket dosyaları depoda
+# Veri seti (Zenodo'dan indirilir) ve kişisel kayıtlar; depoda yalnızca açıklama dosyası var
 veri/*
 !veri/README.md
-!veri/Segmentation.csv
-!veri/Error_types.csv
 
 # Kişisel kayıtlar
 profiller/

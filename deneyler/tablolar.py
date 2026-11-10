@@ -3,7 +3,7 @@ Deneyler için ortak sonuç tabloları.
 
 Girdi: uzun biçimli tekrar tablosu. Her satır bir (koşul, tekrar) çiftidir ve şu sütunları taşır:
 video, kamera, yonelim, satir, kisi, gorus, hata, ek_hata, bant_<ölçüt>, ve koşulu tanımlayan
-anahtar sütunlar (ör. "bant", "kosul").
+anahtar sütunlar (ör. "kosul").
 
 Her ana sonuç iki biçimde verilir: "uygulama senaryosu: önden + çapraz
 (|görüş| ≤ 60°)" ve "tüm görüşler". Profil ayrıca (sınırlılık).
@@ -14,11 +14,9 @@ import numpy as np
 import pandas as pd
 
 from cekirdek import veri
-from cekirdek.degerlendirme import guven_araligi, kisi_bootstrap, psi
 
 SILKME = "ERR_ELEVATED_SHOULDER"
 GORUS_GRUPLARI = ["önden (0–20°)", "çapraz (30–60°)", "profil (70–90°)"]
-TEKRAR_ANAHTARI = ["video", "kamera", "yonelim", "satir", "kisi", "hata", "ek_hata", "gorus"]
 ONDEN_CAPRAZ = "önden+çapraz"
 TUMU = "tüm görüşler"
 ONDEN_CAPRAZ_SINIR = 60
@@ -58,7 +56,7 @@ def _auc(g: pd.DataFrame, poz, neg, c: str) -> float:
 
 def auc_ozeti(df: pd.DataFrame, anahtarlar: list[str], olcutler) -> pd.DataFrame:
     """Koşul × ölçüt AUC tablosu: silkme/doğru ve silkme/diğer (tüm görüşler ve önden+çapraz),
-    görüş grupları, kişi özeti (silkme/doğru, tüm görüşler), Ψ, NaN E sayısı."""
+    görüş grupları, kişi özeti (silkme/doğru, tüm görüşler), NaN E sayısı."""
     kt = kisi_auc(df, anahtarlar, olcutler)
     satirlar = []
     for anahtar, g in df.groupby(anahtarlar, sort=False, observed=True):
@@ -82,7 +80,6 @@ def auc_ozeti(df: pd.DataFrame, anahtarlar: list[str], olcutler) -> pd.DataFrame
             v = sec[sec["ölçüt"] == k]["AUC silkme/doğru"]
             r["kişi AUC ort."], r["kişi AUC en düşük"], r["kişi AUC en yüksek"] = v.mean(), v.min(), v.max()
             r["kişi özeti"] = f"{v.mean():.2f} ({v.min():.2f}–{v.max():.2f})".replace(".", ",")
-            r["Ψ (M39)"] = psi(g[g[c].notna()], c, SILKME)
             r["E boş (NaN) tekrar"] = int(g[c].isna().sum())
             satirlar.append(r)
     return pd.DataFrame(satirlar)
@@ -106,42 +103,3 @@ def kisi_auc_genis(df, anahtarlar, olcutler, gorus: str = TUMU) -> pd.DataFrame:
     kt = kisi_auc(df, anahtarlar, olcutler, gorus)
     return kt.pivot_table(index=anahtarlar + ["ölçüt"], columns="kisi", values="AUC silkme/doğru",
                           sort=False).reset_index()
-
-
-def fark_bootstrap(df: pd.DataFrame, kosul_sutunu: str, farklar, n: int = 2000, tohum: int = 1,
-                   ayrimlar=("silkme/doğru",), gorusler=(TUMU, ONDEN_CAPRAZ)) -> pd.DataFrame:
-    """
-    Koşullar arası AUC farkları için kişi bazlı, eşleştirilmiş bootstrap %95 GA.
-    farklar: [(ölçüt, x, y), ...] → "AUC(x) − AUC(y)"; x, y kosul_sutunu değerleri.
-    """
-    olcutler = sorted({k for k, _, _ in farklar})
-    kosullar = sorted({x for _, x, _ in farklar} | {y for _, _, y in farklar})
-    d0 = df[df[kosul_sutunu].astype(str).isin(kosullar)].copy()
-    d0[kosul_sutunu] = d0[kosul_sutunu].astype(str)
-    genis = d0.set_index(TEKRAR_ANAHTARI + [kosul_sutunu])[[f"bant_{k}" for k in olcutler]].unstack(kosul_sutunu)
-    genis.columns = [f"{a}_{b}" for a, b in genis.columns]
-    genis = genis.reset_index()
-
-    def istatistik(b):
-        s, d, o = maskeler(b)
-        neg = {"silkme/doğru": d, "silkme/diğer": o}
-        cikti = {}
-        for gorus in gorusler:
-            m = gorus_maskesi(b, gorus)
-            for ayrim in ayrimlar:
-                for k, x, y in farklar:
-                    ax = _auc(b, s & m, neg[ayrim] & m, f"bant_{k}_{x}")
-                    ay = _auc(b, s & m, neg[ayrim] & m, f"bant_{k}_{y}")
-                    cikti["|".join((gorus, ayrim, k, x, y))] = ax - ay
-        return cikti
-
-    nokta = istatistik(genis)
-    bs = kisi_bootstrap(genis, istatistik, n=n, tohum=tohum)
-    satirlar = []
-    for c in bs.columns:
-        alt, ust = guven_araligi(bs[c])
-        gorus, ayrim, k, x, y = c.split("|")
-        satirlar.append({"görüş": gorus, "ayrım": ayrim, "ölçüt": k, "fark": f"{x} − {y}",
-                         "nokta tahmini": nokta[c], "bootstrap ort.": bs[c].mean(),
-                         "GA %2,5": alt, "GA %97,5": ust, "GA sıfırı içeriyor": bool(alt <= 0 <= ust)})
-    return pd.DataFrame(satirlar)

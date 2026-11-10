@@ -3,8 +3,7 @@ Uygulamanın karar kuralını dışa aktarır.
 
 Kural beş kişinin hepsinin önden + çapraz tekrarlarıyla kurulur. Prosedür LOSO'daki eğitim adımıyla
 birebir aynıdır (deneyler/deney3.kararlar ile aynı çağrılar): ölçekleme (medyan, IQR), yönler,
-on_kacma/kol_boyu seçimi, T ve şiddet eşikleri. Ana sistem (dondurulmuş): v2 açı bandı + yönlü + ilk sürüm
-kaldırma. Değerler LOSO'daki beş değerle yan yana yazdırılır (sonuclar/kural_disa_aktar/loso_karsilastirma.csv).
+on_kacma/kol_boyu seçimi, T ve şiddet eşikleri. Yöntem (dondurulmuş): açı bandı, yönlü. Değerler LOSO'daki beş değerle yan yana yazdırılır (sonuclar/kural_disa_aktar/loso_karsilastirma.csv).
 
 Kullanım:
     python -m araclar.kural_disa_aktar        # birkaç saniye; önce python -m deneyler.deney2 çalışmış olmalı
@@ -15,7 +14,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import subprocess
-from pathlib import Path
 
 import pandas as pd
 

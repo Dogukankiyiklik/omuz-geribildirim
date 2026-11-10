@@ -7,7 +7,7 @@ adlandırıyor mu? Doğru tekrarlarda gereksiz uyarı ne sıklıkta?
 Adımlar:
   1. Karar: Deney 2 ile aynı kod (sonuclar/deney2/puanlar.csv + cekirdek/hata_turu.esik_sec, kişi bazlı
      birini-dışarıda-bırak); sonuclar/deney2/tahminler.csv ile birebir aynı olduğu denetlenir.
-  2. Şiddet (hafif / orta / belirgin): eşikler eğitim kişilerinin hatalı tekrarlarından (gb.siddet_esikleri).
+  2. Şiddet (hafif / belirgin / çok belirgin): eşikler eğitim kişilerinin hatalı tekrarlarından (gb.siddet_esikleri).
   3. Ölçü: söylenen hatanın "normalde X, sende Y" değerleri. Uygulamanın kullandığı sağlam ölçü:
      tek kare yerine seçilen fazdaki birkaç karenin medyanı (cekirdek/geribildirim.py).
   4. Metin: en fazla 2 hata; hasta cümlesi ve uzman ayrıntısı (cekirdek/geribildirim.py).
@@ -51,13 +51,13 @@ TOHUM = 0
 
 
 # ---------------------------------------------------------------- 1) karar (Deney 2 ile aynı)
-def kararlar(puan: pd.DataFrame, kaldirma_surumu: str = ht.VARSAYILAN_KALDIRMA):
+def kararlar(puan: pd.DataFrame):
     """Kişi bazlı birini-dışarıda-bırak: kural (Deney 2 ile aynı), ilk iki hata, şiddet eşikleri ve sınıfları."""
     satirlar, esik_kayit, kurallar = [], [], {}
     for kisi in sorted(puan.kisi.unique()):
         egitim = puan[(puan.kisi != kisi) & gorus_maskesi(puan, deney2.AYAR_GORUSU)]
         test = puan[puan.kisi == kisi]
-        kural = ht.esik_sec(egitim, YONLU, ht.EX1, kaldirma_surumu)
+        kural = ht.esik_sec(egitim, YONLU, ht.EX1)
         esik = gb.siddet_esikleri(egitim, kural)
         z = kural.z(test)
         ii = ht.ilk_iki(z, kural.T)
@@ -126,9 +126,6 @@ def ayrintilar(tekrarlar) -> dict:
     return cikti
 
 
-kod_uret = degerlendirici.kod_uret   # uygulamayla ortak (cekirdek/degerlendirici.py)
-
-
 def _sayi_var(metin: str) -> bool:
     return any(ch.isdigit() for ch in metin)
 
@@ -144,7 +141,7 @@ def cumleler(p: pd.DataFrame, kurallar: dict, ayr: dict, tohum: int = TOHUM,
         for sira in (1, 2):
             h = r[f"soylenen{sira}"]
             if h and h != ht.DOGRU:
-                kodlar.append(kod_uret(h, r[f"siddet{sira}"], kural, a, olcu_surumu))
+                kodlar.append(degerlendirici.kod_uret(h, r[f"siddet{sira}"], kural, a, olcu_surumu))   # uygulamayla ortak
         metin = gb.iki_katman(kodlar, a["tepe"], int(r.satir), tohum)
         niyet = [k.hata for k in kodlar]
         s = {c: r[c] for c in ANAHTAR + ["kisi", "tekrar_no", "gorus", "gorus_grubu", "hata", "ek_hata",

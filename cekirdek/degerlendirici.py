@@ -37,7 +37,7 @@ def kaldirma_ekle(E: dict, fark: dict, f: dict, kalibrasyon_f: list[dict], yonle
 
 
 def tekrar_puanlari(model, kalibrasyon_f: list[dict], f: dict, olcutler=OLCUTLER, kaldirma: bool = True):
-    """Açı bandı (v2) modeliyle puanlar: (E[(ölçüt, yön)], fark[ölçüt], ek)."""
+    """Açı bandı modeliyle puanlar: (E[(ölçüt, yön)], fark[ölçüt], ek)."""
     E, fark, ek = aci_bandi_puanlari(model, f, olcutler, YONLER)
     ek = {"kapsam": ek["kapsam"], "aralik_disi": float(ek["aralik_disi"])}
     if kaldirma:

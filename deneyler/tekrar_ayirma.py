@@ -26,7 +26,7 @@ from cekirdek import tekrar_ayirici as ta
 from cekirdek import veri
 from cekirdek.konsol import sonuclari_yaz, utf8_cikti
 from cekirdek.ozellikler import ozellikler
-from cekirdek.tekrar_ayirici import IOU_ESIGI, eslestir, iou  # noqa: F401 (eşleştirme çekirdekte)
+from cekirdek.tekrar_ayirici import eslestir, iou
 from deneyler.tablolar import ONDEN_CAPRAZ, TUMU, gorus_maskesi
 
 CIKTI = veri.KOK / "sonuclar" / "tekrar_ayirma"

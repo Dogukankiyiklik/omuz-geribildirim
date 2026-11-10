@@ -27,7 +27,7 @@ içindeyse 0, dışındaysa (sapma − τ)/τ (en fazla 1); E bu kare puanların
 yalnızca veri setinin etiketlediği tekrar kareleri kullanılır.
 
 Kullanım:
-    python -m deneyler.deney1            # ~1–2 dk
+    python -m deneyler.deney1            # ~20 sn
 Çıktı: sonuclar/deney1/{ozet.csv, kisi_auc.csv, kisi_auc_onden_capraz.csv, tekrarlar.csv, sonuclar.xlsx}
   Not: tablolarda puan sütunları, ham dahil, "bant_<ölçü>" adını taşır (ortak tablo kodu bu adı bekler).
 """
@@ -37,17 +37,16 @@ import argparse
 import time
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from cekirdek import veri
 from cekirdek.aci_bandi import aci_bandi_hatasi, aci_bandi_modeli
-from cekirdek.adil_model import adil_ortalama_hata, birini_disarida_alt_kumeler
+from cekirdek.adil_model import adil_ortalama_hata
 from cekirdek.degerlendirme import ham_skor
 from cekirdek.konsol import sonuclari_yaz, utf8_cikti
 from cekirdek.ozellikler import ozellikler
 from deneyler import tablolar as tb
-from deneyler.tablolar import GORUS_GRUPLARI, SILKME, maskeler  # noqa: F401 (dışarıya da sunulur)
+from deneyler.tablolar import maskeler
 
 OLCUTLER = ["YENI", "M33", "M39_F2", "M01"]
 KOSULLAR = ["ham", "genel", "kisiye_ozel"]
@@ -77,52 +76,19 @@ def _cekimler(tekrarlar) -> dict:
 
 
 # ---------------------------------------------------------------- kişiye özel açı bandı
-def kisiye_ozel_degerlendirmeleri(tekrarlar, ozl=None, olcutler=OLCUTLER):
-    """
-    Her tekrar için kişiye özel açı bandı değerlendirmesi (sözlük):
-      t, f (etiketli kareler), model, digerleri / digerleri_f (bandın doğru tekrarları), E,
-      ek (kapsam, aralik_disi, tepe_acisi), model_sayisi (hatalı tekrarda n, doğruda 1).
-    """
-    ozl = ozellik_tablosu(tekrarlar, olcutler) if ozl is None else ozl
-    for _, grup in veri.gruplara_ayir(tekrarlar).items():
-        tl = [{"t": t, "f": _kes(ozl[id(t)], t.etiketli)} for t in grup]
-        dogrular = [x for x in tl if x["t"].dogru]
-        if len(dogrular) < EN_AZ_DOGRU:
-            continue
-        for x in tl:
-            if x["t"].dogru:
-                digerleri = [u for u in dogrular if u is not x]
-                fl = [u["f"] for u in digerleri]
-                model = aci_bandi_modeli(fl, olcutler)
-                E, ek = aci_bandi_hatasi(model, x["f"], olcutler)
-                yield {"t": x["t"], "f": x["f"], "model": model, "digerleri": [u["t"] for u in digerleri],
-                       "digerleri_f": fl, "E": E, "ek": ek, "model_sayisi": 1}
-            else:
-                yield _adil_model(x, dogrular, olcutler)
-
-
-def _adil_model(x, dogrular, olcutler):
-    """
-    Hatalı tekrar: E = n adet (n−1)'li bandın E ortalaması. kapsam = bantların ortalaması;
-    aralik_disi = bantların yarısından fazlasında; tepe_acisi tekrarın kendisinden.
-    Görsel araçlar için "model" ilk bant (1. doğru tekrar dışarıda); gösterilen E yine ortalamadır.
-    """
-    def hata(alt):
-        m = aci_bandi_modeli([u["f"] for u in alt], olcutler)
-        E, ek = aci_bandi_hatasi(m, x["f"], olcutler)
-        ek["_model"] = m
-        return E, ek
-
-    E, sonuclar = adil_ortalama_hata(dogrular, hata, olcutler)
-    ekler = [ek for _, ek in sonuclar]
-    ek = {"kapsam": float(np.mean([e["kapsam"] for e in ekler])),
-          "aralik_disi": bool(np.mean([e["aralik_disi"] for e in ekler]) > 0.5),
-          "tepe_acisi": ekler[0]["tepe_acisi"]}
-    ilk = birini_disarida_alt_kumeler(dogrular)[0]
-    return {"t": x["t"], "f": x["f"], "model": ekler[0]["_model"],
-            "digerleri": [u["t"] for u in dogrular], "digerleri_f": [u["f"] for u in dogrular],
-            "model_digerleri_f": [u["f"] for u in ilk],
-            "E": E, "ek": ek, "model_sayisi": len(dogrular)}
+def kisiye_ozel_degerlendirmeleri(tekrarlar, ozl, olcutler=OLCUTLER):
+    """Her tekrar için (tekrar, E): kişinin aynı çekimdeki doğru tekrarlarından kurulan açı bandıyla."""
+    for _, grup in _cekimler(tekrarlar).items():
+        tl = [(t, _kes(ozl[id(t)], t.etiketli)) for t in grup]
+        dogrular = [f for t, f in tl if t.dogru]
+        for t, f in tl:
+            if t.dogru:   # birini-dışarıda-bırak: tekrarın kendisi banda girmez
+                model = aci_bandi_modeli([u for u in dogrular if u is not f], olcutler)
+                yield t, aci_bandi_hatasi(model, f, olcutler)[0]
+            else:         # adil model: n adet (n−1)'li bandın E ortalaması
+                def hata(alt, f=f):
+                    return aci_bandi_hatasi(aci_bandi_modeli(alt, olcutler), f, olcutler)
+                yield t, adil_ortalama_hata(dogrular, hata, olcutler)[0]
 
 
 # ---------------------------------------------------------------- üç puanlama yolu
@@ -153,7 +119,7 @@ def genel_puanlar(tekrarlar, ozl) -> list[dict]:
 
 
 def kisiye_ozel_puanlar(tekrarlar, ozl) -> list[dict]:
-    return [_satir(d["t"], "kisiye_ozel", d["E"]) for d in kisiye_ozel_degerlendirmeleri(tekrarlar, ozl)]
+    return [_satir(t, "kisiye_ozel", E) for t, E in kisiye_ozel_degerlendirmeleri(tekrarlar, ozl)]
 
 
 # ---------------------------------------------------------------- çalıştır
@@ -172,7 +138,7 @@ def calistir(cikti=CIKTI, yazdir=True, tekrarlar=None) -> dict:
     df = pd.DataFrame(kayit)
     df["kosul"] = pd.Categorical(df.kosul, categories=KOSULLAR)
     df = df.sort_values(["kosul", "video", "kamera", "yonelim", "satir"]).reset_index(drop=True)
-    ozet = tb.auc_ozeti(df, ["kosul"], OLCUTLER).drop(columns=["Ψ (M39)"])
+    ozet = tb.auc_ozeti(df, ["kosul"], OLCUTLER)
     tablolar = {"tekrarlar": df, "ozet": ozet,
                 "kisi_auc": tb.kisi_auc_genis(df, ["kosul"], OLCUTLER),
                 "kisi_auc_onden_capraz": tb.kisi_auc_genis(df, ["kosul"], OLCUTLER, tb.ONDEN_CAPRAZ)}

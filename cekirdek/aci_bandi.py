@@ -2,10 +2,9 @@
 Açı bandı: kol açısına koşullu kişiye özel tolerans bandı.
 
 Soru: "Kol θ derecedeyken bu kişinin omzu normalde nerede?"
-M39'un zaman bandı tekrarları DTW ile zamanda hizalar; kol farklı yüksekliğe
-kalkınca omuz farklı kol açılarında karşılaştırılır. Açı bandında zaman
-ekseni yoktur: her kare, kolun o anki açısına ve hareketin fazına göre karşılaştırılır. Referans
-tekrar gerekmez, bu yüzden rastgelelik de yoktur.
+Literatürdeki bant (M39) tekrarları DTW ile zamanda hizalar; kol farklı yüksekliğe kalkınca omuz
+farklı kol açılarında karşılaştırılır. Açı bandında zaman ekseni yoktur: her kare, kolun o anki
+açısına ve hareketin fazına göre karşılaştırılır.
 
 Tanım (parametreler önceden sabitlendi; test verisine bakarak DEĞİŞTİRİLMEZ):
   1. Yalnızca etiketli tekrar kareleri kullanılır (çağıran taraf keser).
@@ -230,19 +229,3 @@ def aci_bandi_puanlari(model: AciBandi, tekrar: dict, olcutler, yonler=(0, 1, -1
             E[(k, y)] = float(kare_hatasi(tekrar[k][g], mu, tau, y).mean()) if g.any() else np.nan
         fark[k] = float(np.mean(tekrar[k][g] - mu)) if g.any() else np.nan
     return E, fark, ek
-
-
-def aci_eslemesi(ref_kol: np.ndarray, kul_kol: np.ndarray) -> np.ndarray:
-    """
-    Görselleştirme için: kullanıcının her karesine, referans tekrarda AYNI FAZDA ve kol açısı en yakın
-    kare. (Zaman bandındaki DTW eşlemesinin açı bandındaki karşılığı; yalnızca bindirme için.)
-    """
-    rf, _ = fazlar(ref_kol)
-    kf, _ = fazlar(kul_kol)
-    cikti = np.empty(len(kul_kol), dtype=np.int64)
-    for j in range(len(kul_kol)):
-        aday = np.flatnonzero(rf == kf[j])
-        if len(aday) == 0:
-            aday = np.arange(len(ref_kol))
-        cikti[j] = aday[np.argmin(np.abs(ref_kol[aday] - kul_kol[j]))]
-    return cikti

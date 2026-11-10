@@ -1,18 +1,32 @@
+# Python ortamı ve önbellekler
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# Gizli anahtarlar
+.env
+
+# Claude Code'un yerel proje notu (depoya girmez)
+CLAUDE.local.md
+
+# Veri seti (Zenodo'dan indirilir); yalnızca açıklama ve etiket dosyaları depoda
 veri/*
 !veri/README.md
 !veri/Segmentation.csv
 !veri/Error_types.csv
+
+# Kişisel kayıtlar
 profiller/
 oturumlar/
-*.task
-.env
-sonuclar/deney4/onbellek.jsonl
-# Üretilen videolar (yeniden üretilebilir; büyük)
-sonuclar/**/*.mp4
-.pytest_cache/
-# Kişisel görüntü (Karar 56; kişi 1 kendi kaydı): yerelde kalır
 sonuclar/sunum/4b_*.png
 sonuclar/sunum/5b_*.png
+
+# MediaPipe modeli (uygulama ilk çalıştırmada indirir)
+*.task
+
+# Üretilen videolar (yeniden üretilebilir; büyük)
+sonuclar/**/*.mp4
+
+# Arşivlenen LLM deneyinin yerel önbelleği
+sonuclar/deney4/onbellek.jsonl

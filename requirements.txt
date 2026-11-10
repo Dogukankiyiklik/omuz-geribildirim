@@ -1,16 +1,15 @@
-numpy>=1.26
-pandas>=2.1
-scipy>=1.11
-matplotlib>=3.8
-# Karar 27: veri seti MediaPipe 0.10.20 ile üretildi; 0.10.20 numpy<2 gerektirdiği için kurulmadı,
-# uygulama 1.2.2 ile sınandı (pose_landmarker_full). Fark ADIM_06 ve sınırlılıklarda.
+# Python 3.11.9 ile sınandı. Sürümler, projenin geliştirildiği ortamdaki sürümlerdir.
+numpy==2.4.6
+pandas==3.1.1
+scipy==1.17.1
+matplotlib==3.11.2
+# Veri setindeki iskeletler MediaPipe 0.10.20 ile üretildi; uygulama 1.2.2 ile çalışır
+# (pose_landmarker_full modeli).
 mediapipe==1.2.2
-opencv-python>=4.9
-pillow>=10.0
-pytest>=8.0
-# DTW hızlandırma (cekirdek/hizalama.py); yoksa saf Python ile aynı sonuç, yavaş
-numba>=0.60
-# Sonuçların Excel kopyası (sonuclar.xlsx)
-openpyxl>=3.1
-# Adım 8 (LLM): yeni paket gerekmez; cekirdek/llm.py Gemini REST ve yerel Ollama'ya standart
-# kütüphanedeki urllib ile bağlanır.
+opencv-python==5.0.0.93
+pillow==13.0.0
+pytest==9.2.0
+# İsteğe bağlı: DTW'yi hızlandırır. Kurulu değilse sonuç aynıdır, yalnızca daha yavaştır.
+numba==0.68.1
+# Sonuç tablolarının Excel kopyası (.xlsx) için
+openpyxl==3.1.5

@@ -1,10 +1,10 @@
 """
-Deney 1 v2 şekilleri (Adım 2c).
+Deney 1 v2 şekilleri.
 
   1. sonuclar/deney1_v2/auc.png : koşullara göre YENI AUC'si (silkme/doğru ve silkme/diğer);
-                                  çubuk = tüm veri, noktalar = kişiler (Karar 5)
+                                  çubuk = tüm veri, noktalar = kişiler
   2. sonuclar/deney1_v2/ornekler/<tekrar>.png : aynı tekrar v1 (zaman bandı) ve v2 (açı bandı) yan yana
-     Örnekler: Petra cam1 o0 t5, Honza cam1 o0 t5, Terka cam1 o20 t10 (Güncelleme 02).
+     Örnekler: Petra cam1 o0 t5, Honza cam1 o0 t5, Terka cam1 o20 t10.
 
 Kullanım:
     python -m deneyler.deney1_v2_sekiller     # önce: python -m deneyler.deney1_v2
@@ -110,7 +110,7 @@ def aci_bandi_ciz(ax, d, olcut=OLCUT, isaret_aci=90.0):
     """v2: x = kol açısı, y = ölçüt; faz başına bant ve tekrarın kareleri."""
     model = d["model"]
     _, ek = ab.aci_bandi_hatasi(model, d["f"], d2.OLCUTLER, ayrinti=True)
-    # Hatalı tekrarda (Karar 7) E, kapsam ve bayrak n modelin ortalaması; çizilen bant ilk modelden.
+    # Hatalı tekrarda E, kapsam ve bayrak n modelin ortalaması; çizilen bant ilk modelden.
     E = d["E"]
     ek.update({k: d["ek"][k] for k in ("kapsam", "aralik_disi")})
     kol, y = d["f"]["kol"], d["f"][olcut]

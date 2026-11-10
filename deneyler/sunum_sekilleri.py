@@ -1,5 +1,5 @@
 """
-Sunum için şekil adayları (Karar 38) → sonuclar/sunum/. Hangilerinin slayta gireceğine 13–15 Kasım'da karar verilir.
+Sunum şekilleri → sonuclar/sunum/.
 
 Sayılar yalnızca kayıtlı sonuç dosyalarından okunur; hiçbir deney yeniden çalıştırılmaz.
   1_problem.png        : bantsız (ham ölçü) ile kişiye özel açı bandı, omuz silkme tespiti (Ex1, YENI; Deney 1, 1b)
@@ -11,17 +11,17 @@ Sayılar yalnızca kayıtlı sonuç dosyalarından okunur; hiçbir deney yeniden
                          bindirme, kırmızı uzuv
   5_bindirme.png       : aynı tekrarın 3 karesi (kaldırırken, tepede, indirirken): turkuaz referans + kullanıcı iskeleti
   demo_yedek_veriseti.mp4: uygulama ekranının ~25 s'lik kaydı (Honza, tekrar 5–7), pencere açmadan aynı çizim koduyla
-Karar 56 (--kendi-kayit): kişi 1'in kendi kaydından (veri/kendi_kayit/kisi1/, MediaPipe noktaları önbellekten)
+--kendi-kayit: kişi 1'in kendi kaydından (veri/kendi_kayit/kisi1/, MediaPipe noktaları önbellekten)
   4b_geri_bildirim.png, 5b_bindirme.png : tekrar 7 (omuz) için 4 ve 5'in aynısı
   demo_kisi1.mp4      : tekrar 4 (doğru), 7 (omuz), 11 (baş sola), 6 (az kaldırma) ve oynatımları (~45–60 s)
   Profil profiller/kisi1.npz olarak kaydedilir (canlı demo komutu bunu kullanır). Kişisel görüntü: git'e girmez.
 4 ve 5 ile video, uygulamanın kendi kodunu (uygulama/panel.py, uygulama/oturum.py) pencere açmadan çalıştırır; profil
-Karar 40'taki veri seti profilidir (Honza cam1 yönelim 0, kalibrasyon tekrarları 1, 2, 3, 9, 10).
+uygulama.main --veri-seti ile aynı veri seti profilidir (Honza cam1 yönelim 0, kalibrasyon tekrarları 1, 2, 3, 9, 10).
 
 Kullanım:
     python -m deneyler.sunum_sekilleri                 # ~2 dk (MediaPipe ~45 s)
     python -m deneyler.sunum_sekilleri --uygulamasiz   # yalnızca 1–3, ~15 s
-    python -m deneyler.sunum_sekilleri --kendi-kayit   # yalnızca 4b, 5b ve demo_kisi1.mp4 (Karar 56), ~3–5 dk
+    python -m deneyler.sunum_sekilleri --kendi-kayit   # yalnızca 4b, 5b ve demo_kisi1.mp4, ~3–5 dk
 """
 from __future__ import annotations
 
@@ -74,8 +74,8 @@ def _satir(df, **kosul):
 
 
 def auc_cubuklari(ax, cubuklar: list[tuple[str, float, list[float], str]], baslik: str, deger_ustte: bool = False):
-    """cubuklar: (etiket, AUC, kişi AUC'leri, renk). Kişi değerleri nokta (Karar 5).
-    deger_ustte: değer yazısı çubuğun içi yerine üstüne, kişi noktalarının da üstüne yazılır (Karar 44)."""
+    """cubuklar: (etiket, AUC, kişi AUC'leri, renk). Kişi değerleri nokta.
+    deger_ustte: değer yazısı çubuğun içi yerine üstüne, kişi noktalarının da üstüne yazılır."""
     x = np.arange(len(cubuklar))
     for i, (ad, v, kisi, renk) in enumerate(cubuklar):
         ax.bar(i, v, width=0.56, color=renk, zorder=2)
@@ -99,7 +99,7 @@ def auc_cubuklari(ax, cubuklar: list[tuple[str, float, list[float], str]], basli
 
 
 def onden_capraz_notu(oz1b: pd.DataFrame) -> str:
-    """Karar 44: altyazıya önden + çapraz değerleri (deney1b/ozet.csv, v2, YENI)."""
+    """Altyazıya önden + çapraz değerleri (deney1b/ozet.csv, v2, YENI)."""
     def v(kosul):
         x = float(_satir(oz1b, bant="v2", kosul=kosul, **{"ölçüt": "YENI"})["AUC silkme/doğru (önden+çapraz)"])
         return f"{x:.2f}".replace(".", ",")
@@ -294,7 +294,7 @@ def bindirme_sekli(k, o, depo, G: int, Y: int, yol: Path, altyazi: str) -> Path:
     return _kaydet(fig, yol)
 
 
-# ---------------------------------------------------------------- Karar 56: kişi 1'in kendi kaydı
+# ---------------------------------------------------------------- kişi 1'in kendi kaydı
 ETIKET_ADI = {"dogru": "doğru", "omuz": "omuz silkmesi", "bas": "baş eğme", "dirsek": "dirsek bükme",
               "az_kaldirma": "yetersiz kaldırma", "one_kacma": "kolun öne kaçması"}
 
@@ -309,10 +309,10 @@ def _baslik_karesi(G: int, Y: int, metin1: str, metin2: str) -> np.ndarray:
 def kendi_kayit_ciktilari(klasor: Path, kisi: str = "kisi1", secim=(4, 7, 11, 6), hedef_no: int = 7,
                           once_s: float = 2.0, sonra_s: float = 1.5, baslik_s: float = 1.5) -> list[Path]:
     """
-    Karar 56: kişi 1'in kalibrasyonu (profil) + test videosunda seçilen tekrarlar ve oynatımları.
-    uygulama_ciktilari ile aynı döngü (aynı panel, oturum ve oynatım kodu); MediaPipe noktaları Adım 7'nin
+    Kişi 1'in kalibrasyonu (profil) + test videosunda seçilen tekrarlar ve oynatımları.
+    uygulama_ciktilari ile aynı döngü (aynı panel, oturum ve oynatım kodu); MediaPipe noktaları kendi kayıt deneyinin
     önbelleğinden (aynı video, aynı model: veri/ara/kendi_kayit/), yoksa durur. Kalibrasyon yığın modunun
-    kalibre_et'i ile (Adım 7 ile aynı) kurulur ve profiller/<kisi>.npz olarak kaydedilir; değerlendirme bu
+    kalibre_et'i ile (kendi kayıt deneyiyle aynı) kurulur ve profiller/<kisi>.npz olarak kaydedilir; değerlendirme bu
     profili yükleyerek yapılır (canlı demo komutu ile aynı yol).
     """
     import tempfile
@@ -337,7 +337,7 @@ def kendi_kayit_ciktilari(klasor: Path, kisi: str = "kisi1", secim=(4, 7, 11, 6)
         o.kalibrasyon, o.profil = prof.kalibrasyon, prof.profil
         return o
 
-    # 1. geçiş (görüntüsüz): tekrar sınırları; etiketlerle sırayla eşlenir (Adım 7'deki gibi)
+    # 1. geçiş (görüntüsüz): tekrar sınırları; etiketlerle sırayla eşlenir (kendi kayıt deneyindeki gibi)
     o1 = yeni_oturum()
     oturum_isle(lm_hepsi, o1)
     etiket = etiketleri_oku(kk / "etiketler.csv").set_index("tekrar_no")
@@ -434,16 +434,16 @@ def kendi_kayit_ciktilari(klasor: Path, kisi: str = "kisi1", secim=(4, 7, 11, 6)
     for no in secim:
         c = kayit[no].sonuc.hasta_cumlesi
         print(f"  tekrar {no} ({etiket.loc[no, 'etiket']}): {c}\n"
-              f"      Adım 7 kaydıyla {'AYNI' if c == kayitli.loc[no, 'hasta_cumlesi'] else 'FARKLI'}")
+              f"      kendi kayıt deneyiyle {'AYNI' if c == kayitli.loc[no, 'hasta_cumlesi'] else 'FARKLI'}")
     return yollar
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Sunum şekil adayları (Karar 38)")
+    ap = argparse.ArgumentParser(description="Sunum şekil adayları")
     ap.add_argument("--cikti", default=str(CIKTI))
     ap.add_argument("--uygulamasiz", action="store_true", help="yalnızca 1–3 (MediaPipe çalıştırılmaz)")
     ap.add_argument("--kendi-kayit", action="store_true",
-                    help="yalnızca kişi 1'in 4b, 5b ve demo_kisi1.mp4'ü (Karar 56)")
+                    help="yalnızca kişi 1'in 4b, 5b ve demo_kisi1.mp4'ü")
     args = ap.parse_args()
     utf8_cikti()
     klasor = Path(args.cikti)

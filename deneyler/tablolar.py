@@ -1,11 +1,11 @@
 """
-Deneyler için ortak sonuç tabloları (Adım 3'ten itibaren).
+Deneyler için ortak sonuç tabloları.
 
 Girdi: uzun biçimli tekrar tablosu. Her satır bir (koşul, tekrar) çiftidir ve şu sütunları taşır:
 video, kamera, yonelim, satir, kisi, gorus, hata, ek_hata, bant_<ölçüt>, ve koşulu tanımlayan
 anahtar sütunlar (ör. "bant", "kosul").
 
-Karar 6 (Güncelleme 03): Her ana sonuç iki biçimde verilir: "uygulama senaryosu: önden + çapraz
+Her ana sonuç iki biçimde verilir: "uygulama senaryosu: önden + çapraz
 (|görüş| ≤ 60°)" ve "tüm görüşler". Profil ayrıca (sınırlılık).
 """
 from __future__ import annotations
@@ -21,16 +21,11 @@ TEKRAR_ANAHTARI = ["video", "kamera", "yonelim", "satir", "kisi", "hata", "ek_ha
 ONDEN_CAPRAZ = "önden+çapraz"
 TUMU = "tüm görüşler"
 ONDEN_CAPRAZ_SINIR = 60
-# Ex7 (Adım 4b, Güncelleme 05): uygulama senaryosu yan veya çapraz, çünkü ekstansiyon sagital düzlemde
-CAPRAZ_PROFIL = "çapraz+profil"
-CAPRAZ_PROFIL_SINIR = 30
 
 
 def gorus_maskesi(df: pd.DataFrame, gorus: str) -> pd.Series:
     if gorus == TUMU:
         return pd.Series(True, index=df.index)
-    if gorus == CAPRAZ_PROFIL:
-        return df.gorus.abs() >= CAPRAZ_PROFIL_SINIR
     if gorus == ONDEN_CAPRAZ:
         return df.gorus.abs() <= ONDEN_CAPRAZ_SINIR
     return df.gorus.map(veri.gorus_grubu) == gorus

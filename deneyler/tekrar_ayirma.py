@@ -1,5 +1,5 @@
 """
-Tekrar ayırıcının veri setinde sınanması (Güncelleme 07, Karar 25).
+Tekrar ayırıcının veri setinde sınanması.
 
 Ayırıcı (cekirdek/tekrar_ayirici.py, uygulamayla aynı kod) Ex1'in bütün sürekli iskelet dizilerinde
 (her video × kamera) kare kare çalıştırılır ve Segmentation.csv ile karşılaştırılır.
@@ -7,7 +7,7 @@ Ayırıcı (cekirdek/tekrar_ayirici.py, uygulamayla aynı kod) Ex1'in bütün s�
   * Raporlanan: bulunan / kaçırılan / fazladan; başlangıç ve bitiş farkının (bulunan − etiket, kare)
     medyanı ve çeyrekleri; hata türüne göre kaçırma. Önden + çapraz ve tüm görüşler ayrı.
   * Fazladan bir tekrarın görüşü, aynı dizide zamanca en yakın etiketli tekrarın yönelimiyle belirlenir.
-  * Eşikler bu sonuca göre DEĞİŞTİRİLMEZ. Etiketlilerin %90'ından azı bulunursa ADIM_06'ya yazılır.
+  * Eşikler bu sonuca göre DEĞİŞTİRİLMEZ. Etiketlilerin %90'ından azı bulunursa uyarı verilir.
 
 Kullanım:
     python -m deneyler.tekrar_ayirma          # ~1 dk
@@ -30,7 +30,7 @@ from cekirdek.tekrar_ayirici import IOU_ESIGI, eslestir, iou  # noqa: F401 (eşl
 from deneyler.tablolar import ONDEN_CAPRAZ, TUMU, gorus_maskesi
 
 CIKTI = veri.KOK / "sonuclar" / "tekrar_ayirma"
-HEDEF_ORAN = 90.0   # Karar 25: %90'ın altı ADIM_06'ya yazılır ve kullanıcıya söylenir
+HEDEF_ORAN = 90.0   # %90'ın altında uyarı verilir
 GORUSLER = (ONDEN_CAPRAZ, TUMU, "profil (70–90°)")
 
 
@@ -103,7 +103,7 @@ def tablolar(et: pd.DataFrame, fz: pd.DataFrame) -> dict:
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Tekrar ayırıcının veri setinde sınanması (Karar 25)")
+    ap = argparse.ArgumentParser(description="Tekrar ayırıcının veri setinde sınanması")
     ap.parse_args()
     utf8_cikti()
     t0 = time.time()
@@ -114,7 +114,7 @@ def main():
     sonuclari_yaz(T, CIKTI)
     pd.set_option("display.width", 250)
     pd.set_option("display.max_columns", 30)
-    print("Tekrar ayırma (Karar 25): kural önceden sabit, sonuca göre değiştirilmez")
+    print("Tekrar ayırma: kural önceden sabit, sonuca göre değiştirilmez")
     print("\n1) Özet:")
     print(T["ozet"].round(2).T.to_string(header=False))
     print("\n2) Hata türüne göre kaçırma:")
@@ -124,7 +124,7 @@ def main():
     for _, r in T["ozet"].iterrows():
         if r["bulunan /100"] < HEDEF_ORAN:
             print(f"\nUYARI: {r['görüş']}: etiketlilerin {r['bulunan /100']:.2f}'i bulundu (< %{HEDEF_ORAN:.0f}); "
-                  "Karar 25 gereği eşikler değiştirilmez, ADIM_06'ya yazılır.")
+                  "eşikler bu sonuca göre değiştirilmez.")
     print(f"\nSüre: {time.time() - t0:.1f} s · Çıktı: {CIKTI}")
 
 

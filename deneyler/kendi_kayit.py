@@ -1,9 +1,8 @@
 """
-Adım 7 — kendi kayıtlarımızla deneme (Güncelleme 08, Karar 33 ve 35).
+Kendi kayıtlarımızla deneme.
 
-Dondurulmuş yöntem (Karar 18) + modeller/kural_ex1.json + yığın modu (uygulama/toplu.py) + MediaPipe 1.2.2.
-Hiçbir eşik bu kayıtlara göre değiştirilmez. Metrikler arsiv/ilerleme/ADIM_07.md "Önceden belirlenenler"
-bölümünde, çekimden önce sabitlendi:
+Dondurulmuş yöntem + modeller/kural_ex1.json + yığın modu (uygulama/toplu.py) + MediaPipe 1.2.2.
+Hiçbir eşik bu kayıtlara göre değiştirilmez. Metrikler çekimden önce sabitlendi:
   * hatalı tekrarlarda: katı (cümledeki ilk hata = etiket), ilk iki (etiket cümlede söylendi),
     olumlu cümle (hiç hata söylenmedi);
   * doğru tekrarlarda gereksiz uyarı (cümlede en az bir hata), üç grupta ayrı: normal, bakış, hızlı;
@@ -44,7 +43,7 @@ from cekirdek.metin_cozumleyici import cozumle
 CIKTI = veri.KOK / "sonuclar" / "kendi_kayit"
 ONBELLEK = veri.VERI_KOK / "ara" / "kendi_kayit"   # OMUZ_VERI yoksa veri/ara/kendi_kayit
 
-# Karar 33: test videosunun içeriği (21 tekrar)
+# test videosunun içeriği (21 tekrar)
 ETIKETLER = {"dogru": ht.DOGRU, "omuz": "ERR_ELEVATED_SHOULDER", "bas": "ERR_HEAD_TO_SIDE",
              "dirsek": "ERR_BENT_ARM", "az_kaldirma": "ERR_LOW_ABDUCTION", "one_kacma": "ERR_ARM_FORWARD"}
 NOTLAR = ("", "bakis", "hizli")
@@ -59,7 +58,7 @@ GRUPLAR = {"normal": "doğru (normal)", "bakis": "doğru, bakış", "hizli": "do
 
 # ---------------------------------------------------------------- 1) çekimden önce: sıra ve şablon
 def sira_uret(tohum: int = 0) -> pd.DataFrame:
-    """Karar 33'teki 21 tekrarın karışık sırası (tohumlu, tekrarlanabilir)."""
+    """Test videosundaki 21 tekrarın karışık sırası (tohumlu, tekrarlanabilir)."""
     liste = [(e, n) for e, n, adet in PROTOKOL for _ in range(adet)]
     rng = np.random.default_rng(tohum)
     sira = [liste[i] for i in rng.permutation(len(liste))]
@@ -96,7 +95,7 @@ def etiketleri_oku(yol) -> pd.DataFrame:
     if hatali:
         raise SystemExit(f"bilinmeyen not: {sorted(hatali)}; geçerli: bos, bakis, hizli")
     if ((df["not"] != "") & (df.etiket != "dogru")).any():
-        raise SystemExit("'bakis' ve 'hizli' notu yalnızca 'dogru' etiketli tekrarlarda olur (Karar 33)")
+        raise SystemExit("'bakis' ve 'hizli' notu yalnızca 'dogru' etiketli tekrarlarda olur")
     if df.tekrar_no.duplicated().any() or sorted(df.tekrar_no) != list(range(1, len(df) + 1)):
         raise SystemExit("tekrar_no 1'den başlayıp birer artmalı ve tekrarsız olmalı")
     return df.sort_values("tekrar_no").reset_index(drop=True)
@@ -104,7 +103,7 @@ def etiketleri_oku(yol) -> pd.DataFrame:
 
 def onbellekli_pozlar(yol, yalniz_onbellek: bool = False) -> np.ndarray:
     """MediaPipe noktaları; video değişmediyse önbellekten (veri/ara/kendi_kayit/).
-    yalniz_onbellek=True: önbellek yoksa MediaPipe çalıştırılmaz, durulur (yeniden üretim, Karar 53)."""
+    yalniz_onbellek=True: önbellek yoksa MediaPipe çalıştırılmaz, durulur (yeniden üretim)."""
     from uygulama.toplu import pozlar
     yol = Path(yol)
     st = yol.stat()
@@ -305,7 +304,7 @@ def birlikte_yaz(cikti: Path = CIKTI) -> None:
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Adım 7: kendi kayıtlarla deneme (yığın modu)")
+    ap = argparse.ArgumentParser(description="Kendi kayıtlarla deneme (yığın modu)")
     ap.add_argument("--sablon", help="çekimden önce: karışık sırayla etiketler.csv şablonu yaz")
     ap.add_argument("--tohum", type=int, default=0, help="sıra için tohum (ikinci kişi için 1)")
     ap.add_argument("--kisi", default="kisi1")
@@ -314,7 +313,7 @@ def main():
     ap.add_argument("--etiketler")
     ap.add_argument("--eslesme", help="ayrılan tekrar sayısı tutmazsa: 'ayrilan,tekrar_no' CSV")
     ap.add_argument("--yalniz-onbellek", action="store_true",
-                    help="MediaPipe noktaları önbellekte yoksa dur (yeniden üretim, Karar 53)")
+                    help="MediaPipe noktaları önbellekte yoksa dur (yeniden üretim)")
     args = ap.parse_args()
     utf8_cikti()
     if args.sablon:

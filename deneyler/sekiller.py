@@ -1,5 +1,5 @@
 """
-Deney 1 şekilleri (Adım 2).
+Deney 1 şekilleri.
 
   1. sonuclar/deney1/auc.png         : ölçütlere göre AUC (silkme/doğru), bantsız ve bantlı yan yana,
                                        bantlı için kişi bazlı bootstrap %95 GA

@@ -1,15 +1,15 @@
 """
-Deney 3 — kural tabanlı Türkçe geri bildirim (Adım 5; PLAN + Güncelleme 01, 05, 06).
+Deney 3 — kural tabanlı Türkçe geri bildirim.
 
 Soru: Deney 2'nin kararı ölçü içeren bir Türkçe cümleye çevrildiğinde, cümle doğru hatayı
 adlandırıyor mu? Doğru tekrarlarda gereksiz uyarı ne sıklıkta?
 
-Tanımlar ADIM_05.md "Önceden belirlenenler" bölümünde (kod ve sonuçlardan önce commit'lendi):
-  * Sistem: dondurulmuş ana sistem (Karar 18): v2 açı bandı + yönlü + ilk sürüm kaldırma.
+Tanımlar kod ve sonuçlardan önce sabitlendi:
+  * Sistem: dondurulmuş ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma.
     Karar Deney 2 ile aynı kod (deneyler/deney2 puanları + cekirdek/hata_turu.esik_sec, kişi bazlı
     birini-dışarıda-bırak); sonuclar/deney2/tahminler.csv ile birebir aynı olduğu denetlenir.
   * En fazla 2 hata (ht.ilk_iki); cümle cekirdek/geribildirim.py; cümleden hata listesi
-    cekirdek/metin_cozumleyici.py (Deney 4'te LLM cümleleri de aynı çıkarıcıyla).
+    cekirdek/metin_cozumleyici.py.
   * Metrikler: katı / esnek / ilk iki / ilk iki (esnek), hatalılarda olumlu cümle, doğrularda
     gereksiz uyarı, çıkarıcı uyumu; ana tablo önden + çapraz, ayrıca tüm görüşler, profil, görüş
     grupları, kişiler; kişi bazlı bootstrap (2000, tohum 1).
@@ -17,8 +17,8 @@ Tanımlar ADIM_05.md "Önceden belirlenenler" bölümünde (kod ve sonuçlardan 
 Kullanım:
     python -m deneyler.deney3                  # ~1–3 dk; önce python -m deneyler.deney2 çalışmış olmalı
     python -m deneyler.deney3 --bootstrap 0    # bootstrap'sız (hızlı sınama)
-    python -m deneyler.deney3 --olcu-surumu saglam   # + sağlam ölçü çıktıları (Güncelleme 07, Karar 21)
-Güncelleme 07 (Karar 28): her tekrar için hasta_cumlesi ve uzman_ayrintisi; çıkarıcı ikisinde de çalışır.
+    python -m deneyler.deney3 --olcu-surumu saglam   # + sağlam ölçü çıktıları
+Her tekrar için hasta_cumlesi ve uzman_ayrintisi yazılır; çıkarıcı ikisinde de çalışır.
 Çıktı: sonuclar/deney3/
 """
 from __future__ import annotations
@@ -97,9 +97,9 @@ def deney2_ile_denetle(p: pd.DataFrame, yol: Path = deney2.CIKTI / "tahminler.cs
     return len(q)
 
 
-# ---------------------------------------------------------------- 2) kare bazında ayrıntı (Karar 7)
+# ---------------------------------------------------------------- 2) kare bazında ayrıntı
 def ayrintilar(tekrarlar) -> dict:
-    """Her tekrar için kol, ham değerler, model ortalaması μ ve bant_disi (Karar 7), omuz eğimi bandı, tepe."""
+    """Her tekrar için kol, ham değerler, model ortalaması μ ve bant_disi, omuz eğimi bandı, tepe."""
     ozl = {id(t): ozellikler(t.dizi, OLCUTLER + ANLATIM) for t in tekrarlar}
     cikti = {}
     for _, grup in veri.gruplara_ayir(tekrarlar).items():
@@ -116,14 +116,13 @@ def ayrintilar(tekrarlar) -> dict:
                      else list(range(len(dogrular))))
             ayr = [aci_bandi_hatasi(modeller[i], f, OLCUTLER, ayrinti=True)[1] for i in secim]
             ayr_ek = [aci_bandi_hatasi(modeller_ek[i], f, ANLATIM, ayrinti=True)[1] for i in secim]
-            mu, bd, tau = {}, {}, {}
+            mu, bd = {}, {}
             for k in OLCUTLER:
                 mu[k], bd[k] = gb.model_ortalamasi(ayr, k)
-                tau[k] = gb.tau_ortalamasi(ayr, k)       # yalnızca Deney 4 (C koşulu); Deney 3'te kullanılmaz
             mu_ek, _ = gb.model_ortalamasi(ayr_ek, gb.OMUZ_ANLATIM)
             beklenen_tepe = float(np.mean([np.median([tepe_acisi(u["kol"]) for u in altlar[i]]) for i in secim]))
             cikti[(t.video, t.kamera, int(t.yonelim), int(t.satir))] = {
-                "kol": f["kol"], "deger": {k: f[k] for k in OLCUTLER}, "mu": mu, "bd": bd, "tau": tau,
+                "kol": f["kol"], "deger": {k: f[k] for k in OLCUTLER}, "mu": mu, "bd": bd,
                 "gor": {k: gb.olcut_gorunurlugu(t.dizi[t.etiketli], k) for k in OLCUTLER},
                 "ek_deger": f[gb.OMUZ_ANLATIM], "ek_mu": mu_ek,
                 "tepe": tepe_acisi(f["kol"]), "beklenen_tepe": beklenen_tepe}
@@ -139,7 +138,7 @@ def _sayi_var(metin: str) -> bool:
 
 def cumleler(p: pd.DataFrame, kurallar: dict, ayr: dict, tohum: int = TOHUM,
              olcu_surumu: str = "tek_kare") -> pd.DataFrame:
-    """Her tekrar için sapma kodları, iki metin (Karar 28) ve her metinden çıkarılan hata listesi."""
+    """Her tekrar için sapma kodları, iki metin ve her metinden çıkarılan hata listesi."""
     kayit = []
     for _, r in p.iterrows():
         a = ayr[(r.video, r.kamera, int(r.yonelim), int(r.satir))]
@@ -278,7 +277,7 @@ def olcu_tablosu(c: pd.DataFrame) -> pd.DataFrame:
 
 
 def metin_tablosu(c: pd.DataFrame) -> pd.DataFrame:
-    """Karar 28, betimsel (önden + çapraz): iki metnin kelime sayısı ve hasta cümlesinde sayı içerme oranı."""
+    """Betimsel (önden + çapraz): iki metnin kelime sayısı ve hasta cümlesinde sayı içerme oranı."""
     g = c[gorus_maskesi(c, ONDEN_CAPRAZ)]
     kel_h = g.hasta_cumlesi.str.split().str.len()
     kel_u = g.uzman_ayrintisi.str.split().str.len()
@@ -307,7 +306,7 @@ def metin_tablosu(c: pd.DataFrame) -> pd.DataFrame:
 
 
 def ozet_tablosu(c: pd.DataFrame) -> pd.DataFrame:
-    """Karar 28: metrikler iki metin için ayrı ayrı; kararlar aynı olduğundan eşit olmalı (assert)."""
+    """Metrikler iki metin için ayrı ayrı; kararlar aynı olduğundan eşit olmalı (assert)."""
     satir = []
     for gr in GORUSLER:
         m = {metin: metrik_satiri(metin_secimi(c, metin)[gorus_maskesi(c, gr)]) for metin in ("hasta", "uzman")}
@@ -352,9 +351,9 @@ def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM, baslik_eki: s
     surum = str(c.olcu_surumu.iloc[0]) if "olcu_surumu" in c else "tek_kare"
     md = [f"# Deney 3 — örnek geri bildirim cümleleri{baslik_eki}", "",
           f"Önden + çapraz, tohum {tohum}. Her gerçek sınıftan 3 tekrar ve sistemin iki hata söylediği 2 tekrar.",
-          "Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma (Karar 18). Ölçüler kişinin kendi kalibrasyonuna göre.",
-          f"Ölçü sürümü: `{surum}` (Karar 21). Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), "
-          "altında **uzman ayrıntısı** (Karar 28).", ""]
+          "Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişinin kendi kalibrasyonuna göre.",
+          f"Ölçü sürümü: `{surum}`. Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), "
+          "altında **uzman ayrıntısı**.", ""]
     for n, (grup, i) in enumerate(secim, 1):
         r = g.iloc[i]
         ek_ham = "" if pd.isna(r.ek_hata) or str(r.ek_hata) == "nan" else str(r.ek_hata)
@@ -375,7 +374,7 @@ def ornek_cumleler(c: pd.DataFrame, yol: Path, tohum: int = TOHUM, baslik_eki: s
 # ---------------------------------------------------------------- çalıştır
 def calistir(cikti=CIKTI, bootstrap_n=2000, yazdir=True, tohum: int = TOHUM, olcu_surumu: str = "tek_kare"):
     """
-    Birincil sonuç tek kare ölçüsüyle (ADIM_05). olcu_surumu = "saglam" (Karar 21) ise ana tablolar yine tek
+    Birincil sonuç tek kare ölçüsüyle. olcu_surumu = "saglam" ise ana tablolar yine tek
     kare sürümünden yazılır; ek olarak olcu_saglam.csv, cumleler_saglam.csv, ornek_cumleler_saglam.md
     üretilir ve iki sürümün çıkarılan hata listelerinin (yani bütün metriklerin) aynı olduğu denetlenir.
     """
@@ -400,7 +399,7 @@ def calistir(cikti=CIKTI, bootstrap_n=2000, yazdir=True, tohum: int = TOHUM, olc
     ornek_cumleler(c, cikti / "ornek_cumleler.md", tohum)
     if olcu_surumu == "saglam":
         cs = cumleler(p, kurallar, ayr, tohum, "saglam")
-        # Karar 21: ölçü yalnızca anlatımda; çıkarılan listeler (metriklerin tek girdisi) değişmemeli.
+        # ölçü yalnızca anlatımda; çıkarılan listeler (metriklerin tek girdisi) değişmemeli.
         for sutun in ("soylenmek_istenen", "cikarilan", "cikarilan_hasta"):
             assert (cs[sutun].to_numpy() == c[sutun].to_numpy()).all(), sutun
         assert ozet_tablosu(cs).equals(T["ozet"]), "sağlam sürümde ana metrikler değişti"
@@ -445,7 +444,7 @@ def main():
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--tohum", type=int, default=TOHUM)
     ap.add_argument("--olcu-surumu", choices=gb.OLCU_SURUMLERI, default="tek_kare",
-                    help="saglam: ana tablolara ek olarak sağlam ölçü çıktıları (Karar 21)")
+                    help="saglam: ana tablolara ek olarak sağlam ölçü çıktıları")
     args = ap.parse_args()
     utf8_cikti()
     print("Deney 3 — kural tabanlı Türkçe geri bildirim (ana sistem: v2 yönlü, kaldırma ilk sürüm)")

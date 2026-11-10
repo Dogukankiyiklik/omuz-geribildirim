@@ -1,0 +1,37 @@
+# sonuclar/
+
+Deneylerin çıktıları. Belgelerdeki (`docs/DENEYLER.md`, rapor, sunum) her sayı buradaki bir dosyadan kopyalanır. Klasörlerin adı onu üreten betiğin adıdır; betikler [`deneyler/README.md`](../deneyler/README.md)'de anlatılıyor.
+
+- **CSV** dosyaları asıl kayıttır. UTF-8 ile yazılır ve ondalık ayırıcı noktadır.
+- **`sonuclar.xlsx`** aynı tabloların Excel kopyasıdır. Türkçe Excel, CSV'deki ondalık noktayı binlik ayırıcı sanabildiği için tablolara Excel'de bakarken bu dosyayı açın.
+- **Videolar** (`.mp4`) yeniden üretilebilir ve büyük oldukları için depoya girmez. Bunlar `deney1/galeri/` ve `sunum/demo_*.mp4` gibi dosyalardır.
+
+Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyler.hepsi` ile denetlenir.
+
+## Klasörler
+
+| Klasör | Ne var | En önemli dosya |
+| --- | --- | --- |
+| `deney1/` | İlk sürüm (zaman bandı) ile ham ölçünün silkme tespiti; beş omuz ölçüsü | `ozet.csv` (AUC'ler; regresyon testi bunu `referans/beklenen_deney1_ozet.csv` ile karşılaştırır), `bootstrap.csv` (ölçüler arası fark, kişi bazlı %95 GA) |
+| `deney1_v2/` | Yöntem düzeltmelerinin adım adım etkisi (v1 → v1a → v1b → v2 açı bandı) | `ozet.csv`, `kisi_auc.csv` (kişi başına AUC), `ornekler/` (aynı tekrarın zaman bandı ve açı bandı görünümü) |
+| `deney1b/` | Bant yok / genel bant / kişiye özel bant | `ozet.csv` (`docs/DENEYLER.md` Soru 1 tablosu) |
+| `deney2/` | Hata türü kararı | `ozet.csv` (makro-F1, hatalılarda tür doğru, gereksiz uyarı…), `tahminler.csv` (her tekrarın kararı), `karisiklik_*` (karışıklık matrisleri), `esikler.csv` (her test kişisi için seçilen T) |
+| `deney3/` | Kararın Türkçe cümleye çevrilmesi | `ozet.csv`, `cumleler.csv` (her tekrarın cümlesi), `ornek_cumleler_saglam.md` (okunabilir örnekler), `siddet_esikleri.csv` |
+| `kendi_kayit/` | Kendi çektiğimiz videoda değerlendirme (kişi 1) | `kisi1/ozet.csv` (`docs/DENEYLER.md` Soru 3), `kisi1/cumle_etiket.csv` (her tekrarın etiketi ve cümlesi) |
+| `tekrar_ayirma/` | Otomatik tekrar ayırmanın veri setinin etiketlerine karşı sınanması | `ozet.csv` |
+| `kamera_acisi/` | Kamera açısı uyarısının eşiği (`modeller/kamera_esigi.json`) | `dagilim.csv` |
+| `hiz_esigi/` | Hız notunun eşiği (`modeller/hiz_esigi.json`) | `ozet.csv` |
+| `kural_disa_aktar/` | Uygulamanın kural dosyasının (`modeller/kural_ex1.json`) deneydeki kurallarla karşılaştırması | `loso_karsilastirma.csv` |
+| `uygulama_saglik/` | Uygulamanın MediaPipe sürümü (1.2.2) ile veri setininki (0.10.20) aynı videoda ne kadar farklı (`python -m uygulama.toplu --veri-seti ex1_Honza`) | `ex1_Honza_cam1_o0_poz_farki.csv` |
+| `sunum/` | Sunum şekilleri (`deneyler/sunum_sekilleri.py`). `4b_*` ve `5b_*` kişisel görüntü içerdiği için depoya girmez. | `1_problem.png` … `5_bindirme.png` |
+| `gorsel_kontrol/` | Görsel kontrol aracının videoları (`araclar/gorsel_kontrol.py`); yalnızca yerelde | – |
+
+`hepsi/` klasörü `python -m deneyler.hepsi` çalıştırılınca oluşur. Son çalıştırmanın raporu: `arsiv/sonuclar/hepsi/`.
+
+## Kısaltmalar
+
+- **v1b / v2:** zaman bandı (çoklu referans) ve açı bandı. Ana yöntem v2.
+- **yonlu / yonsuz:** yönlü bant yalnızca hatanın beklenen yönündeki sapmayı sayar (örneğin omuz yukarı); ana yöntem yönlü.
+- **oc / tum:** önden + çapraz görüş ve tüm görüşler.
+- **kati / esnek:** katı değerlendirmede yalnızca birincil hata doğru sayılır, esnekte ek hatalar da doğru sayılır.
+- **saglam:** uygulamanın kullandığı sağlam ölçü. Cümledeki ölçü tek kare yerine birkaç karenin medyanından alınır.

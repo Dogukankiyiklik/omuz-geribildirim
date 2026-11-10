@@ -1,20 +1,20 @@
 """
-Bütün deneylerin temiz bir klasörde yeniden üretilmesi ve kayıtlı sonuçlarla karşılaştırılması (Adım 9; Karar 37).
+Bütün deneylerin temiz bir klasörde yeniden üretilmesi ve kayıtlı sonuçlarla karşılaştırılması.
 
 Ne yapar?
   1. Son commit'in (HEAD) temiz bir kopyasını açar: `git worktree add --detach <hedef> HEAD`. Commit'lenmemiş
      değişiklikler kopyaya girmez. Kopyada sonuclar/ ve deneylerin ürettiği modeller/*.json dosyaları silinir.
   2. Veri kopyalanmaz ve bağlanmaz: kopyadaki kod, OMUZ_VERI ortam değişkeniyle asıl veri/ klasörünü yalnızca okur.
-  3. Deneyleri Karar 37'deki sırayla, aynı Python yorumlayıcısıyla, kopyanın içinde çalıştırır. Her adımın günlüğü
+  3. Deneyleri aşağıdaki ADIMLAR sırasıyla, aynı Python yorumlayıcısıyla, kopyanın içinde çalıştırır. Her adımın günlüğü
      <hedef>/hepsi_gunluk/ altına yazılır.
   4. Üretilen her CSV'yi ve modeller/*.json'u, bu klasördeki (proje) kayıtlı dosyayla karşılaştırır.
      Regresyon özeti: sonuclar/hepsi/regresyon.csv (çalıştırınca oluşur), adimlar.csv, ozet.md.
-Kendi kayıt (Adım 7) kayıtlı ara çıktılardan (önbellekten) üretilir; video üzerinde MediaPipe yeniden
+Kendi kayıt deneyi, kayıtlı ara çıktılardan (önbellekten) üretilir; video üzerinde MediaPipe yeniden
 çalıştırılmaz. Önbellek yoksa adım başarısız olur ("üretilmedi").
-Arşivlenen deneyler (Deney 1c, Ex7, siluet, Deney 4) burada yok; bkz. arsiv/README.md.
+Ödevin dışında kalan eski deneyler burada yok.
 
 Kullanım:
-    python -m deneyler.hepsi                 # tam çalıştırma (kullanıcı çalıştırır; arşivlenen adımlar olmadan ~1 sa)
+    python -m deneyler.hepsi                 # tam çalıştırma (~10 dk)
     python -m deneyler.hepsi --hizli         # küçük alt küme (deney 1, kamera açısı, hız eşiği), ~1 dk
     python -m deneyler.hepsi --adimlar deney2 deney3   # yalnızca seçilen adımlar (bağımlılıklar kullanıcının işi)
     python -m deneyler.hepsi --temizle       # temiz kopyayı (git worktree) kaldırır
@@ -51,8 +51,8 @@ class Adim(NamedTuple):
     girdiler: adımdan önce projeden temiz kopyaya kopyalanan insan girdisi dosyalar (ör. kullanıcı etiketleri);
       bunlar yeniden üretilmez ve karşılaştırılmaz.
     dosyalar: {klasör: [dosya, ...]} yalnızca bu CSV'ler karşılaştırılır (None: klasördeki bütün CSV'ler).
-    yok_sutun: {"klasör/dosya": [sütun, ...]} karşılaştırmada yok sayılan sütunlar (gerekçe ADIM_09'da).
-    kaynak: "" (baştan) ya da önbellekten üretimin açıklaması (Karar 53)."""
+    yok_sutun: {"klasör/dosya": [sütun, ...]} karşılaştırmada yok sayılan sütunlar.
+    kaynak: "" (baştan) ya da önbellekten üretimin açıklaması."""
     ad: str
     komut: list
     klasorler: list
@@ -81,8 +81,6 @@ ADIMLAR = [
                          "--etiketler", "{VERI}/kendi_kayit/kisi1/etiketler.csv", "--yalniz-onbellek"],
          ["kendi_kayit"], [], kaynak="önbellekten: veri/ara/kendi_kayit/ (MediaPipe noktaları)"),
 ]
-# Ödev sadeleştirmesi (odev-sade dalı): Deney 1c, Ex7, 6b (siluet) ve Deney 4 arsiv/ altına taşındı;
-# onların yeniden üretimi v-sunum etiketindeki hepsi.py ile yapılır.
 HIZLI = ["deney1", "kamera_acisi", "hiz_esigi"]
 URETILEN_MODELLER = sorted({m for a in ADIMLAR for m in a.modeller})
 # Yeniden üretilmeyen, yalnızca listelenen kayıtlı çıktılar
@@ -159,7 +157,7 @@ def adim_calistir(ad: str, komut: list[str], hedef: Path, gunluk: Path) -> dict:
 
 # ---------------------------------------------------------------- karşılaştırma
 def _csv_oku(p: Path) -> pd.DataFrame | None:
-    """Boş (sütunsuz) CSV için None (ör. sonuclar/siluet/nan_nedenleri.csv)."""
+    """Boş (sütunsuz) CSV için None."""
     try:
         return pd.read_csv(p, encoding="utf-8-sig", keep_default_na=False, low_memory=False)
     except pd.errors.EmptyDataError:

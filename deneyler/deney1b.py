@@ -1,5 +1,5 @@
 """
-Deney 1b — genel bant ile kişiye özel bant (Adım 3).
+Deney 1b — genel bant ile kişiye özel bant.
 
 Soru: Kalibrasyon kişiye özel olmak zorunda mı? Başkalarının doğru tekrarlarından kurulan bir bant
 yeterli olur mu?
@@ -13,7 +13,7 @@ referans, v2: açı bandı), ikisinde de pay hariç:
                 aynı modelle değerlendirilir → adil ve deterministik.
   genel_tek   : "Başka birinin kalibrasyonu": diğer kişilerden BİRİNİN doğru tekrarları (~5, kişiye
                 özel modeldeki 4'e yakın sayı) ile bant; 4 kişinin her biri sırayla, E'lerin ortalaması.
-  kisiye_ozel : Deney 1 v2'deki v1b / v2 aynen (Karar 7 dahil; aynı kod çağrılır).
+  kisiye_ozel : Deney 1 v2'deki v1b / v2 aynen (adil model dahil; aynı kod çağrılır).
 
 Kullanım:
     python -m deneyler.deney1b            # birkaç dakika

@@ -1,5 +1,5 @@
 """
-Deney 1 v2 — yöntem düzeltmelerinin ablasyonu (Adım 2c, arsiv/ilerleme/GUNCELLEME_02.md).
+Deney 1 v2 — yöntem düzeltmelerinin ablasyonu.
 
 Koşullar (birikimli; hepsinde 5 omuz ölçütü, yönsüz bant):
   v1  : zaman bandı (M39), pay dahil, tek rastgele referans  = Deney 1 aynen (temel çizgi)
@@ -9,10 +9,10 @@ Koşullar (birikimli; hepsinde 5 omuz ölçütü, yönsüz bant):
 
 Adillik (her koşulda): doğru tekrar birini-dışarıda-bırak; hatalı tekrar aynı sayıda (n−1) doğru tekrarla.
   v1, v1a: dışarıda bırakılan doğru tekrar rastgele (tohum) — Deney 1'e sadık.
-  v1b, v2: her doğru tekrar sırayla dışarıda, n model, E'lerin ortalaması (Güncelleme 03, Karar 7) →
+  v1b, v2: her doğru tekrar sırayla dışarıda, n model, E'lerin ortalaması →
            E tamamen deterministik.
 "Pay hariç": ölçütler tüm dizide hesaplanır (dinlenme tabanı = ilk 8 kare, pay dahil), sonra
-DTW / bant / E için yalnızca etiketli kareler (first_frame … last_frame) kullanılır (Karar 3).
+DTW / bant / E için yalnızca etiketli kareler (first_frame … last_frame) kullanılır.
 
 Kullanım:
     python -m deneyler.deney1_v2                 # birkaç dk (tohum duyarlılığı için ikinci tohum dahil)
@@ -39,7 +39,7 @@ from deneyler.deney1 import GORUS_GRUPLARI, SILKME, maskeler
 
 OLCUTLER = DENEY1_OLCUTLERI
 KOSULLAR = ["v1", "v1a", "v1b", "v2"]
-# Güncelleme 03, Karar 7: bu koşullarda hatalı tekrarın E'si tüm (n−1)'li modellerin ortalaması
+# Adil model: bu koşullarda hatalı tekrarın E'si tüm (n−1)'li modellerin ortalaması
 # (rastgele "atla" yok → E tamamen deterministik). v1 ve v1a Deney 1'e sadık kalır (tek rastgele).
 ADIL_ORTALAMA = ("v1b", "v2")
 KOSUL_ACIKLAMA = {
@@ -82,7 +82,7 @@ def degerlendirmeler(tekrarlar, kosul: str, tohum: int = 0, ozl=None):
         for x in tl:
             t = x["t"]
             if not t.dogru and kosul in ADIL_ORTALAMA:
-                # Karar 7: her doğru tekrar sırayla dışarıda, n model, E'lerin ortalaması.
+                # her doğru tekrar sırayla dışarıda, n model, E'lerin ortalaması.
                 yield _adil_ortalama_degerlendirme(x, dogrular, kosul)
                 continue
             if t.dogru:
@@ -106,7 +106,7 @@ def degerlendirmeler(tekrarlar, kosul: str, tohum: int = 0, ozl=None):
 
 def _adil_ortalama_degerlendirme(x, dogrular, kosul):
     """
-    Hatalı tekrar, v1b / v2 (Karar 7). E = n adet (n−1)'li modelin E ortalaması.
+    Hatalı tekrar, v1b / v2. E = n adet (n−1)'li modelin E ortalaması.
     v2 ek bilgileri: kapsam = modellerin ortalaması; aralik_disi = modellerin yarısından fazlasında
     bayrak; tepe_acisi tekrarın kendisinden (modele bağlı değil).
     Görsel araçlar için "model" ilk alt kümenin (1. doğru tekrar dışarıda) modelidir; gösterilen E
@@ -179,7 +179,7 @@ def ozet_tablosu(df, kisi_tablo) -> pd.DataFrame:
             r = {"koşul": kosul, "ölçüt": k,
                  "AUC silkme/doğru": _auc(g, s, d, c),
                  "AUC silkme/diğer hatalar": _auc(g, s, o, c)}
-            # Karar 6: uygulama senaryosu = önden + çapraz (|görüş| ≤ 60°)
+            # uygulama senaryosu = önden + çapraz (|görüş| ≤ 60°)
             oc = g.gorus.abs() <= 60
             r["AUC silkme/doğru (önden+çapraz)"] = _auc(g, s & oc, d & oc, c)
             r["AUC silkme/diğer (önden+çapraz)"] = _auc(g, s & oc, o & oc, c)
@@ -198,7 +198,7 @@ def ozet_tablosu(df, kisi_tablo) -> pd.DataFrame:
 
 
 FARKLAR = [("v2", "v1"), ("v1a", "v1"), ("v1b", "v1a"), ("v2", "v1b")]
-# Güncelleme 03: silkme/diğer ayrımı için farklar (açı bandının asıl katkısı burada)
+# silkme/diğer ayrımı için farklar (açı bandının asıl katkısı burada)
 # (ayrım, ölçüt, x, y)
 FARKLAR_DIGER = [("silkme/diğer", k, x, y) for k in ("YENI", "M33") for x, y in (("v2", "v1b"), ("v2", "v1"))]
 FARKLAR_TUMU = [("silkme/doğru", "YENI", x, y) for x, y in FARKLAR] + FARKLAR_DIGER

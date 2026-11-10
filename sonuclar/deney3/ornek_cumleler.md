@@ -1,8 +1,8 @@
 # Deney 3 — örnek geri bildirim cümleleri
 
 Önden + çapraz, tohum 0. Her gerçek sınıftan 3 tekrar ve sistemin iki hata söylediği 2 tekrar.
-Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma (Karar 18). Ölçüler kişinin kendi kalibrasyonuna göre.
-Ölçü sürümü: `tek_kare` (Karar 21). Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), altında **uzman ayrıntısı** (Karar 28).
+Ana sistem: v2 açı bandı + yönlü + ilk sürüm kaldırma. Ölçüler kişinin kendi kalibrasyonuna göre.
+Ölçü sürümü: `tek_kare`. Her örnekte önce **hasta cümlesi** (uygulamada büyük yazı), altında **uzman ayrıntısı**.
 
 ## 1. (doğru) ex1_Petra · cam2 · yönelim 60° · görüş -15° · tekrar 2
 

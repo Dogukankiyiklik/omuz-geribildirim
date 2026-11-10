@@ -1,28 +1,28 @@
 """
-Deney 2 — hata türünü bulma (Adım 4, PLAN.md + Güncelleme 02, 03, 04).
+Deney 2 — hata türünü bulma.
 
 Soru: Sistem bir tekrarın doğru olup olmadığını, yanlışsa HANGİ hatayı içerdiğini bulabiliyor mu?
 
 1) Tekrar puanları (her tekrar, her ölçüt; yönsüz ve iki yönlü E, ortalama imzalı fark):
-   v2  : açı bandı (ana yöntem, Karar 6)
-   v1b : zaman bandı, çoklu referans (yalnızca karşılaştırma temel çizgisi, Karar 6)
+   v2  : açı bandı (ana yöntem)
+   v1b : zaman bandı, çoklu referans (yalnızca karşılaştırma temel çizgisi)
    Kaldırma: iki sürüm de hesaplanır; karar kuralı --kaldirma-surumu ile seçer.
-     ilk    (varsayılan; Karar 17–18): d = (tepe medyanı − tepe) / max(IQR, 5°) → sonuclar/deney2/
-     revize (Karar 13; başarısız deneme): tek kutulu tepe bandı, E 0–1 → sonuclar/deney2_revize/
-   Adillik: doğru tekrar birini-dışarıda-bırak; hatalı tekrar tüm (n−1)'li modellerin ortalaması (Karar 7).
+     ilk    (varsayılan): d = (tepe medyanı − tepe) / max(IQR, 5°) → sonuclar/deney2/
+     revize (başarısız deneme): tek kutulu tepe bandı, E 0–1 → sonuclar/deney2_revize/
+   Adillik: doğru tekrar birini-dışarıda-bırak; hatalı tekrar tüm (n−1)'li modellerin ortalaması.
    Bir gruptaki n alt küme modeli bir kez kurulur: doğru tekrar i, i'nci alt kümeyle (kendisi dışarıda)
    değerlendirilir; bu, Deney 1 v2'deki birini-dışarıda-bırak ile aynı modeldir.
 2) Karar kuralı (cekirdek/hata_turu.py), kişi bazlı birini-dışarıda-bırak: 4 kişide ölçekleme, yön,
    öne kaçma ölçütü ve T seçilir; 5. kişide test edilir. Ayar yalnızca eğitim kişilerinin
    önden + çapraz (|görüş| ≤ 60°) tekrarlarıyla yapılır (uygulama senaryosu).
 3) Temel çizgi: tek toplam hata (z'lerin ortalaması) ile yalnızca doğru/yanlış.
-4) "İlk iki" (Karar 14): birincil hata en yüksek iki z içinde mi; ikinci z de T'yi geçiyor mu.
+4) "İlk iki": birincil hata en yüksek iki z içinde mi; ikinci z de T'yi geçiyor mu.
 
 Kullanım:
     python -m deneyler.deney2                 # ~5–10 dk (puanlar), sonra karar kuralı ve tablolar
     python -m deneyler.deney2 --puan-hazir    # puanlar sonuclar/deney2/puanlar.csv'den okunur
     python -m deneyler.deney2 --galeri        # ayrıca galeri (sonuclar/deney2/galeri/)
-    python -m deneyler.deney2 --kaldirma-surumu revize   # Karar 13 denemesi → sonuclar/deney2_revize/
+    python -m deneyler.deney2 --kaldirma-surumu revize   # denenip elenen sürüm → sonuclar/deney2_revize/
 Çıktı: sonuclar/deney2/ (ilk) ya da sonuclar/deney2_revize/ (revize)
 """
 from __future__ import annotations
@@ -88,7 +88,7 @@ def grup_modelleri(dogrular_f: list[dict], bant: str, olcutler=OLCUTLER) -> list
 
 
 def _model_puani(model, alt_f, f, bant, olcutler=OLCUTLER, kaldirma=True):
-    """Tek bir (n−1)'li modelle puanlar: (E, fark, ek). kaldirma=False: tepe bandı hesaplanmaz (Ex7)."""
+    """Tek bir (n−1)'li modelle puanlar: (E, fark, ek). kaldirma=False: az kaldırma puanı hesaplanmaz."""
     if bant == "v2":   # uygulamayla ortak kod (cekirdek/degerlendirici.py)
         return degerlendirici.tekrar_puanlari(model, alt_f, f, olcutler, kaldirma)
     E, fark = coklu_model_puanlari(model, f, olcutler, YONLER)
@@ -127,7 +127,7 @@ def puan_tablosu(tekrarlar, bant: str, ozl=None, yazdir=True, olcutler=OLCUTLER,
             r.update({ht.fark_sutunu(k): v for k, v in fark.items()})
             if bant == "v2":
                 r["kapsam"] = float(np.mean([s[2]["kapsam"] for s in sonuc]))
-                # Karar 7 ayrıntısı: modellerin yarısından fazlasında bayrak
+                # modellerin yarısından fazlasında bayrak
                 r["aralik_disi"] = bool(np.mean([s[2]["aralik_disi"] for s in sonuc]) > 0.5)
             kayit.append(r)
     df = pd.DataFrame(kayit)
@@ -199,7 +199,7 @@ def ozet_satiri(p: pd.DataFrame, siniflar=ht.SINIFLAR) -> dict:
 
 
 def ilk_iki_satiri(p: pd.DataFrame) -> dict:
-    """Karar 14: hatalı tekrarlarda birincil hata en yüksek iki z içinde mi; ikinci z de T'yi geçiyor mu."""
+    """Hatalı tekrarlarda birincil hata en yüksek iki z içinde mi; ikinci z de T'yi geçiyor mu."""
     h = p[p.hata != ht.DOGRU]
     d = p[p.hata == ht.DOGRU]
     ilk2 = (h.z1_hata == h.hata) | (h.z2_hata == h.hata)
@@ -290,8 +290,8 @@ def tablolar_uret(tahminler: dict, kurallar: dict, puanlar: dict, bootstrap_n=20
 
 def kaldirma_tablosu(tahminler: dict, puanlar: dict) -> pd.DataFrame:
     """
-    "Az kaldırma" kararlarının dökümü (ADIM_04 inceleme tablosunun revize karşılığı): kolun kişinin
-    normalinden ne kadar az kalktığı, eksik = μ − tepe (derece; hatalıda Karar 7 ortalaması).
+    "Az kaldırma" kararlarının dökümü (inceleme tablosunun revize karşılığı): kolun kişinin
+    normalinden ne kadar az kalktığı, eksik = μ − tepe (derece; hatalıda adil modellerin ortalaması).
     """
     anahtar = ["video", "kamera", "yonelim", "satir"]
     sut = ht.fark_sutunu(ht.KALDIRMA)
@@ -376,7 +376,7 @@ ILK_SURUM = veri.KOK / "sonuclar" / "deney2_ilk" / "tahminler.csv"
 
 def ilk_surumle_karsilastir(tahminler: dict, yol: Path = ILK_SURUM, n=2000, tohum=1) -> pd.DataFrame | None:
     """
-    Güncelleme 05: revize (Karar 13) − ilk sürüm, aynı tekrarlarda; kişi bazlı bootstrap %95 GA.
+    revize − ilk sürüm, aynı tekrarlarda; kişi bazlı bootstrap %95 GA.
     İlk sürümün tahminleri sonuclar/deney2_ilk/tahminler.csv dosyasından okunur (yoksa None).
     """
     if not Path(yol).exists():
@@ -512,7 +512,7 @@ def yazdir_ozet(T):
     print("\n2) Temel çizgi (tek toplam hata, doğru/yanlış) ve 6 sınıflı kural:")
     t = T["temel_cizgi"]
     print(t[t["görüş"] != "profil (70–90°)"].round(3).to_string(index=False))
-    print("\n2b) İlk iki (Karar 14):")
+    print("\n2b) İlk iki:")
     print(T["ilk_iki"].round(2).to_string(index=False))
     print("\n2c) Az kaldırma kararları ve eksik açı (ana sistem):")
     kd = T["kaldirma"]
@@ -537,7 +537,7 @@ def yazdir_ozet(T):
         print("\n8) Kişi bazlı bootstrap %95 GA:")
         print(T["bootstrap"].round(3).to_string(index=False))
     if "ilk_surum_karsilastirma" in T:
-        print("\n9) Revize − ilk sürüm (Güncelleme 05; kişi bazlı bootstrap %95 GA):")
+        print("\n9) Revize − ilk sürüm (kişi bazlı bootstrap %95 GA):")
         print(T["ilk_surum_karsilastirma"].round(3).to_string(index=False))
 
 
@@ -545,7 +545,7 @@ def main():
     ap = argparse.ArgumentParser(description="Deney 2: hata türünü bulma")
     ap.add_argument("--cikti", default=None, help="varsayılan: sonuclar/deney2 (ilk) ya da deney2_revize")
     ap.add_argument("--kaldirma-surumu", choices=ht.KALDIRMA_SURUMLERI, default=ht.VARSAYILAN_KALDIRMA,
-                    help="az kaldırma puanı: ilk (varsayılan, Karar 17) ya da revize (Karar 13 denemesi)")
+                    help="az kaldırma puanı: ilk (varsayılan) ya da revize (denenip elenen sürüm)")
     ap.add_argument("--puan-hazir", action="store_true", help="puanlar.csv'yi yeniden hesaplama")
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--galeri", action="store_true", help="galeri videolarını da üret")

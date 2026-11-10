@@ -1,5 +1,5 @@
 """
-Hız bilgi notunun eşiği (Güncelleme 08, Karar 31).
+Hız bilgi notunun eşiği.
 
 Veri setinin Ex1 DOĞRU tekrarlarında süre = (last_frame − first_frame + 1) / 30 FPS. Birim, diğer deneylerle
 aynı: her (Segmentation.csv satırı, kamera) bir tekrardır; yalnızca önden + çapraz (|görüş| ≤ 60°) kameralar.
@@ -25,7 +25,7 @@ from deneyler.deney1 import GORUS_GRUPLARI
 
 CIKTI = veri.KOK / "sonuclar" / "hiz_esigi"
 FPS = 30.0
-UYGULAMA = GORUS_GRUPLARI[:2]       # önden + çapraz (Karar 6)
+UYGULAMA = GORUS_GRUPLARI[:2]       # önden + çapraz
 
 
 def sure_tablosu(seg: pd.DataFrame | None = None) -> pd.DataFrame:

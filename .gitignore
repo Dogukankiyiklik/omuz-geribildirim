@@ -27,6 +27,3 @@ sonuclar/sunum/5b_*.png
 
 # Üretilen videolar (yeniden üretilebilir; büyük)
 sonuclar/**/*.mp4
-
-# Arşivlenen LLM deneyinin yerel önbelleği
-sonuclar/deney4/onbellek.jsonl

@@ -1,5 +1,5 @@
 """
-Deney 2 galerisi (Adım 4, Güncelleme 04 not 2): sonuclar/deney2/galeri/
+Deney 2 galerisi: sonuclar/deney2/galeri/
 
 Ana sistem (v2 = açı bandı, yönlü), yalnızca önden + çapraz (|görüş| ≤ 60°), katı değerlendirme.
 Gruplar (her birinden n video, tohum 0):
@@ -7,7 +7,7 @@ Gruplar (her birinden n video, tohum 0):
   * kaçırılan hatalar (gerçek hata → sistem "doğru" dedi).
 Görsel, KARARI VEREN ölçütün eğrisini ve bandını gösterir: karışmada sistemin seçtiği hatanın ölçütü,
 kaçırmada gerçek hatanın ölçütü. Kaldırma ölçütünde bant yoktur; kol açısı zamana göre ve kalibrasyon
-tepelerinin tepe bandı μ ± τ çizilir (Güncelleme 05, Karar 13).
+tepelerinin tepe bandı μ ± τ çizilir.
 
 Kullanım (Deney 2'den sonra; puanlar.csv ve tahminler.csv hazır olmalı):
     python -m deneyler.deney2_galeri
@@ -125,7 +125,7 @@ class Deney2Gorseli(AciBandiGorseli):
         plt.close(fig)
 
     def satir_d(self) -> float:
-        """Kaldırma puanı (Karar 7: modellerin ortalaması): ilk sürümde imzalı d, revizede yönlü E."""
+        """Kaldırma puanı (modellerin ortalaması): ilk sürümde imzalı d, revizede yönlü E."""
         if self.surum == "ilk":
             return float(np.mean([ht.kaldirma_sapmasi(self.ek["tepe_acisi"], t) for t in self.d["kalibrasyon_tepeleri"]]))
         return float(np.mean([ht.kaldirma_puanlari(self.ek["tepe_acisi"], t)[0][1]

@@ -1,5 +1,5 @@
 """
-Kamera açısı uyarısının eşiği (Güncelleme 07, Karar 26).
+Kamera açısı uyarısının eşiği.
 
 Veri setinin doğru Ex1 tekrarlarında dinlenme omuz genişliği / gövde boyu oranının dağılımı, görüş
 grubuna göre. Eşik = çapraz (30–60°) grubundaki oranın 10. yüzdeliği (önceden sabit).

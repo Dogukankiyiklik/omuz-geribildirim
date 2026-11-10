@@ -28,7 +28,7 @@ from deneyler.tablolar import gorus_maskesi
 
 MODEL = veri.KOK / "modeller" / "kural_ex1.json"
 CIKTI = veri.KOK / "sonuclar" / "kural_disa_aktar"
-BANT, YONLU = deney2.ANA_SISTEM
+YONLU = deney2.YONLU
 
 
 def _commit() -> str:
@@ -77,9 +77,9 @@ def main():
     ap.add_argument("--model", default=str(MODEL))
     args = ap.parse_args()
     utf8_cikti()
-    puan = deney2.puanlari_oku(deney2.CIKTI)[BANT]
+    puan = deney2.puanlari_oku(deney2.CIKTI)
     egitim, kural, esik = kur(puan)
-    bilgi = {"egzersiz": "ex1", "sistem": deney2.sistem_adi(BANT, YONLU), "kaldirma_surumu": kural.kaldirma_surumu,
+    bilgi = {"egzersiz": "ex1", "sistem": deney2.SISTEM_ADI, "kaldirma_surumu": kural.kaldirma_surumu,
              "olcu_surumu": gb.VARSAYILAN_OLCU, "egitim_gorusu": deney2.AYAR_GORUSU,
              "kisiler": sorted(egitim.kisi.unique().tolist()), "egitim_tekrar": int(len(egitim)),
              "commit": _commit(), "tarih": dt.datetime.now().isoformat(timespec="seconds")}
@@ -89,7 +89,6 @@ def main():
     assert (k2.karar(egitim) == kural.karar(egitim)).all() and e2 == esik
 
     loso = pd.read_csv(deney2.CIKTI / "esikler.csv", encoding="utf-8-sig")
-    loso = loso[loso.sistem == deney2.sistem_adi(BANT, YONLU)]
     sid_yol = veri.KOK / "sonuclar" / "deney3" / "siddet_esikleri.csv"
     loso_sid = pd.read_csv(sid_yol, encoding="utf-8-sig") if sid_yol.exists() else None
     tablo = karsilastirma(kural, esik, loso, loso_sid)

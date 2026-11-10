@@ -49,7 +49,7 @@ OLCUTLER = list(DENEY2_OLCUTLERI)
 ANLATIM = [gb.OMUZ_ANLATIM]
 ANAHTAR = ["video", "kamera", "yonelim", "satir"]
 GORUSLER = (ONDEN_CAPRAZ, TUMU, "profil (70–90°)")
-BANT, YONLU = deney2.ANA_SISTEM   # ("v2", True)
+YONLU = deney2.YONLU   # yönlü açı bandı
 TOHUM = 0
 
 
@@ -84,12 +84,12 @@ def kararlar(puan: pd.DataFrame, kaldirma_surumu: str = ht.VARSAYILAN_KALDIRMA):
 
 
 def deney2_ile_denetle(p: pd.DataFrame, yol: Path = deney2.CIKTI / "tahminler.csv") -> int:
-    """Kararlar sonuclar/deney2/tahminler.csv (v2_yonlu) ile birebir aynı olmalı. Dönüş: denetlenen satır."""
+    """Kararlar sonuclar/deney2/tahminler.csv ile birebir aynı olmalı. Dönüş: denetlenen satır."""
     if not Path(yol).exists():
         print("  UYARI: sonuclar/deney2/tahminler.csv yok; denetim atlandı")
         return 0
     d2 = pd.read_csv(yol, encoding="utf-8-sig", keep_default_na=False)
-    d2 = d2[d2.sistem == deney2.sistem_adi(BANT, YONLU)].set_index(ANAHTAR)
+    d2 = d2.set_index(ANAHTAR)
     q = p.set_index(ANAHTAR).join(d2[["tahmin", "soylenen1", "soylenen2"]], rsuffix="_d2", how="inner")
     assert len(q) == len(p) == len(d2), (len(q), len(p), len(d2))
     for c in ("tahmin", "soylenen1", "soylenen2"):
@@ -108,8 +108,8 @@ def ayrintilar(tekrarlar) -> dict:
         if len(dogrular) < 3:
             continue
         dogrular_f = [f for _, f in dogrular]
-        modeller = deney2.grup_modelleri(dogrular_f, "v2", OLCUTLER)
-        modeller_ek = deney2.grup_modelleri(dogrular_f, "v2", ANLATIM)
+        modeller = deney2.grup_modelleri(dogrular_f, OLCUTLER)
+        modeller_ek = deney2.grup_modelleri(dogrular_f, ANLATIM)
         altlar = birini_disarida_alt_kumeler(dogrular_f)
         for t, f in tl:
             secim = ([next(j for j, (u, _) in enumerate(dogrular) if u is t)] if t.dogru
@@ -383,7 +383,7 @@ def calistir(cikti=CIKTI, bootstrap_n=2000, yazdir=True, tohum: int = TOHUM, olc
     t0 = time.time()
     cikti = Path(cikti)
     cikti.mkdir(parents=True, exist_ok=True)
-    puan = deney2.puanlari_oku(deney2.CIKTI)[BANT]
+    puan = deney2.puanlari_oku(deney2.CIKTI)
     p, kurallar, esikler = kararlar(puan)
     n = deney2_ile_denetle(p)
     if yazdir:

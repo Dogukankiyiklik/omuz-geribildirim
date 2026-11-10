@@ -49,6 +49,13 @@ Kulak–omuz ölçüsü (`YENI`), silkmeli tekrar ile doğru tekrar [`deney1/oze
 
 **Cevap: kısmen.** Önden + çapraz görüşte hatalı tekrarların yarısından biraz fazlasında ilk söylenen hata doğru; üçte ikisinde doğru hata cümlede geçiyor. Doğru tekrarların çoğuna "doğru" deniyor. Beş hata türü arasında rastgele tahmin %20 tutturur; sonuç bunun çok üstünde, ama kusursuz değil.
 
+**Nasıl karar veriliyor** (`deneyler/deney2.py`, kural `cekirdek/hata_turu.py`):
+
+1. Her hata türünün bir ölçüsü var: omuz silkmesi → kulak–omuz, baş eğme → baş eğikliği, kolun öne kaçması → iki adaydan eğitimde seçilen, dirsek bükme → dirsek açısı. Bunlar kişiye özel açı bandıyla puanlanır. Bant yönlüdür: yalnızca hatanın yönündeki taşma sayılır. Yetersiz kaldırmanın puanı, kolun en yüksek açısının kalibrasyondaki tepe açılarının ortancasından ne kadar eksik kaldığıdır.
+2. Puanlar ortak bir ölçeğe çevrilir: z = (puan − doğru tekrarlardaki ortanca) / (doğru tekrarlardaki yayılım).
+3. En büyük z, eşik T'den küçükse "doğru"; değilse en büyük z'yi veren hata söylenir.
+4. T, yönler ve öne kaçma ölçüsü 4 kişide seçilir, 5. kişide sınanır (her kişi için tekrarlanır).
+
 Cümleye çevirme kayıpsız: cümlenin söylediği hata, karar kuralının bulduğu hatayla her tekrarda aynı. Bu yüzden "hata türü doğruluğu" ile "cümle doğruluğu" aynı sayı [`deney2/ozet.csv`, `deney3/ozet.csv`]:
 
 | Ölçü (önden + çapraz; 682 hatalı, 681 doğru tekrar) | Değer |
@@ -99,6 +106,7 @@ Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/READM
 | **Zamansal yumuşatma** (One Euro, Savitzky–Golay; ödevde önerilen) | MediaPipe titremesi %38–87 azaldı, ama silkme tespiti değişmedi: AUC 0,947 → 0,943 ve 0,947. Kullanılmadı. | `deney1c/ozet.csv`, `deney1c/titreme.csv` |
 | **Görüntüden omuz silueti** (omuz bölgesinde segmentasyon maskesi; ödevdeki "pose + lokal görüntü" önerisi) | Önden çekimde silkmeyi ayırıyor (0,94), çapraz çekimde arama bölgesi başın üstüne düşüyor (0,55). Toplamda 0,72; kulak–omuz ölçüsü aynı tekrarlarda 0,97. | `siluet/ozet.csv` |
 | **Zaman bandı** (literatürdeki yöntem: tekrarlar DTW ile zamanda hizalanır, bant zamana göre kurulur). Açı bandından önce bunu kullandık. | Kulak–omuz silkme / doğru 0,909 (açı bandında 0,947); asıl fark silkmeyi diğer hatalardan ayırmada: 0,705 (açı bandında 0,829). Kol az kaldırılınca omuz yanlış kol açısıyla karşılaştırılıyordu. Açı bandına geçildi. | `sonuclar/deney1_v2/ozet.csv` (`v1` ve `v2` satırları, `YENI`); dosya `ecd69a9` commit'inde, Deney 1 sadeleştirilince depodan çıkarıldı |
+| Deney 2'de zaman bandı ve yönsüz bant | Hata türü kararında açı bandı (yönlü) ile fark anlamlı değil: önden + çapraz makro-F1 farkı zaman bandına göre +0,004 (%95 GA −0,027 – +0,019), yönsüz banda göre +0,004 (%95 GA −0,032 – +0,043). Uygulamanın yöntemi (açı bandı, yönlü) kaldı. | `sonuclar/deney2/bootstrap.csv` (`a18101a` commit'inde; Deney 2 sadeleştirilince depodan çıkarıldı) |
 | Yetersiz kaldırma puanının "revize" hâli | Hata türü doğruluğunu düşürdü (makro-F1 0,631 → 0,568); ilk hâline dönüldü. | `deney2_revize/ozet.csv` |
 | Cümleyi bir LLM'e yazdırmak (Gemini, ücretsiz katman; 150 tekrar) | Karar kuraldan gelip LLM yalnızca cümleyi yazınca sonuç kural cümlesiyle aynı düzeyde (ilk söylenen doğru 61'e 61), üstünlük yok. Hatayı da LLM'e buldurunca 61'den 45'e düştü. Ürün kural tabanlı kaldı. | `deney4/ozet.csv` |
 | Aynı sistemi başka bir harekette denemek (omuz ekstansiyonu, Ex7) | Silkme tespiti taşınıyor (AUC 0,89–0,94), ama hata türü zayıf (makro-F1 0,40). Ödevin kapsamı dışında. | `ex7/ozet.csv` |

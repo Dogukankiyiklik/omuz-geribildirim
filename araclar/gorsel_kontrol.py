@@ -286,8 +286,6 @@ class TekrarGorseli:
         return cikti
 
 
-AciBandiGorseli = TekrarGorseli  # eski ad (deneyler/deney2_galeri.py kullanır)
-
 
 def oynat(yol: Path, fps: float = 30.0) -> None:
     """MP4'ü pencerede oynatır. Boşluk: duraklat, q / Esc: çık."""

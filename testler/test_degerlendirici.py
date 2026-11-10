@@ -20,7 +20,7 @@ PUAN = veri.KOK / "sonuclar" / "deney2" / "puanlar.csv"
                     reason="veri ya da Deney 3 çıktıları yok")
 def test_uygulama_deney3_ile_ayni():
     from deneyler import deney2, deney3
-    puan = deney2.puanlari_oku(deney2.CIKTI)["v2"]
+    puan = deney2.puanlari_oku(deney2.CIKTI)
     p, kurallar, esikler = deney3.kararlar(puan)
     c = pd.read_csv(CUMLELER, encoding="utf-8-sig", keep_default_na=False)
     tekrarlar = veri.tekrarlari_yukle(1)

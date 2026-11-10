@@ -14,13 +14,10 @@ ILK = veri.KOK / "sonuclar" / "deney2" / "tahminler.csv"
 
 
 @pytest.mark.skipif(not (PUAN.exists() and ILK.exists()), reason="Deney 2 çıktıları yok")
-@pytest.mark.parametrize("bant,yonlu", [("v2", True)])
-def test_dondurulmus_yontem_ilk_surumu_uretir(bant, yonlu):
+def test_dondurulmus_yontem_ilk_surumu_uretir():
     from deneyler import deney2
-    puanlar = deney2.puanlari_oku(PUAN.parent)
-    tah, _ = deney2.loso(puanlar[bant], yonlu)
+    tah, _ = deney2.loso(deney2.puanlari_oku(PUAN.parent))
     ilk = pd.read_csv(ILK, encoding="utf-8-sig", keep_default_na=False)
-    ilk = ilk[ilk.sistem == deney2.sistem_adi(bant, yonlu)]
     anahtar = ["video", "kamera", "yonelim", "satir"]
     a = tah.set_index(anahtar).sort_index()
     b = ilk.set_index(anahtar).sort_index()

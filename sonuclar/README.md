@@ -13,7 +13,7 @@ Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyle
 | Klasör | Ne var | En önemli dosya |
 | --- | --- | --- |
 | `deney1/` | Omuz silkmesini ayırma: dört omuz ölçüsü × üç puanlama (`ham`, `genel`, `kisiye_ozel`) | `ozet.csv` (AUC'ler; `docs/DENEYLER.md` Soru 1; regresyon testi bunu `referans/beklenen_deney1_ozet.csv` ile karşılaştırır), `kisi_auc.csv` (kişi başına AUC) |
-| `deney2/` | Hata türü kararı | `ozet.csv` (makro-F1, hatalılarda tür doğru, gereksiz uyarı…), `tahminler.csv` (her tekrarın kararı), `karisiklik_*` (karışıklık matrisleri), `esikler.csv` (her test kişisi için seçilen T) |
+| `deney2/` | Hata türü kararı (açı bandı, yönlü) | `ozet.csv` (makro-F1, hatalılarda tür doğru, gereksiz uyarı…), `ilk_iki.csv`, `tahminler.csv` (her tekrarın kararı), `puanlar.csv` (her tekrarın ölçü puanları; Deney 3 ve kural dosyası bunu okur), `karisiklik_*` (karışıklık matrisleri), `esikler.csv` (her test kişisi için seçilen T) |
 | `deney3/` | Kararın Türkçe cümleye çevrilmesi | `ozet.csv`, `cumleler.csv` (her tekrarın cümlesi), `ornek_cumleler_saglam.md` (okunabilir örnekler), `siddet_esikleri.csv` |
 | `kendi_kayit/` | Kendi çektiğimiz videoda değerlendirme (kişi 1) | `kisi1/ozet.csv` (`docs/DENEYLER.md` Soru 3), `kisi1/cumle_etiket.csv` (her tekrarın etiketi ve cümlesi) |
 | `tekrar_ayirma/` | Otomatik tekrar ayırmanın veri setinin etiketlerine karşı sınanması | `ozet.csv` |
@@ -28,8 +28,7 @@ Bütün CSV'lerin bugünkü koddan aynen yeniden üretildiği `python -m deneyle
 
 ## Kısaltmalar
 
-- **v1b / v2** (Deney 2 tablolarında): zaman bandı (çoklu referans) ve açı bandı. Ana yöntem v2 (açı bandı).
-- **yonlu / yonsuz:** yönlü bant yalnızca hatanın beklenen yönündeki sapmayı sayar (örneğin omuz yukarı); ana yöntem yönlü.
+- **yönlü bant:** yalnızca hatanın beklenen yönündeki sapmayı sayar (örneğin omuz yukarı). Deney 2 ve uygulama yönlü bant kullanır. Kural dosyasındaki `"sistem": "v2_yonlu"` bu demektir (v2 = açı bandı).
 - **oc / tum:** önden + çapraz görüş ve tüm görüşler.
 - **kati / esnek:** katı değerlendirmede yalnızca birincil hata doğru sayılır, esnekte ek hatalar da doğru sayılır.
 - **saglam:** uygulamanın kullandığı sağlam ölçü. Cümledeki ölçü tek kare yerine birkaç karenin medyanından alınır.

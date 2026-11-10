@@ -1,7 +1,7 @@
 """
-MediaPipe Tasks PoseLandmarker sarmalayıcısı (Adım 6).
+MediaPipe Tasks PoseLandmarker sarmalayıcısı.
 
-Model: pose_landmarker_full.task (veri setiyle aynı "Full" model; Karar 27). İlk çalıştırmada
+Model: pose_landmarker_full.task (veri setiyle aynı "Full" model). İlk çalıştırmada
 modeller/ altına indirilir (*.task git'e girmez). Çıktı veri setinin _2d biçimindedir: (33, 4) =
 x, y (görüntüye göre 0–1), z (göreli derinlik), görünürlük. Kişi bulunamazsa satır NaN olur.
 """

@@ -1,14 +1,14 @@
 """
-Omuz geri bildirim uygulaması (Adım 6): solda görüntü ve iskelet, sağda geri bildirim paneli.
+Omuz geri bildirim uygulaması: solda görüntü ve iskelet, sağda geri bildirim paneli.
 
 Kullanım:
     # Canlı kamera: önce kalibrasyon, sonra değerlendirme
-    python -m uygulama.main --isim dogukan
-    python -m uygulama.main --profil profiller/dogukan.npz        # kayıtlı profille doğrudan değerlendirme
-    # Video dosyası (Karar 27, birincil demo yolu)
-    python -m uygulama.main --isim dogukan --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
-    python -m uygulama.main --profil profiller/dogukan.npz --video test.mp4
-    # Veri setinden bir video (Karar 40): profil aynı videonun etiketi doğru tekrarlarından kurulur
+    python -m uygulama.main --isim adin
+    python -m uygulama.main --profil profiller/adin.npz            # kayıtlı profille doğrudan değerlendirme
+    # Video dosyası (sunumdaki demonun ana yolu)
+    python -m uygulama.main --isim adin --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
+    python -m uygulama.main --profil profiller/adin.npz --video test.mp4
+    # Veri setinden bir video: profil aynı videonun etiketi doğru tekrarlarından kurulur
     python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 
 Kullanım kolaylığı:
@@ -398,7 +398,7 @@ def main():
     ap.add_argument("--video", help="değerlendirilecek video; verilmezse canlı kamera")
     ap.add_argument("--kamera", default="0",
                     help="canlı kamera numarası (varsayılan 0); --veri-seti ile veri setindeki kamera (cam1/cam2/cam3)")
-    ap.add_argument("--veri-seti", help="veri setinden video, ör. ex1_Honza (Karar 40; --kamera camN --yonelim ile)")
+    ap.add_argument("--veri-seti", help="veri setinden video, ör. ex1_Honza (--kamera camN --yonelim ile)")
     ap.add_argument("--yonelim", type=int, default=0, help="--veri-seti ile kişinin yönelimi (derece)")
     ap.add_argument("--cozunurluk", default="1280x720",
                     help="canlı kamera çözünürlüğü, GxY (varsayılan 1280x720; geniş görüş için). Ör. 1920x1080")
@@ -412,7 +412,7 @@ def main():
     ap.add_argument("--elle-onay", action="store_true", help="otomatik kabul yok; her tekrar için Kabul/Reddet bekle")
     args = ap.parse_args()
     if args.veri_seti:
-        # Karar 40: profil, aynı videonun etiketi doğru ilk tekrarlarından (sağlık kontrolüyle aynı yol);
+        # Profil, aynı videonun etiketi doğru ilk tekrarlarından (sağlık kontrolüyle aynı yol);
         # yeni yöntem kodu yok. Kalibrasyona giren tekrarların kararı adil bir sınama değildir.
         from uygulama.toplu import veri_seti_profili
         if args.profil or args.kalibrasyon_video or args.video:

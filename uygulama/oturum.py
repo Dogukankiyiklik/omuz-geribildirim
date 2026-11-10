@@ -1,16 +1,16 @@
 """
-Arayüzden bağımsız oturum mantığı (Adım 6). Pencere (uygulama/main.py) ve yığın modu (uygulama/toplu.py)
+Arayüzden bağımsız oturum mantığı. Pencere (uygulama/main.py) ve yığın modu (uygulama/toplu.py)
 bunu ortak kullanır. Karar ve cümle yalnızca cekirdek/ içinden gelir.
 
 Akış:
-  * Her kare: MediaPipe noktaları (33, 4) → kol açısı → TekrarAyirici (Karar 25).
+  * Her kare: MediaPipe noktaları (33, 4) → kol açısı → TekrarAyirici (tekrarları ayırır).
   * Kalibrasyon: biten her tekrar "onay bekliyor" olur; kullanıcı kabul ya da ret eder. Varsayılan 6,
-    en az 5 tekrar (Karar 8). Her kalibrasyon tekrarının dinlenme karelerinde kamera açısı oranı
-    ölçülür (Karar 26); eşiğin altındaysa uyarı verilir, kalibrasyon engellenmez.
-  * Değerlendirme: tam model (kalibrasyondaki bütün tekrarlar, Karar 24) + modeller/kural_ex1.json
+    en az 5 tekrar. Her kalibrasyon tekrarının dinlenme karelerinde kamera açısı oranı
+    ölçülür; eşiğin altındaysa uyarı verilir, kalibrasyon engellenmez.
+  * Değerlendirme: tam model (kalibrasyondaki bütün tekrarlar) + modeller/kural_ex1.json
     → cekirdek.degerlendirici.degerlendir → karar, hasta cümlesi, uzman ayrıntısı.
-  * Yumuşatma yok (Karar 10): ölçütler ham noktalardan.
-  * Bilgi notları (Güncelleme 08, Karar 30–31; cekirdek/bilgi_notlari.py): her değerlendirme tekrarında kamera
+  * Noktalar yumuşatılmaz: ölçütler MediaPipe'ın ham noktalarından hesaplanır.
+  * Bilgi notları (cekirdek/bilgi_notlari.py): her değerlendirme tekrarında kamera
     açısı notu, hız notu ve sol kol notu. Karar kuralına ve cümleye girmez; CSV'de ayrı sütunlar.
 """
 from __future__ import annotations
@@ -38,7 +38,7 @@ OTURUM_KLASORU = KOK / "oturumlar"
 HEDEF_KALIBRASYON = 6
 EN_AZ_KALIBRASYON = 5
 GORUNURLUK_ESIGI = 0.5     # arayüz kalite kontrolü: omuz ve kalçaların MediaPipe görünürlüğü (tekrar medyanı)
-EGZERSIZLER = {"ex1": "Kolu yana kaldırma (sağ kol)"}   # Karar 27: ilk sürüm yalnızca Ex1
+EGZERSIZLER = {"ex1": "Kolu yana kaldırma (sağ kol)"}   # yalnızca bu egzersiz destekleniyor
 
 
 def kalite_sorunu(dizi: np.ndarray) -> str:
@@ -72,7 +72,7 @@ class TekrarKaydi:
     kamera_orani: float = np.nan
     sonuc: dg.Sonuc | None = field(default=None, repr=False)
     kalite_sorunu: str = ""  # boş değilse: omuz/kalça kadrajda değildi (yalnızca arayüz uyarısı)
-    notlar: bn.BilgiNotlari | None = field(default=None, repr=False)   # Karar 30–31 (yalnızca bilgi)
+    notlar: bn.BilgiNotlari | None = field(default=None, repr=False)   # yalnızca bilgi; karara girmez
 
     @property
     def etiketli(self) -> slice:

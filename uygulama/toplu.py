@@ -1,14 +1,14 @@
 """
-Yığın modu (Adım 6): pencere açmadan aynı değerlendirme. Adım 7 (kendi kayıtlar) bunu kullanır.
+Yığın modu: pencere açmadan aynı değerlendirme. Kendi kayıt deneyi (deneyler/kendi_kayit.py) bunu kullanır.
 
 Kullanım:
     # 1) Kalibrasyon videosundan profil + test videosunu değerlendirme
-    python -m uygulama.toplu --isim dogukan --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
+    python -m uygulama.toplu --isim adin --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
     # 2) Kayıtlı profille değerlendirme
-    python -m uygulama.toplu --profil profiller/dogukan.npz --video test.mp4
-    # 3) Sağlık kontrolü: veri setinden bir video, MediaPipe yeniden çalıştırılır (Güncelleme 07, madde 6)
+    python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4
+    # 3) Sağlık kontrolü: veri setinden bir video; MediaPipe yeniden çalıştırılır ve veri setindeki iskeletle karşılaştırılır
     python -m uygulama.toplu --veri-seti ex1_Honza --kamera cam1 --yonelim 0
-    # Pencere modunda aynı video (Karar 40): python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
+    # Pencere modunda aynı video: python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 
 Kalibrasyon videosunda ayrılan bütün tekrarlar kabul edilir (en fazla 6; videoda yalnızca doğru tekrarlar
 olmalı). Çıktı: oturum CSV'si (varsayılan oturumlar/<tarih>.csv) ve terminalde tablo.
@@ -106,7 +106,7 @@ def degerlendir_video(yol, kalibrasyon: Oturum, lm: np.ndarray | None = None) ->
 def veri_seti_kalibrasyonu(video_id: str, kamera: str, yonelim: int, kalibrasyon_sayisi: int = HEDEF_KALIBRASYON):
     """
     Veri setinden bir video: MediaPipe yeniden çalıştırılır, tekrarlar ayrılır, Segmentation.csv ile eşlenir ve
-    etiketi doğru olan ilk `kalibrasyon_sayisi` tekrarla kalibrasyon yapılır (sağlık kontrolü ve Karar 40).
+    etiketi doğru olan ilk `kalibrasyon_sayisi` tekrarla kalibrasyon yapılır (sağlık kontrolü ve main.py --veri-seti).
     Dönüş: sözlük (yol, fps, W, H, bas, son, lm, s, o, es, etiket, kal, poz_farki).
     """
     from deneyler.tekrar_ayirma import eslestir
@@ -140,7 +140,7 @@ def veri_seti_kalibrasyonu(video_id: str, kamera: str, yonelim: int, kalibrasyon
 
     o = Oturum(W / H, fps)
     o.hedef = 10 ** 6
-    o.kalite_kontrol = False          # raporlanmış sağlık kontrolüyle aynı davranış (ADIM_06)
+    o.kalite_kontrol = False          # sağlık kontrolünde kadraj nedeniyle hiçbir tekrar reddedilmez
     oturum_isle(lm, o)
     et = [(int(r.first_frame) - bas, int(r.last_frame) - bas) for _, r in s.iterrows()]
     es = eslestir(et, [(k.bas, k.son) for k in o.tekrarlar])
@@ -159,7 +159,7 @@ def veri_seti_kalibrasyonu(video_id: str, kamera: str, yonelim: int, kalibrasyon
 
 def veri_seti_profili(video_id: str, kamera: str, yonelim: int, klasor: Path | None = None):
     """
-    Karar 40: pencere modunda veri setinden bir videoyu denemek için profil. İlk çalıştırmada
+    Pencere modunda veri setinden bir videoyu denemek için profil. İlk çalıştırmada
     veri_seti_kalibrasyonu (MediaPipe, ~1 dk) ve profiller/veriseti_<video>_<kamera>_o<yönelim>.npz kaydı;
     sonraki çalıştırmalarda bu dosya yüklenir. Dönüş: (video yolu, profil dosyası, kalibrasyon tekrar numaraları).
     """

@@ -1,12 +1,11 @@
 """
-Uygulamanın çizimleri (Adım 6): iskelet, referans bindirme (P3), geri bildirim paneli, omuz eğrisi.
+Uygulamanın çizimleri: iskelet, referans bindirme (P3), geri bildirim paneli, omuz eğrisi.
 
 Türkçe karakter için metin PIL (ImageDraw + TTF) ile çizilir; cv2.putText Türkçe çizemez.
 Font: matplotlib ile gelen DejaVu Sans (her kurulumda var).
 """
 from __future__ import annotations
 
-import textwrap
 from dataclasses import dataclass
 
 import cv2
@@ -222,7 +221,8 @@ def _simdi(oturum) -> tuple[str, str, tuple]:
             neden = f"Kol en fazla {g['tepe']:.0f}°'ye çıktı; en az {ta.EN_AZ_TEPE:.0f}° gerekli."
         else:
             sure = f"{g['sure_s']:.1f}".replace(".", ",")
-            neden = f"Çok hızlıydı ({sure} sn); en az 0,8 sn sürmeli."
+            en_az = f"{ta.EN_AZ_SURE_S:g}".replace(".", ",")
+            neden = f"Çok hızlıydı ({sure} sn); en az {en_az} sn sürmeli."
         return "Bu hareket tekrar sayılmadı", neden, P_UYARI
     kol = oturum.kol_anlik
     if np.isfinite(kol) and kol > ta.BITIS_ESIGI:
@@ -281,7 +281,7 @@ def panel(Y: int, oturum, uzman_acik: bool, oynatim: bool, mesaj: str = "", egze
         yaz(f"1. KALİBRASYON — kabul edilen: {n}/{oturum.hedef}  (en az {oturum.en_az})", 18, P_UYARI, True)
         yaz("Kolunu doğru şekilde, yandan yukarı tam kaldır. Sistem bu tekrarlardan senin normal hareketini "
             "öğrenir; hatalar sonra buna göre bulunur.", 15, P_IKINCIL)
-        yaz(bn.KALIBRASYON_YONERGESI, 16, P_METIN, True)                    # Karar 29 (yönerge)
+        yaz(bn.KALIBRASYON_YONERGESI, 16, P_METIN, True)
     else:
         yaz(f"2. DEĞERLENDİRME — kalibrasyon: {len(oturum.kalibrasyon)} tekrar", 18, P_DOGRU, True)
     if oturum.uyari:
@@ -327,9 +327,9 @@ def panel(Y: int, oturum, uzman_acik: bool, oynatim: bool, mesaj: str = "", egze
         if k.kalite_sorunu:
             yaz(f"⚠ Bu tekrarda {k.kalite_sorunu}; sonuç güvenilir değil.", 16, P_UYARI, True)
         yaz(s.hasta_cumlesi, 23, P_METIN)                                # hasta cümlesi: büyük
-        if k.notlar is not None and k.notlar.kamera:                     # Karar 30 (yalnızca arayüz)
+        if k.notlar is not None and k.notlar.kamera:                     # yalnızca arayüz
             yaz("⚠ " + bn.KAMERA_NOTU, 15, P_UYARI, True)
-        if k.notlar is not None and k.notlar.metinler:                   # Karar 31: bilgi notu, hata değil
+        if k.notlar is not None and k.notlar.metinler:                   # bilgi notu, hata değil
             yaz("Bilgi: " + " ".join(k.notlar.metinler), 17, (42, 100, 170), True)
         y += 4
         if uzman_acik:
@@ -380,7 +380,3 @@ def _omuz_grafigi(d, x, y, G, H, k) -> int:
 
 def ekran(video_img: np.ndarray, panel_img: np.ndarray) -> np.ndarray:
     return np.hstack([video_img, panel_img])
-
-
-def satir_sar(metin: str, n: int = 60) -> str:
-    return "\n".join(textwrap.wrap(metin, n))

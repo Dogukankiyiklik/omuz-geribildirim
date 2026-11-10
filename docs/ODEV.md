@@ -1,14 +1,25 @@
 # Ödev tanımı ve projedeki karşılıkları
 
-Kaynak: "Bilgisayarla Görü – Ara Sınav Projesi" Word dosyası. Sunum 16 Kasım 2026, 5 dakika. **Sunumdan sonra** 1 sayfalık rapor teslim edilir.
+Kaynak: hocanın verdiği Word dosyası, [`ODEV_asil.docx`](ODEV_asil.docx) ("Bilgisayarla Görü – Ara Sınav Projesi"; rapor şablonu, problem tanımları, kaynak rehberi). Bu belge onun özeti ve projedeki karşılıklarıdır; ikisi çelişirse Word dosyası geçerlidir. Sunum 16 Kasım 2026, 5 dakika. **Sunumdan sonra** 1 sayfalık rapor teslim edilir.
 
 ## Proje konusu
 Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıcıya anlamlı geri bildirim üretilmesi. Üç problemden en az birini çözen **çalışan bir uygulama** isteniyor; birden fazlası seçilebilir. **Proje üçünü de kapsıyor.**
 
+## Dikkat: ödev metni yoga diyor, proje omuz egzersizi yapıyor
+
+Word dosyasında Problem 1'in başlığı "**Yoga** Hareketinin Doğruluğunun Ölçülmesi ve Doğal Dil Geri Bildirimi", Problem 3'ünki "Referans **Yoga** Hareketi ile Kullanıcı Hareketinin Aynı Video Üzerinde Çakıştırılması". İkisi de "doğru yoga hareketini gösteren bir referans video" ile kullanıcının videosunu karşılaştırmayı anlatıyor. Problem 2 ise doğrudan omuz/skapula ölçümü.
+
+Projede iki fark var; sunumda sorulursa cevabı hazır olmalı:
+
+- **Hareket:** yoga pozu yerine kolu yana kaldırma (omuz rehabilitasyon egzersizi). Gerekçe: Problem 2 omuzu istiyor; üç problem aynı harekette, aynı uygulamada birlikte çözüldü. İstenen adımların hepsi (ölçüm, referansla karşılaştırma, hata büyüklüğü, doğal dil, zamansal + geometrik hizalama, bindirme) bu harekette yapılıyor.
+- **Referans:** başka birinin "doğru" videosu yerine kişinin kendi 6 doğru tekrarı. Gerekçe ölçüldü: başkalarının tekrarlarından kurulan bant çok daha kötü çalışıyor (AUC 0,67'ye karşı 0,95; [`DENEYLER.md`](DENEYLER.md) Soru 1). Bindirme kodu iki farklı kişinin tekrarını da hizalayabiliyor ([`SISTEM.md`](SISTEM.md), sık sorulan sorular).
+
+Bu sapmanın hocayla konuşulup konuşulmadığı bu depoda kayıtlı değil; sunumdan önce teyit etmek iyi olur.
+
 ## Problemler ve şartlar
 
-### P1 — Hareket doğruluğu ve doğal dil geri bildirimi
-- Referans hareket ile kullanıcı hareketi karşılaştırılır.
+### P1 — (Yoga) hareketinin doğruluğu ve doğal dil geri bildirimi
+- Referans video ile kullanıcının aynı hareketi yaptığı video karşılaştırılır.
 - Eklem açıları, doğrultular ve hizalama ölçüleri üretilir.
 - **Hatalı bölge ve hata büyüklüğü** belirlenir; düzeltme doğal dilde söylenir.
   - Örnek: "Sağ kolunu yaklaşık 90° kaldırman gerekiyordu; sen 80° kaldırdın…"
@@ -31,7 +42,7 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
   - **Denenip elenenler:** zamansal yumuşatma ve görüntüden omuz silueti; ikisi de bantlı kulak–omuz ölçüsünden iyi değil (kodları `arsiv/`).
   - **Karşılaştırma:** [`DENEYLER.md`](DENEYLER.md) Soru 1.
 
-### P3 — Referans ve kullanıcı hareketini çakıştırma
+### P3 — Referans (yoga) hareketi ile kullanıcı hareketini aynı videoda çakıştırma
 - **Zamansal hizalama:** DTW veya başlangıç/bitiş eşleme.
 - **Geometrik hizalama:** öteleme, ölçek, döndürme veya Procrustes.
 - İki iskelet aynı video üzerinde farklı renklerle gösterilir; hatalı bölgeler görünür olur.
@@ -45,7 +56,7 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
    - ek yöntemler
    - araçlar
    - girdi/referans
-3. **Yeniden gerçekleştirme adımları (ana bölüm):**
+3. **Yeniden gerçekleştirme adımları (ana bölüm, 5–8 adım):**
    1. ortam
    2. girdi hazırlığı
    3. pose çıkarımı
@@ -66,3 +77,5 @@ Raporun sınırlılık veya kaynak kısmında anılabilir:
 - **Lefebvre vd. (2025):** DeepLabCut ile 20 anatomik omuz/üst ekstremite noktası.
 - **Ceglia vd. (2026):** RGB-D ve akromial küme ile omuz/skapula kinematiği.
 - **RGB-D omuz ROM sistematik derlemesi (2025).**
+
+Projede gerçekten kullanılan makaleler ve rapor için kaynak önerisi: [`LITERATUR.md`](LITERATUR.md).

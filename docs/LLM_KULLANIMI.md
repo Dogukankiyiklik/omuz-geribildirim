@@ -10,7 +10,7 @@
 - Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması, kalıntıların temizlenmesi ve belgelerin yeniden yazılması. Aynı gün, kullanıcının isteğiyle Deney 1–3 uygulamanın kullandığı tek yönteme indirildi, sunum şekilleri betiği ve görsel kontrol aracı kaldırıldı, çekirdekte artık kullanılmayan kod silindi; her adımda bütün sonuçların birebir aynı yeniden üretildiği `deneyler/hepsi.py` ile denetlendi.
 
 ## Claude (ayrı sohbet): planlama ve yorum
-- Literatür taraması (`arsiv/docs/ARKA_PLAN.md`).
+- Literatür taraması (`arsiv/docs/ARKA_PLAN.md`) ve makale özetleri: her makale, sabit bir istemle tek tek özetletildi; kullanılan sekiz makalenin özeti [`LITERATUR.md`](LITERATUR.md)'de.
 - Planlama (`arsiv/PLAN.md`) ve güncellemeler (`arsiv/ilerleme/GUNCELLEME_XX.md`).
 - Sonuçların yorumu ve karar önerileri (`arsiv/ilerleme/KARARLAR.md`). Deneylerin ölçütleri ve yöntem ayrıntıları çoğunlukla sonuçtan önce yazılıp commit'lendi ("önceden kayıt"); sonradan yapılan analizler kayıtlarda öyle işaretlendi.
 - Çekim sırasında kullanılan suflör sayfası (`arsiv/docs/cekim_suflor.html`).

@@ -149,7 +149,7 @@ Bant fikri, μ ve τ'nun tanımı ve τ'ya alt sınır **Jánošová ve ark. (20
 
 ## Literatürden alınanlar
 
-Kodda makaleler M numarasıyla anılır (ör. `M39`). Bu tablo yalnızca yöntemde gerçekten kullanılanları verir.
+Kodda makaleler M numarasıyla anılır (ör. `M39`). Bu tablo yalnızca yöntemde gerçekten kullanılanları verir; her birinin özeti ve künyesi [`LITERATUR.md`](LITERATUR.md)'de.
 
 | Kodda | Makale | Ne alındı |
 | --- | --- | --- |

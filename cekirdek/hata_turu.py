@@ -1,7 +1,7 @@
 """
 Hata türünü bulma (Adım 4, Deney 2): bir tekrar doğru mu, yanlışsa hangi hata?
 
-Her hata türünün bir ölçütü vardır (PLAN.md, Adım 4):
+Her hata türünün bir ölçütü vardır (arsiv/PLAN.md, Adım 4):
   ERR_ELEVATED_SHOULDER : YENI (kulak – omuz mesafesi / gövde)       — açı bandı
   ERR_HEAD_TO_SIDE      : bas (M39 F3)                               — açı bandı
   ERR_ARM_FORWARD       : on_kacma (M39 F1) ya da kol_boyu           — açı bandı; hangisi, eğitim kişilerinde seçilir

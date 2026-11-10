@@ -1,7 +1,8 @@
 """
-Karar 17–18 (Güncelleme 06): dondurulmuş Ex1 yöntemi (v2 yönlü + ilk sürüm kaldırma) Deney 2'nin
-ilk sürüm kararlarını birebir üretmeli. Puanlar sonuclar/deney2/puanlar.csv'den okunur; karar kuralı
-yeniden kurulur ve tahminler sonuclar/deney2_ilk/tahminler.csv ile karşılaştırılır.
+Dondurulmuş Ex1 yöntemi (v2 yönlü + ilk sürüm kaldırma) kayıtlı Deney 2 kararlarını birebir üretmeli.
+Puanlar sonuclar/deney2/puanlar.csv'den okunur; karar kuralı kişi bazlı birini-dışarıda-bırak ile yeniden
+kurulur ve tahminler sonuclar/deney2/tahminler.csv ile karşılaştırılır. (Bu dosya, arşivdeki
+sonuclar/deney2_ilk/tahminler.csv ile v2 yönlü satırlarda birebir aynıdır; sadeleştirmede doğrulandı.)
 Dosyalar yoksa (ör. temiz klon) test atlanır.
 """
 import pandas as pd
@@ -10,7 +11,7 @@ import pytest
 from cekirdek import veri
 
 PUAN = veri.KOK / "sonuclar" / "deney2" / "puanlar.csv"
-ILK = veri.KOK / "sonuclar" / "deney2_ilk" / "tahminler.csv"
+ILK = veri.KOK / "sonuclar" / "deney2" / "tahminler.csv"
 
 
 @pytest.mark.skipif(not (PUAN.exists() and ILK.exists()), reason="Deney 2 çıktıları yok")

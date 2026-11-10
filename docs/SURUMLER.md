@@ -42,12 +42,12 @@ tzdata==2026.6
 
 ## MediaPipe sürüm notu
 - **Veri seti:** REHAB26'nın iskeletleri MediaPipe **v0.10.20**, Full model ile üretildi (Zenodo sayfası).
-- **Uygulama:** MediaPipe **1.2.2**, `pose_landmarker_full`, VIDEO modu. 0.10.20 kurulmadı: numpy'yi 2.4.6'dan 1.26.4'e indirip OpenCV'yi değiştirecekti, bu da raporlanmış deneylerin ortamını bozardı (Karar 27; ADIM_06).
+- **Uygulama:** MediaPipe **1.2.2**, `pose_landmarker_full`, VIDEO modu. 0.10.20 kurulmadı: numpy'yi 2.4.6'dan 1.26.4'e indirip OpenCV'yi değiştirecekti, bu da raporlanmış deneylerin ortamını bozardı (Karar 27; `arsiv/ilerleme/ADIM_06.md`).
 - **Ölçülen fark:** aynı Honza karelerinde (ex1_Honza, cam1, yönelim 0) kol açısı farkı medyan **0,92°**, %95 **3,09°** (`sonuclar/uygulama_saglik/ex1_Honza_cam1_o0_poz_farki.csv`). Sınırlılık olarak raporlanır.
-- Deneyler (Deney 1–4) MediaPipe'ı çalıştırmaz; veri setinin hazır iskeletlerini kullanır. Bu yüzden deney sonuçları MediaPipe sürümüne bağlı değildir.
-- **Ölçütte etkisi (Karar 52):** 6b'de aynı 1363 tekrarda YENI ölçütü 1.2.2 noktalarıyla AUC silkme/doğru 0,969, veri setinin 0.10.20 noktalarıyla 0,968 (`sonuclar/siluet/ozet.csv`). Sürüm farkı bu ölçütü pratikte etkilemiyor; Karar 27'nin sınırlılık notu hafifler.
-- Adım 7 (kendi kayıt) ve 6b (siluet) MediaPipe 1.2.2 ile çalıştırıldı; noktaları önbellekte (`veri/ara/`).
+- Deneyler MediaPipe'ı çalıştırmaz; veri setinin hazır iskeletlerini kullanır. Bu yüzden deney sonuçları MediaPipe sürümüne bağlı değildir.
+- **Ölçütte etkisi (Karar 52):** arşivdeki siluet denemesinde (6b) aynı 1363 tekrarda YENI ölçütü 1.2.2 noktalarıyla AUC silkme/doğru 0,969, veri setinin 0.10.20 noktalarıyla 0,968 (`arsiv/sonuclar/siluet/ozet.csv`). Sürüm farkı bu ölçütü pratikte etkilemiyor; Karar 27'nin sınırlılık notu hafifler.
+- Kendi kayıt (Adım 7) ve arşivdeki siluet denemesi MediaPipe 1.2.2 ile çalıştırıldı; noktaları önbellekte (`veri/ara/`).
 
 ## Yapay zekâ modelleri
-- **Deney 4:** Google Gemini ücretsiz katmanı, model **`gemini-3.5-flash-lite`**, temperature 0, düşünme ayarı model varsayılanı (`thinkingBudget = 0` bu modelde reddedildi). Asıl deney **7 Kasım 2026, 15:05–15:29** (`sonuclar/deney4/bilgi.json`). Ön tercih `gemini-2.5-flash` ücretsiz katmanda günde 20 istekle sınırlıydı (Karar 41; ayrıntı `ilerleme/ADIM_08.md`). Yanıtlar `sonuclar/deney4/onbellek.jsonl`'de saklı; `deneyler/hepsi.py` tabloları buradan ağa gitmeden yeniden üretir (Karar 53).
+- **Deney 4 (arşivde):** Google Gemini ücretsiz katmanı, `gemini-3.5-flash-lite`, temperature 0; 7 Kasım 2026. Ayrıntı: `arsiv/ilerleme/ADIM_08.md`. Uygulama LLM kullanmaz.
 - **Claude Code / Claude:** kod ve planlama için (`docs/LLM_KULLANIMI.md`); sonuçları üreten kodun parçası değil.

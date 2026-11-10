@@ -14,7 +14,7 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
   - Örnek: "Sağ kolunu yaklaşık 90° kaldırman gerekiyordu; sen 80° kaldırdın…"
 - Doğru harekette olumlu geri bildirim verilir.
 - **Yeterli değil:** Sadece iskelet çizmek veya "%85 doğru" demek. AUC ve accuracy deneysel değerlendirmede kullanılabilir, ama kullanıcıya verilen ana çıktı fiziksel ölçüm ve doğal dil olmalı.
-- **Bizde:** Adım 4–5. Cümlelerde ölçü (derece, gövde %) ve düzeltme önerisi var; doğru tekrarda somut olumlu cümle.
+- **Bizde:** 5 ölçü (`cekirdek/ozellikler.py`), hata türü (`cekirdek/hata_turu.py`), Türkçe cümle (`cekirdek/geribildirim.py`). Hasta cümlesinde derece ve düzeltme önerisi, uzman ayrıntısında "normalde X, sende Y"; doğru tekrarda olumlu cümle. Ölçüm: [`DENEYLER.md`](DENEYLER.md) Soru 2 ve 3.
 
 ### P2 — Omuz/skapula hareketlerinin hassas ölçümü
 - Standart pose çıktısının hangi durumda sınırlı kaldığı gösterilir.
@@ -24,20 +24,19 @@ Videodan insan hareketlerinin ölçülmesi, karşılaştırılması ve kullanıc
 - **Yeterli değil:** MediaPipe'ın omuz koordinatlarını doğrudan okuyup piksel farkını raporlamak.
 - **Hocanın önerdiği yöntemler:** shoulder ROI, optical flow, zamansal yumuşatma/Kalman, DeepLabCut ile özel noktalar, RGB-D, keypoint + lokal görüntü/özel geometrik ölçüm birleşimi. Ayrıca "kol elevasyonu ile omuz/skapula hareketi arasındaki ilişki" ölçülebilecekler arasında sayılmış.
 - **Bizde:**
-  - **Sınırın gösterilmesi:** Deney 1, bantsız ölçütler (AUC 0,60–0,70) ve bant grafiği.
+  - **Sınırın gösterilmesi:** ham ölçüler silkmeyi zayıf ayırıyor (AUC 0,60–0,70); doğru harekette de omuz kalkıyor.
   - **İyileştirmeler:**
-    1. kol açısına koşullu, kişiye özel bant;
-    2. kulak–omuz geometrik ölçütü;
-    3. zamansal yumuşatma (Deney 1c);
-    4. isteğe bağlı siluet ölçütü (Adım 6b).
-  - **Karşılaştırma:** AUC tabloları.
+    1. kol açısına koşullu, kişiye özel bant (asıl katkı; AUC 0,70 → 0,95);
+    2. kulak–omuz geometrik ölçüsü (omuzu kafaya göre ölçmek).
+  - **Denenip elenenler:** zamansal yumuşatma ve görüntüden omuz silueti; ikisi de bantlı kulak–omuz ölçüsünden iyi değil (kodları `arsiv/`).
+  - **Karşılaştırma:** [`DENEYLER.md`](DENEYLER.md) Soru 1.
 
 ### P3 — Referans ve kullanıcı hareketini çakıştırma
 - **Zamansal hizalama:** DTW veya başlangıç/bitiş eşleme.
 - **Geometrik hizalama:** öteleme, ölçek, döndürme veya Procrustes.
 - İki iskelet aynı video üzerinde farklı renklerle gösterilir; hatalı bölgeler görünür olur.
 - **Yeterli değil:** Videoları yan yana oynatmak veya aynı kare numaralarını üst üste çizmek.
-- **Bizde:** Görsel kontrol aracı (Adım 2b) ve uygulamadaki tekrar oynatımı (Adım 6, madde 5b). İkisi ortak `cekirdek/bindirme.py` kodunu kullanır.
+- **Bizde:** uygulamada her tekrar sonrası oynatım: referans (kişinin kalibrasyon tekrarı) DTW ile zamanda, kalça ortasına öteleme + gövde boyu oranıyla ölçek + gövde ekseniyle döndürme ile geometride hizalanır; banttan çıkan uzuv kırmızı. Kod: `cekirdek/bindirme.py`, `uygulama/panel.py`. Ayrıntı: [`SISTEM.md`](SISTEM.md) §7.
 
 ## 1 sayfalık rapor şablonu
 1. **Problem ve amaç:** 2–3 cümle.

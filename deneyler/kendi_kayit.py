@@ -2,7 +2,7 @@
 Adım 7 — kendi kayıtlarımızla deneme (Güncelleme 08, Karar 33 ve 35).
 
 Dondurulmuş yöntem (Karar 18) + modeller/kural_ex1.json + yığın modu (uygulama/toplu.py) + MediaPipe 1.2.2.
-Hiçbir eşik bu kayıtlara göre değiştirilmez. Metrikler ilerleme/ADIM_07.md "Önceden belirlenenler"
+Hiçbir eşik bu kayıtlara göre değiştirilmez. Metrikler arsiv/ilerleme/ADIM_07.md "Önceden belirlenenler"
 bölümünde, çekimden önce sabitlendi:
   * hatalı tekrarlarda: katı (cümledeki ilk hata = etiket), ilk iki (etiket cümlede söylendi),
     olumlu cümle (hiç hata söylenmedi);

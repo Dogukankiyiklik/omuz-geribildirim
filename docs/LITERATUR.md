@@ -3,7 +3,8 @@
 Kodda ve belgelerde geçen `M39`, `M01` gibi adlar makale kodlarıdır. Bu belge projede işe yarayan on iki makaleyi içerir: yöntemine bir bileşeni giren sekiz makale ve bir tasarım kararının gerekçesi olan dört makale. Önce hangisinden ne alındığı, sonra her birinin özeti.
 
 - Özetler, daha geniş bir literatür özetinden (16 makale) **değiştirilmeden** kopyalandı; o dosya ve makalelerin PDF'leri depoda değil.
-- Özetler makalelerin metninden üretken yapay zekâ (Claude) ile çıkarıldı ([`LLM_KULLANIMI.md`](LLM_KULLANIMI.md)). Sayfa numaraları makaleye aittir; rapora ya da sunuma bir sayı alınmadan önce makalenin kendisinden doğrulanmalı.
+- Özetler makalelerin metninden üretken yapay zekâ (Claude) ile çıkarıldı ([`LLM_KULLANIMI.md`](LLM_KULLANIMI.md)). Sayfa numaraları makaleye aittir.
+- **Doğrulama (11 Kasım 2026):** rapora, sunuma ve [`SUNUM_HAZIRLIK.md`](SUNUM_HAZIRLIK.md)'ye giren iddia ve sayılar on iki makalenin PDF'inde tek tek arandı ve tuttu: M39'un veri seti sayıları, bant tanımı (μ, τ, birinci çeyrek alt sınırı, kare hatası) ve Tablo 1; M01'in kol açısı tanımı, omuz yükselmesi sorunu, F1 0,55/0,50 ve en-boy uyarısı; M33'ün omuz–boyun ölçüsü ve F1 0,76; M22'nin z-normalizasyonu ve künyesi; M12'nin 0,92–0,95 / 0,70 doğrulukları; M34'ün 2B önerisi; M21'in 0,76 / 0,70 doğrulukları; M09'un tek puanı; M23'ün sonuç bilgisi / performans bilgisi ayrımı; M45 ve E2'nin kural tabanlı kodları; E1'in doğal dil geri bildirimi. Düzeltilmesi gereken bir sayı çıkmadı. Aşağıdaki özetlerde bunların dışında kalan sayılar ayrıca doğrulanmadı.
 - Her özetin sonundaki **Dikkat** bölümü, makalede tutarsız görünen noktaları listeler.
 
 ## Yönteme bileşeni giren makaleler

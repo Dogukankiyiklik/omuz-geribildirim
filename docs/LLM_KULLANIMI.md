@@ -9,6 +9,8 @@
 - Geliştirme kayıtları (`arsiv/ilerleme/`), belgeler (`docs/`, klasörlerdeki README'ler) ve sunum şekilleri (`deneyler/sunum_sekilleri.py`; 10 Kasım 2026'da kaldırıldı, git geçmişinde `cc39d2a`). Belgelerdeki sayılar sonuç dosyalarından kopyalandı.
 - Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların `arsiv/` altına taşınması, kalıntıların temizlenmesi ve belgelerin yeniden yazılması. Aynı gün, kullanıcının isteğiyle Deney 1–3 uygulamanın kullandığı tek yönteme indirildi, sunum şekilleri betiği ve görsel kontrol aracı kaldırıldı, çekirdekte artık kullanılmayan kod silindi; her adımda bütün sonuçların birebir aynı yeniden üretildiği `deneyler/hepsi.py` ile denetlendi.
 
+- Rapor, sunum ve hazırlık belgesi (11 Kasım 2026): 1 sayfalık rapor (`docs/RAPOR.docx`), sunum slaytları ve konuşmacı notları, `docs/SUNUM_HAZIRLIK.md` ve sunumdaki açı bandı şekli (`araclar/sunum_sekilleri.py`) Claude Code ile hazırlandı; kullanıcı okuyup düzeltir ve sunar. Aynı gün, kullanılan on iki makaledeki iddia ve sayılar makalelerin PDF'lerinden doğrulandı ([`LITERATUR.md`](LITERATUR.md)).
+
 ## Claude (ayrı sohbet): planlama ve yorum
 - Literatür taraması (`arsiv/docs/ARKA_PLAN.md`) ve makale özetleri: her makale, sabit bir istemle tek tek özetletildi; projede işe yarayan on iki makalenin özeti [`LITERATUR.md`](LITERATUR.md)'de.
 - Planlama (`arsiv/PLAN.md`) ve güncellemeler (`arsiv/ilerleme/GUNCELLEME_XX.md`).
@@ -27,7 +29,7 @@
 - Uygulamanın canlı denemesi ve arayüz geri bildirimi.
 - Kendi kayıtlarının çekimi, etiketlenmesi ve videodan kontrolü.
 - LLM deneyindeki cümlelerin körlemesine elle etiketlenmesi.
-- Sunum ve rapor.
+- Sunumun yapılması; raporun ve slaytların okunup onaylanması.
 
 ## Rapor için not
-> **Üretken yapay zekâ kullanımı.** Kodun yazılması, hata ayıklama, deneylerin bir kısmının çalıştırılması ve belgeler için Claude Code (Anthropic); literatür taraması, deney planlaması ve sonuçların yorumu için Claude kullanıldı. Raporda yer almayan bir yan deneyde Gemini (`gemini-3.5-flash-lite`, ücretsiz katman) yalnızca karşılaştırma koşulu olarak kullanıldı. Sistemin geri bildirimi kural tabanlıdır, LLM kullanmaz. Raporlanan bütün sayılar sonuç dosyalarından alındı ve `python -m deneyler.hepsi` ile yeniden üretilebilir.
+> **Üretken yapay zekâ kullanımı.** Kodun yazılması, hata ayıklama, deneylerin bir kısmının çalıştırılması, belgeler, rapor taslağı ve slaytlar için Claude Code (Anthropic); literatür taraması, deney planlaması ve sonuçların yorumu için Claude kullanıldı. Raporda yer almayan bir yan deneyde Gemini (`gemini-3.5-flash-lite`, ücretsiz katman) yalnızca karşılaştırma koşulu olarak kullanıldı. Sistemin geri bildirimi kural tabanlıdır, LLM kullanmaz. Raporlanan bütün sayılar sonuç dosyalarından alındı ve `python -m deneyler.hepsi` ile yeniden üretilebilir.

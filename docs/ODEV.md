@@ -74,4 +74,4 @@ Raporun sınırlılık veya kaynak kısmında anılabilir:
 - **Ceglia vd. (2026):** RGB-D ve akromial küme ile omuz/skapula kinematiği.
 - **RGB-D omuz ROM sistematik derlemesi (2025).**
 
-Projede gerçekten kullanılan makaleler ve rapor için kaynak önerisi: [`LITERATUR.md`](LITERATUR.md).
+Projede gerçekten kullanılan makaleler ve rapor için kaynak önerisi: [`LITERATUR.md`](LITERATUR.md). Doldurulmuş rapor: [`RAPOR.docx`](RAPOR.docx); sunuma hazırlık: [`SUNUM_HAZIRLIK.md`](SUNUM_HAZIRLIK.md).

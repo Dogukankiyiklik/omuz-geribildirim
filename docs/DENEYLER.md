@@ -67,6 +67,7 @@ Cümleye çevirme kayıpsız: cümlenin söylediği hata, karar kuralının buld
 | Profil görüşte ilk söylenen hata doğru | 16,4 / 100 |
 
 - **En çok karışan çiftler:** kolun öne kaçması ile dirsek bükme (ikisinde de kol kamerada kısa görünüyor) ve baş eğme ile omuz silkmesi (ikisinde de kulak ile omuz arası kısalıyor).
+- **"Az kaldırma" gereğinden sık söyleniyor:** 135 omuz silkmeli tekrarın 56'sına omuz, 37'sine az kaldırma dendi; 137 öne kaçmanın 23'üne de az kaldırma, 48'ine "doğru" dendi. Az kaldırmanın kendisi 135'te 127 bulunuyor [`deney2/karisiklik_oc_kati.csv`].
 - Örnek cümleler: `sonuclar/deney3/ornek_cumleler.md`.
 - Hasta cümlesinde sayı: kolun öne kaçması cümlelerinin hiçbirinde sayı yok (189'da 0), omuz cümlelerinin %66,7'sinde, diğer hatalarda %95–100'ünde var; uzman ayrıntısının hepsinde sayı var [`deney3/metin.csv`]. Nedeni cümle kuralında: hasta cümlesinde yüzde kullanılmıyor, yalnızca 5°'ye yuvarlanmış derece veriliyor; öne kaçma cümlesi hiç sayı içermiyor, omuz cümlesine derece yalnızca omuz çizgisinin eğimi yeterince değiştiyse giriyor (`cekirdek/geribildirim.py`, `hasta_cumlesi`).
 

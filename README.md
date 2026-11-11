@@ -21,6 +21,8 @@ Yöntemin temeli **kişiye özel açı bandı**: kişinin 6 doğru tekrarından,
 - [`docs/ODEV.md`](docs/ODEV.md): ödev şartları ve projedeki karşılıkları (hocanın özgün dosyası: `docs/ODEV_asil.docx`).
 - [`docs/LITERATUR.md`](docs/LITERATUR.md): kodda `M39`, `M01` gibi kodlarla anılan makaleler, hangisinden ne alındığı, rapor için kaynak önerisi ve özetleri.
 - [`docs/YENIDEN_KURULUM.md`](docs/YENIDEN_KURULUM.md): sıfırdan kurulum ve deneylerin yeniden üretimi.
+- [`docs/RAPOR.docx`](docs/RAPOR.docx) ([PDF](docs/RAPOR.pdf)): hocanın şablonuna göre 1 sayfalık rapor.
+- [`docs/SUNUM_HAZIRLIK.md`](docs/SUNUM_HAZIRLIK.md): sunum ve demo için hazırlık; sonuçların açıklaması, makalelerden alınanlar, olası sorular.
 
 ## Hızlı başlangıç
 
@@ -55,7 +57,7 @@ Kod ve sonuç klasörlerinin her birinde, içindeki dosyaları anlatan bir `READ
 | `uygulama/` | Uygulama: kamera/video, kalibrasyon, panel, bindirmeli oynatım (`main.py`), pencere açmadan CSV (`toplu.py`) |
 | `cekirdek/` | Ortak kod: ölçüler, açı bandı, hata türü, Türkçe cümle, DTW, bindirme. Uygulama ve deneyler aynı kodu kullanır |
 | `deneyler/` | Deney betikleri (silkme tespiti: ham / genel bant / kişiye özel bant; hata türü; Türkçe geri bildirim; kendi kayıt; tekrar ayırma; uygulamanın iki eşiği) ve hepsini yeniden üreten `hepsi.py` |
-| `araclar/` | Uygulamanın kural dosyasını üreten `kural_disa_aktar.py` |
+| `araclar/` | Uygulamanın kural dosyasını üreten `kural_disa_aktar.py`; sunumdaki açı bandı şeklini çizen `sunum_sekilleri.py` |
 | `modeller/` | Uygulamanın kullandığı kural ve eşik dosyaları (JSON) |
 | `sonuclar/` | Deney çıktıları (CSV, her deneyin `ozet.csv`'si) ve sunum demosunun yedekleri |
 | `testler/` | pytest testleri |

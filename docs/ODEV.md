@@ -35,7 +35,7 @@ Word dosyası Problem 1 ve 3'ü yoga hareketi ve "doğru yoga hareketini göster
   - **İyileştirmeler:**
     1. kol açısına koşullu, kişiye özel bant (asıl katkı; AUC 0,70 → 0,95);
     2. kulak–omuz geometrik ölçüsü (omuzu kafaya göre ölçmek).
-  - **Denenip elenenler:** zamansal yumuşatma ve görüntüden omuz silueti; ikisi de bantlı kulak–omuz ölçüsünden iyi değil (kodları `arsiv/`).
+  - **Denenip elenenler:** zamansal yumuşatma ve görüntüden omuz silueti; ikisi de bantlı kulak–omuz ölçüsünden iyi değil (kodları git geçmişinde, `v-sunum` etiketi).
   - **Karşılaştırma:** [`DENEYLER.md`](DENEYLER.md) Soru 1.
 
 ### P3 — Referans (yoga) hareketi ile kullanıcı hareketini aynı videoda çakıştırma

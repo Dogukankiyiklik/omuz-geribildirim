@@ -62,7 +62,7 @@ python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4    # pence
 
 ## 5. Kendi videonla deneme
 
-1. **Çekim:** telefon sabit, göğüs hizasında, 2–2,5 m uzakta. Kişi önden ya da en fazla 30° çapraz durur. Baştan kalçaya kadar ve yukarı kalkan sağ kol kadrajda olmalı. Sade arka plan, ışık önden, 30 FPS. Bütün çekimde aynı noktaya bakılır. Ayrıntılı kontrol listesi: [`arsiv/docs/CEKIM_LISTESI.md`](../arsiv/docs/CEKIM_LISTESI.md).
+1. **Çekim:** telefon sabit, göğüs hizasında, 2–2,5 m uzakta. Kişi önden ya da en fazla 30° çapraz durur. Baştan kalçaya kadar ve yukarı kalkan sağ kol kadrajda olmalı. Sade arka plan, ışık önden, 30 FPS. Bütün çekimde aynı noktaya bakılır.
 2. **İki video:** `kalibrasyon` (6 doğru tekrar) ve `test` (sırası önceden üretilmiş tekrarlar). Sıra ve etiket şablonu:
    ```bash
    python -m deneyler.kendi_kayit --sablon veri/kendi_kayit/kisiN/etiketler.csv --tohum N

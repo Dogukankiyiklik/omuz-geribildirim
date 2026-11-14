@@ -22,7 +22,7 @@ Kodda ve belgelerde geçen `M39`, `M01` gibi adlar makale kodlarıdır. Bu belge
 
 ## Tasarım kararlarının gerekçesi olan makaleler
 
-Bunlardan koda bir formül ya da tanım girmedi; bir kararın nedenidirler (kararların günlüğü: `arsiv/ilerleme/KARARLAR.md`, `arsiv/docs/ARKA_PLAN.md`).
+Bunlardan koda bir formül ya da tanım girmedi; bir kararın nedenidirler.
 
 | Kod | Makale | Hangi kararın gerekçesi |
 | --- | --- | --- |

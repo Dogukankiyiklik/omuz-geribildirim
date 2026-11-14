@@ -92,7 +92,7 @@ Her hata türünün bir ölçüsü var. Uzunlukları kişinin dinlenmedeki **gö
 ### 3.8 Türkçe cümle
 - Bulunan hata önce bir **sapma kodu**na çevriliyor: hata türü, taraf, faz (kaldırırken / yukarıdayken / indirirken), yön, şiddet, ölçü (derece) ve kişinin normal değeri.
 - Kod, kurallarla iki katmanlı metne dönüşüyor: büyük yazıyla **hasta cümlesi** (ne oldu + ne yapmalı; sayılar 5°'ye yuvarlı) ve `U` tuşuyla açılan **uzman ayrıntısı** ("dirsek açın normalde 177 derece iken 120 dereceye indi").
-- **Dil modeli (LLM) yok.** Cümleler tamamen kural tabanlı. Bir yan deneyde Gemini'ye yazdırmayı denedik; üstünlük çıkmadı (7. bölüm).
+- **Dil modeli (LLM) yok.** Cümleler tamamen kural tabanlı.
 - Omuz cümlesindeki "derece", omuz çizgisinin gövde eksenine göre eğiminin kişinin normalinden farkı. Bu yalnızca anlatım için; karara girmiyor.
 - Fikrin kaynakları: pozdan kurallarla metin üretme PoseScript ve PoseFix'ten ("posecode" ve "paircode" kavramları); skor yerine "hangi eklem, hangi fazda, nasıl düzelt" bilgisini verme ilkesi Ye ve ark. derlemesinden (sonuç bilgisi yerine performans bilgisi).
 
@@ -246,15 +246,13 @@ Aşağıdaki her satırı 11 Kasım 2026'da **makalenin kendi PDF'inden** doğru
 
 ## 7. Denenip elenenler (soru gelirse)
 
-Kodları ve sonuçları `arsiv/` altında; ödevin parçası değiller ama "bunu denediniz mi?" sorusunun cevabıdırlar. Kaynak yolları `arsiv/sonuclar/` altına göre.
+Kodları ve sonuçları depoda değil, git geçmişinde (`v-sunum` etiketi); ödevin parçası değiller ama "bunu denediniz mi?" sorusunun cevabıdırlar. Kaynak yolları o etiketteki `sonuclar/` klasörüne göre.
 
 | Ne denendi | Ne oldu | Kaynak |
 | --- | --- | --- |
 | **Zamansal yumuşatma** (ödevin P2 için önerdiği) | MediaPipe titremesi %38–87 azaldı, ama silkme tespiti değişmedi (AUC 0,947 → 0,943 ve 0,947). Kullanılmadı. | `deney1c/ozet.csv` |
 | **Görüntüden omuz silueti** (ödevdeki "pose + lokal görüntü" önerisi) | Önden çekimde ayırıyor (0,94), çaprazda bozuluyor (0,55); toplamda 0,72. Kulak–omuz aynı tekrarlarda 0,97. | `siluet/ozet.csv` |
 | **Zaman bandı** (literatürdeki hâli: DTW ile zamanda hizala) | Silkme / doğru 0,909 (açı bandında 0,947); silkme / diğer hatalar 0,705 (açı bandında 0,829). Açı bandına geçildi. | DENEYLER.md, "Denenip işe yaramayanlar" |
-| **Cümleyi LLM'e yazdırmak** (Gemini, 150 tekrar) | Karar kuraldan gelip LLM yalnızca cümleyi yazınca aynı düzey (61'e 61). Hatayı da LLM'e buldurunca 61'den 45'e düştü. Kural tabanlı kaldı. | `deney4/ozet.csv` |
-| **Başka bir hareket** (omuz ekstansiyonu) | Silkme tespiti taşınıyor (AUC 0,89–0,94), ama hata türü zayıf (makro-F1 0,40). | `ex7/ozet.csv` |
 
 ## 8. Sınırlılıklar (kendin söyle, sorulmasını bekleme)
 

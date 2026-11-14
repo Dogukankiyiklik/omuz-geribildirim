@@ -63,7 +63,6 @@ Kod ve sonuç klasörlerinin her birinde, içindeki dosyaları anlatan bir `READ
 | `testler/` | pytest testleri |
 | `referans/` | Silkme tespitinin (Deney 1) beklenen sonuçları; kod değişince sonuçların bozulmadığını sınayan test bunu kullanır |
 | `docs/` | Belgeler (yukarıdaki liste; ayrıca sunum demosu `DEMO.md`, paket sürümleri `SURUMLER.md`, yapay zekâ kullanımı `LLM_KULLANIMI.md`) |
-| `arsiv/` | Ödevin parçası olmayan her şey: bildiri deneyleri, geliştirme kayıtları. Neden orada olduklarını [`arsiv/README.md`](arsiv/README.md) anlatır |
 | `veri/` | Veri setleri (git'e **girmez**; indirme: [`veri/README.md`](veri/README.md)) |
 
 ## Veri seti ve lisans

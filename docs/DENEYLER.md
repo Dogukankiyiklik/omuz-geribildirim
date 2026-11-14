@@ -99,7 +99,7 @@ Cümleye çevirme kayıpsız: cümlenin söylediği hata, karar kuralının buld
 
 ## Denenip işe yaramayanlar
 
-Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/README.md)); kaynak yolları `arsiv/sonuclar/` altına göre. İki zaman bandı satırının kaynağı ise git geçmişinde (satırda yazılı commit). İlk ikisi ödevin Problem 2 için önerdiği yöntemlerdi.
+Bu denemelerin kodları ve sonuçları depodan çıkarıldı; hepsi git geçmişinde duruyor. Kaynak sütunundaki yollar, aksi yazılmadıkça `v-sunum` etiketindeki `sonuclar/` klasörüne göredir (`git worktree add ../omuz-v-sunum v-sunum` ile açılır). İlk ikisi ödevin Problem 2 için önerdiği yöntemlerdi.
 
 | Deneme | Sonuç | Kaynak |
 | --- | --- | --- |
@@ -108,8 +108,6 @@ Kodları ve sonuçları `arsiv/` altında ([`../arsiv/README.md`](../arsiv/READM
 | **Zaman bandı** (literatürdeki yöntem: tekrarlar DTW ile zamanda hizalanır, bant zamana göre kurulur). Açı bandından önce bunu kullandık. | Kulak–omuz silkme / doğru 0,909 (açı bandında 0,947); asıl fark silkmeyi diğer hatalardan ayırmada: 0,705 (açı bandında 0,829). Kol az kaldırılınca omuz yanlış kol açısıyla karşılaştırılıyordu. Açı bandına geçildi. | `sonuclar/deney1_v2/ozet.csv` (`v1` ve `v2` satırları, `YENI`); dosya `ecd69a9` commit'inde, Deney 1 sadeleştirilince depodan çıkarıldı |
 | Deney 2'de zaman bandı ve yönsüz bant | Hata türü kararında açı bandı (yönlü) ile fark anlamlı değil: önden + çapraz makro-F1 farkı zaman bandına göre +0,004 (%95 GA −0,027 – +0,019), yönsüz banda göre +0,004 (%95 GA −0,032 – +0,043). Uygulamanın yöntemi (açı bandı, yönlü) kaldı. | `sonuclar/deney2/bootstrap.csv` (`a18101a` commit'inde; Deney 2 sadeleştirilince depodan çıkarıldı) |
 | Yetersiz kaldırma puanının "revize" hâli | Hata türü doğruluğunu düşürdü (makro-F1 0,631 → 0,568); ilk hâline dönüldü. | `deney2_revize/ozet.csv` |
-| Cümleyi bir LLM'e yazdırmak (Gemini, ücretsiz katman; 150 tekrar) | Karar kuraldan gelip LLM yalnızca cümleyi yazınca sonuç kural cümlesiyle aynı düzeyde (ilk söylenen doğru 61'e 61), üstünlük yok. Hatayı da LLM'e buldurunca 61'den 45'e düştü. Ürün kural tabanlı kaldı. | `deney4/ozet.csv` |
-| Aynı sistemi başka bir harekette denemek (omuz ekstansiyonu, Ex7) | Silkme tespiti taşınıyor (AUC 0,89–0,94), ama hata türü zayıf (makro-F1 0,40). Ödevin kapsamı dışında. | `ex7/ozet.csv` |
 
 ## Sınırlılıklar
 

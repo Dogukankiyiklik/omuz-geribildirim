@@ -42,7 +42,7 @@ tzdata==2026.6
 - **Uygulama:** MediaPipe **1.2.2**, `pose_landmarker_full`, VIDEO modu. 0.10.20 kurulmadı, çünkü numpy'yi 2.4.6'dan 1.26.4'e indirip OpenCV'yi değiştirecekti; bu da deneylerin ortamını bozardı.
 - **Deneyler etkilenmez:** deneyler MediaPipe'ı çalıştırmaz, veri setinin hazır iskeletlerini kullanır.
 - **Ölçülen fark:** aynı Honza karelerinde (ex1_Honza, cam1, yönelim 0) kol açısı farkı medyan **0,92°**, %95 **3,09°** (`sonuclar/uygulama_saglik/ex1_Honza_cam1_o0_poz_farki.csv`).
-- **Silkme ölçüsüne etkisi:** aynı 1363 tekrarda kulak–omuz ölçüsünün AUC'si (silkme / doğru) 1.2.2 noktalarıyla 0,969, veri setinin 0.10.20 noktalarıyla 0,968 (`arsiv/sonuclar/siluet/ozet.csv`). Sürüm farkı bu ölçüyü pratikte etkilemiyor; yine de sınırlılık olarak raporlanır.
+- **Silkme ölçüsüne etkisi:** aynı 1363 tekrarda kulak–omuz ölçüsünün AUC'si (silkme / doğru) 1.2.2 noktalarıyla 0,969, veri setinin 0.10.20 noktalarıyla 0,968 (`sonuclar/siluet/ozet.csv`, `v-sunum` etiketinde). Sürüm farkı bu ölçüyü pratikte etkilemiyor; yine de sınırlılık olarak raporlanır.
 - Kendi kayıt deneyi MediaPipe 1.2.2 ile çalıştırıldı; noktaları `veri/ara/kendi_kayit/` önbelleğinde.
 
 ## Yapay zekâ araçları

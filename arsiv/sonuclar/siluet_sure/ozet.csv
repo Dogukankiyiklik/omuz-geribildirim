@@ -1,3 +1,0 @@
-﻿maske,ölçülen kare,ms/kare (ağırlıklı ort.),önden+çapraz tekrar,önden+çapraz kare (±10 pay dahil),video×kamera,tahmini toplam dk (yalnızca model),duvar ms/kare,tahmini toplam dk (çözme dahil),tahmini disk MB (ham float32),tahmini disk MB (8 bit sıkıştırılmış),tahmini disk MB (ikili sıkıştırılmış)
-False,9000,13.634813088916012,1363,162931,15,37.02556218983624,19.966073011110794,54.21820402955487,,,
-True,9000,21.012937244464005,1363,162931,15,57.06098130296275,28.040356888888912,76.14405647105932,1288809.66796875,6534.980089673996,498.768388487498

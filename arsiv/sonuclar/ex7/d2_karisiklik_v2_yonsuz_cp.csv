@@ -1,7 +1,0 @@
-﻿,tahmin: doğru,tahmin: omuz,tahmin: gövde öne,tahmin: gövde dönme,tahmin: dirsek,tahmin: kol yana
-gerçek: doğru,411,21,27,12,19,16
-gerçek: omuz,20,57,5,2,10,6
-gerçek: gövde öne,25,13,58,1,1,2
-gerçek: gövde dönme,12,10,31,37,6,4
-gerçek: dirsek,19,15,9,2,53,4
-gerçek: kol yana,51,4,7,3,9,28

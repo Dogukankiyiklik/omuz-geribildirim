@@ -1,4 +1,0 @@
-﻿adım,komut,çıkış kodu,süre (s)
-deney1,python -m deneyler.deney1 --galeri-yok,0,16.8
-kamera_acisi,python -m deneyler.kamera_acisi,0,3.1
-hiz_esigi,python -m deneyler.hiz_esigi,0,2.1

@@ -1,4 +1,0 @@
-Tekrarın değerlendirmesi:
-{girdi}
-
-Hastaya söylenecek metni yaz.

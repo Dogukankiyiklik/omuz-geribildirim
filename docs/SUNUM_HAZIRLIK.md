@@ -2,52 +2,58 @@
 
 Sunum 16 Kasım 2026'da, 5 dakika. Slaytlar: https://claude.ai/artifact/1upSPPq9oUYNJhikbSmk1q (sayfanın Paylaş › Dışa aktar menüsünden PowerPoint ya da PDF olarak indirilebilir). Rapor: [`RAPOR.docx`](RAPOR.docx) ve [`RAPOR.pdf`](RAPOR.pdf).
 
-Sunumu çalışmak için **yalnızca 1–4. bölümleri okuman yeterli.** Sonraki "Ek" bölümü eski, ayrıntılı notlardır; deneylerin sonuçları oradadır ve sunumda kullanılmaz.
+Sunumu çalışmak için **1–6. bölümleri okuman yeterli.** En alttaki "Ek" eski, ayrıntılı notlardır; deneylerin sonuçları oradadır ve sunumda kullanılmaz.
 
-## 1. Anlatının özeti
+## 1. Akış (7 slayt, yaklaşık 4 dakika + demo)
 
-Sunumda deney ve karşılaştırma yok. Hikâye şu:
-
-1. Kolu yana kaldırma egzersizini tek kamerayla izleyen bir uygulama yaptım; ödevin üç problemini de bu uygulamada ele aldım.
-2. Hata türlerini ve eşikleri belirlemek için etiketli bir veri seti (REHAB26-ViewAngles) kullandım.
-3. Pavlikov ve arkadaşlarının makalesinde, sabit eşikle omuz yükselmesinin en zor yakalanan hata olduğunu gördüm. Bunun nedeni, kol kalkarken omzun doğal olarak da yükselmesi. Yazarlar kişiye özel eşik öneriyor.
-4. Jánošová ve arkadaşlarının makalesindeki kişiye özel tolerans bandını aldım. Benim eklediğim, bu bandı zamana göre değil kol açısına göre kurmak oldu.
-5. Sonuç olarak uygulama hatayı Türkçe ve dereceyle söylüyor, doğru hareketi de kullanıcının görüntüsünün üzerine bindiriyor.
-
-## 2. Slayt slayt konuşma metni
-
-Her slaytın konuşmacı notunda da aynı metin var. Toplam yaklaşık 4,5 dakika, ardından 1 dakikalık demo.
-
-| # | Slayt | Süre | Ne söyleyeceksin |
+| # | Slayt | Süre | Özü |
 | --- | --- | --- | --- |
-| 1 | Kapak | 15 sn | Merhaba, ben Doğukan. Kolu yana kaldırma egzersizini tek bir kamerayla izleyen bir uygulama geliştirdim. Hareket yanlış yapıldığında bunu fark ediyor ve neyin yanlış olduğunu, nasıl düzeltileceğini Türkçe söylüyor. |
-| 2 | Projenin Amacı | 30 sn | Ödevdeki üç problemi tek uygulamada ele aldım: hatayı bulup Türkçe söylemek, omzu hassas ölçmek ve doğru hareketi görüntünün üzerine bindirmek. Yoga yerine kolu yana kaldırmayı seçtim, çünkü ikinci problem zaten omuzla ilgiliydi. Referans olarak da kişinin kendi doğru tekrarlarını kullanıyorum. |
-| 3 | Veri Seti | 30 sn | REHAB26-ViewAngles adlı açık bir veri seti kullandım. Beş kişi, üç egzersiz, farklı kamera açıları; egzersizlerden biri kolu yana kaldırma. Seçmemin asıl nedeni etiketli olması: her tekrar ya doğru ya da beş hatadan biri. Bir hareketin ne zaman hatalı sayılacağına karar vermek için buna ihtiyacım vardı. Sunumdaki görüntüler de buradan. |
-| 4 | Sistem Nasıl Çalışıyor? | 35 sn | MediaPipe ile iskelet çıkarıyorum, kol açısından tekrarları ayırıyorum, her tekrarda beş ölçüyü kişinin kendi normaliyle karşılaştırıyorum. En çok sapan ölçü hatanın türünü veriyor; sonra Türkçe cümle ve bindirme geliyor. Başta kısa bir kalibrasyon var: kişi kolunu altı kez doğru kaldırıyor. |
-| 5 | Literatürden Aldıklarım | 40 sn | Pavlikov'da sabit eşikle omuz yükselmesinin en zor yakalanan hata olduğunu gördüm, çünkü kol kalkarken omuz da doğal olarak yükseliyor. Jánošová'dan kişiye özel tolerans bandını aldım, Cóias'tan omzu boyna göre ölçme fikrini, Sarsfield'den de DTW'yi. Benim eklediğim, bandı kol açısına göre kurmak. |
-| 6 | Omuz Silkmesini Nasıl Tespit Ediyorum? | 40 sn | Grafiği anlat (aşağıda). |
-| 7 | Türkçe Geri Bildirim | 30 sn | Puan yerine ne yaptığını ve nasıl düzelteceğini söylüyor. Cümlede derece ve kişinin kendi normali var: "normalde 150 dereceye çıkıyorsun, 35 derece daha kaldır." Doğru yapınca da söylüyor. Cümleler kurallarla oluşturuluyor, dil modeli yok. |
-| 8 | Doğru Hareketin Üzerine Bindirilmesi | 35 sn | Tekrar bitince yeniden oynatılıyor, üstüne turkuaz referans iskelet çiziliyor. Hızlar farklı olabileceği için DTW ile zamanda eşliyorum; referansı kalçaya taşıyıp boya göre ölçekliyor ve döndürüyorum. Normal aralığın dışına çıkan uzuv kırmızı. |
-| 9 | Sınırlılıklar ve Kaynaklar | 30 sn | Tek kamera olduğu için derinlik yok; öne kaçma ile dirsek bükme karışabiliyor. Yandan çekim uygun değil. Kalibrasyon şart. Hatalar taklit, gerçek hastada denenmedi. "Şimdi uygulamayı veri setindeki bir videoda kısaca göstereyim." |
-| — | Demo | ~60 sn | 4. bölüm. |
+| 1 | Projede Ele Alınan Problemler | 25 sn | Üç problemi de ele aldım; yoga yerine kolu yana kaldırma, çünkü 2. problem omuzla ilgili. |
+| 2 | Uygulama Nasıl Çalışıyor? | 50 sn | 6 tekrarlık kalibrasyon → kişinin normali → her tekrar bununla karşılaştırılır → cümle ve bindirme. Herkes kendisiyle karşılaştırılıyor. Veri seti etiketli olduğu için kullanıldı. |
+| 3 | Omuz Silkmesini Nasıl Yakalıyorum? (grafik) | 50 sn | MediaPipe omzu tek nokta veriyor; doğru harekette de omuz kalkıyor. Kulak–omuz mesafesi, kişiye özel aralık, kol açısına göre. |
+| 4 | Her Hata Türünün Kendi Ölçüsü Var (grafik) | 45 sn | Beş hata, beş ölçü; en büyük sapma hata olarak söyleniyor. |
+| 5 | Puan Yerine Türkçe Geri Bildirim | 25 sn | "%90 iyisin" değil; ne yaptın, nasıl düzeltirsin. |
+| 6 | Doğru Tekrarın Üzerine Bindirilmesi | 35 sn | DTW ile zamanda, taşıma-ölçekleme-döndürme ile konumda eşleme; hatalı uzuv kırmızı. |
+| 7 | Dezavantajlar ve Kaynaklar | 40 sn | Kalibrasyon = kişinin doğrusu (fizyoterapist + güncelleme); 2B, derinlik yok. Sonra demo. |
 
-**6. slayttaki grafiği nasıl anlatacaksın:**
+Her slaytın konuşmacı notunda söyleyeceğin metin tam olarak yazılı.
+
+## 2. İki grafiği nasıl anlatacaksın
+
+**3. slayt: omuz grafiği**
 - Dikey eksen kulak ile omuz arasındaki mesafe. Eğri **aşağı indikçe omuz kulağa yaklaşıyor.**
 - Mavi çizgiler doğru tekrarlar, turuncu çizgi omuz silkmeli tekrar.
-- **Sol grafik (zamana göre):** Doğru tekrarlarda da eğri aşağı iniyor, yani omuz doğru harekette de kalkıyor. "Omuz şu kadar kalkarsa hata" diyen sabit bir eşik bu yüzden işe yaramıyor.
-- **Sağ grafik (kol açısına göre):** Gri alan bu kişinin normal aralığı. Doğru tekrarlar gri alanın içinde, omuz silkmeli tekrar ise belirgin şekilde altında. Uygulama tam olarak buna bakıyor.
+- **Sol (zamana göre):** Doğru tekrarlarda da eğri iniyor, yani omuz doğru harekette de kalkıyor. Sabit bir eşik bu yüzden işe yaramıyor.
+- **Sağ (kol açısına göre):** Gri alan bu kişinin normal aralığı. Doğru tekrarlar içinde, omuz silkmeli tekrar belirgin şekilde altında.
 
-## 3. Soru gelirse: kısa cevaplar
+**4. slayt: ısı haritası**
+- Satırlar veri setindeki gerçek hata, sütunlar uygulamanın beş ölçüsü.
+- Sayı, o ölçünün kişinin normalinden ne kadar saptığı: 0 = normal, büyüdükçe sapma artıyor. 3,8 ve üstü uygulamada hata sayılıyor (kalın yazılanlar).
+- Söylenecek tek cümle: **"Her hatada en çok kendi ölçüsü sapıyor; uygulama da en büyük sapmayı hata olarak söylüyor."**
+- Kolun öne kaçması satırında dirsek ölçüsü de yükseliyor (3,5'e 2,6): tek kamera olduğu için bu ikisi karışabiliyor. Bunu 7. slayttaki dezavantaja bağla.
+
+## 3. Notlarındaki düzeltmeler (sunumdan önce bil)
+
+- **Bant zamana göre değil, kol açısına göre.** Makaledeki yöntemde bant zamana göre kuruluyordu. Senin eklediğin, aynı kol açısında karşılaştırmak. Bunu söyle; senin katkın bu.
+- **DTW hata tespitinde yok, yalnızca bindirmede var.** Hata, kol açısına göre bandın dışına çıkılıp çıkılmadığından bulunuyor. DTW'nin yanındaki "farklı şey" de geometrik hizalama: referans iskeleti kişinin kalçasına taşımak, boyuna göre ölçeklemek ve gövde açısına göre döndürmek.
+- **Tek bant yok, dört bant + bir karşılaştırma var.** Kalibrasyonda dört ölçünün her biri için ayrı bir kişiye özel aralık çıkarılıyor: kulak–omuz mesafesi (omuz silkmesi), baş–gövde açısı (baş eğme), omuz–bilek mesafesi (kolun öne kaçması), dirsek açısı (dirsek bükme). Her biri kaldırma ve indirme için ayrı, kol açısının her 5°'lik aralığı için ayrı.
+- **Kolu az kaldırma bantla değil, tepe açısıyla bulunuyor.** Kalibrasyondaki 6 tekrarın en yüksek kol açılarının ortancası kişinin "normalde çıktığı" açı. Yeni tekrarın en yüksek açısı bundan ne kadar eksikse o kadar sapma. Cümledeki "normalde 150 dereceye çıkıyorsun" bu sayı.
+- **Hangi hata söyleniyor?** Beş sapma ortak bir ölçeğe çevriliyor (bu ölçek ve 3,8 eşiği veri setinden). En büyüğü 3,8'in altındaysa "doğru"; değilse en büyük olan hata söyleniyor, ikincisi de eşiği geçiyorsa o da ekleniyor ("Ayrıca…").
+- **2B kararı Jánošová ve arkadaşlarından.** Onların çalışmasında tek kamerada 2B, 3B'den daha iyi ayırt etmiş. "Yüksek doğruluk elde etmişler" deme; "2B daha güvenilir çıkmış" de.
+- **Kolun öne kaçması zaten kolun kısalmasından ölçülüyor** (omuz ile bilek arasındaki mesafe). Dezavantaj olarak "bu yüzden dirsek bükmeyle karışabiliyor" de.
+- **6 tekrar:** Uygulama en az 5 tekrar kabul ediyor ve her 5°'lik aralığın geçerli sayılması için en az 3 tekrarın oradan geçmesi gerekiyor. "Az olursa değişkenliği göremiyoruz, çok olursa kişi yoruluyor" gerekçen yeterli.
+
+## 4. Soru gelirse: kısa cevaplar
 
 - **Neden yoga değil?** Hareketin yoga olması şart değildi. İkinci problem omuzla ilgili olduğu için omuz egzersizi seçtim; üç problem aynı harekette birleşti.
-- **Neden başka birinin videosu değil de kişinin kendi tekrarları?** Herkesin omzu farklı hareket ediyor. Makale de kişiye özel eşik öneriyordu. Ben de ayrıca denedim, kişinin kendi tekrarlarıyla belirgin şekilde daha iyi çıktı.
-- **Kişiye özel bandın işe yaradığını nereden biliyorsun?** Makale böyle öneriyordu; ben de denedim, belirgin şekilde daha iyi çıktı. (Sayı sorulursa: omuz silkmesini ayırmada ham ölçü 0,70, kişiye özel bant 0,95 AUC.)
-- **Veri setini neden kullandın?** Etiketli olduğu için. Bir sapmanın ne zaman hata sayılacağını belirlemek için doğru ve hatalı örneklere ihtiyacım vardı. Hata türleri de oradan.
+- **Neden uzman videosu değil de kişinin kendisi?** Herkesin omzu, kol uzunluğu, hareket açıklığı farklı. Makale de kişiye özel aralık öneriyordu. Ben de denedim, kişinin kendi tekrarlarıyla belirgin şekilde daha iyi çıktı.
+- **Kişiye özel aralığın işe yaradığını nereden biliyorsun?** Makale böyle öneriyordu; ben de denedim, belirgin şekilde daha iyi çıktı. (Sayı sorulursa: omuz silkmesini ayırmada ham ölçü 0,70, kişiye özel aralık 0,95 AUC.)
+- **Veri setini neden kullandın?** Etiketli olduğu için: her tekrar doğru ya da beş hatadan biri. Hangi sapmanın hata sayılacağını belirlemek için buna ihtiyacım vardı.
 - **Kürek kemiğini ölçüyor musun?** Doğrudan hayır; MediaPipe kürek kemiğini vermiyor. Omzun kulağa göre konumundan dolaylı ölçüyorum.
-- **Dil modeli kullandın mı?** Uygulamada hayır, cümleler kural tabanlı. Kodun yazımında ve belgelerde Claude Code'dan destek aldım; raporda yazıyor.
+- **Dil modeli kullandın mı?** Uygulamada hayır, cümleler hazır kalıplarla kuruluyor. Kodun yazımında ve belgelerde Claude Code'dan destek aldım; raporda yazıyor.
 - **Gerçek zamanlı mı?** Canlı kamerayla çalışıyor; karar tekrar bitince veriliyor, çünkü tekrarın tamamına bakılıyor.
 
-## 4. Demo (veri setindeki videoyla)
+## 5. Demo (veri setindeki videoyla)
 
 Sunumdan önce aynı bilgisayarda bir kez dene. Ayrıntılar ve yedek yollar: [`DEMO.md`](DEMO.md).
 
@@ -57,18 +63,23 @@ python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 ```
 
 - `veri/rehab26/videos.zip` gerekir. İlk açılışta kalibrasyon hazırlanırken yaklaşık 1 dakika bekleme olur; **bunu sunumdan önce bir kez çalıştır**, sonraki açılışta profil hazır gelir.
-- Kalibrasyon, videodaki doğru etiketli tekrarlardan (1, 2, 3, 9, 10) otomatik kurulur.
+- Kalibrasyon, videodaki doğru etiketli tekrarlardan otomatik kurulur.
 - Göstereceğin tekrarlar sırayla:
   - **5. tekrar, omuz silkmesi:** "Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut…"
   - **6. tekrar, baş eğme:** "Kolun yukarıdayken başını yaklaşık 20 derece yana eğdin…"
   - **7. tekrar, kolu az kaldırma:** "Kolunu 115 dereceye kadar kaldırdın; normalde 150 dereceye çıkıyorsun…"
   - **8. tekrar, dirsek bükme:** "Kolun yukarıdayken dirseğini yaklaşık 30 derece büktün…"
 - Vaktin azsa 5. tekrarın oynatımından sonra **Q** ile çık.
-- **Dikkat:** 4. tekrar veri setinde "kolun öne kaçması" olarak etiketli, ama uygulama "doğru" diyor. Üzerinde durma. Sorulursa: tek kamerada derinlik olmadığı için öne kaçmayı her zaman göremiyor, sınırlılıklarda bahsettiğim durum bu.
+- **Dikkat:** 4. tekrar veri setinde "kolun öne kaçması" olarak etiketli, ama uygulama "doğru" diyor. Üzerinde durma. Sorulursa: tek kamerada derinlik olmadığı için öne kaçmayı her zaman göremiyor, dezavantajlarda bahsettiğim durum bu.
 - Hatalı tekrarlarda ikinci bir hata da söylenebiliyor ("Ayrıca kolun öne kaçtı" gibi). Normal; en büyük hata önce söyleniyor.
 - Tuşlar: Boşluk duraklat, R son tekrarı yeniden oynat, U uzman ayrıntısı, Q çıkış. Önce pencereye bir kez tıkla.
 
+## 6. Söylemeyeceklerin
+
+Sunumda deney sonuçlarına (AUC, yüzdeler, karşılaştırma tabloları) girme; yalnızca sorulursa 4. bölümdeki tek cümleyle cevap ver. Yandan çekimden ve veri setindeki kişilerin hasta olmamasından bahsetmen gerekmiyor.
+
 ---
+
 
 # Ek: ayrıntılı notlar (sunumda kullanılmıyor)
 

@@ -22,7 +22,7 @@ Yöntemin temeli **kişiye özel açı bandı**: kişinin 6 doğru tekrarından,
 - [`docs/LITERATUR.md`](docs/LITERATUR.md): kodda `M39`, `M01` gibi kodlarla anılan makaleler, hangisinden ne alındığı, rapor için kaynak önerisi ve özetleri.
 - [`docs/YENIDEN_KURULUM.md`](docs/YENIDEN_KURULUM.md): sıfırdan kurulum ve deneylerin yeniden üretimi.
 - [`docs/RAPOR.docx`](docs/RAPOR.docx) ([PDF](docs/RAPOR.pdf)): hocanın şablonuna göre 1 sayfalık rapor.
-- [`docs/SUNUM_HAZIRLIK.md`](docs/SUNUM_HAZIRLIK.md): sunum ve demo için hazırlık; sonuçların açıklaması, makalelerden alınanlar, olası sorular.
+- [`docs/SUNUM_HAZIRLIK.md`](docs/SUNUM_HAZIRLIK.md): sunum için slayt slayt konuşma metni, kısa soru-cevaplar ve demo; sonunda ayrıntılı notlar (deney sonuçları dahil).
 
 ## Hızlı başlangıç
 

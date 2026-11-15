@@ -1,12 +1,80 @@
-# Sunuma hazırlık: her şeyin açıklaması
+# Sunuma hazırlık
 
-Bu dosya, sunumu ve canlı demoyu yapacak kişi (sen) için yazıldı. Baştan sona bir kez okuyunca projenin ne yaptığını, her sayının nereden geldiğini, hangi makaleden ne alındığını ve gelebilecek sorulara ne cevap vereceğini bilmiş olursun. Jargon ilk geçtiği yerde açıklanıyor; ayrıca 4. bölümde küçük bir sözlük var.
+Sunum 16 Kasım 2026'da, 5 dakika. Slaytlar: https://claude.ai/artifact/1upSPPq9oUYNJhikbSmk1q (sayfanın Paylaş › Dışa aktar menüsünden PowerPoint ya da PDF olarak indirilebilir). Rapor: [`RAPOR.docx`](RAPOR.docx) ve [`RAPOR.pdf`](RAPOR.pdf).
 
-- Sunum: 16 Kasım 2026, 5 dakika. Slaytlar: https://claude.ai/artifact/1upSPPq9oUYNJhikbSmk1q (sayfanın Paylaş › Dışa aktar menüsünden PowerPoint ya da PDF olarak indirilir).
-- Rapor: [`RAPOR.docx`](RAPOR.docx) (hocanın şablonu doldurulmuş hâli, 1 sayfa) ve aynısının [`RAPOR.pdf`](RAPOR.pdf) kopyası.
-- Bu dosyadaki her sayı bir sonuç dosyasından kopyalandı; yanında köşeli parantez içinde kaynağı yazıyor (`sonuclar/` altına göre yol).
+Sunumu çalışmak için **yalnızca 1–4. bölümleri okuman yeterli.** Sonraki "Ek" bölümü eski, ayrıntılı notlardır; deneylerin sonuçları oradadır ve sunumda kullanılmaz.
 
-## 1. Proje 30 saniyede
+## 1. Anlatının özeti
+
+Sunumda deney ve karşılaştırma yok. Hikâye şu:
+
+1. Kolu yana kaldırma egzersizini tek kamerayla izleyen bir uygulama yaptım; ödevin üç problemini de bu uygulamada ele aldım.
+2. Hata türlerini ve eşikleri belirlemek için etiketli bir veri seti (REHAB26-ViewAngles) kullandım.
+3. Pavlikov ve arkadaşlarının makalesinde, sabit eşikle omuz yükselmesinin en zor yakalanan hata olduğunu gördüm. Bunun nedeni, kol kalkarken omzun doğal olarak da yükselmesi. Yazarlar kişiye özel eşik öneriyor.
+4. Jánošová ve arkadaşlarının makalesindeki kişiye özel tolerans bandını aldım. Benim eklediğim, bu bandı zamana göre değil kol açısına göre kurmak oldu.
+5. Sonuç olarak uygulama hatayı Türkçe ve dereceyle söylüyor, doğru hareketi de kullanıcının görüntüsünün üzerine bindiriyor.
+
+## 2. Slayt slayt konuşma metni
+
+Her slaytın konuşmacı notunda da aynı metin var. Toplam yaklaşık 4,5 dakika, ardından 1 dakikalık demo.
+
+| # | Slayt | Süre | Ne söyleyeceksin |
+| --- | --- | --- | --- |
+| 1 | Kapak | 15 sn | Merhaba, ben Doğukan. Kolu yana kaldırma egzersizini tek bir kamerayla izleyen bir uygulama geliştirdim. Hareket yanlış yapıldığında bunu fark ediyor ve neyin yanlış olduğunu, nasıl düzeltileceğini Türkçe söylüyor. |
+| 2 | Projenin Amacı | 30 sn | Ödevdeki üç problemi tek uygulamada ele aldım: hatayı bulup Türkçe söylemek, omzu hassas ölçmek ve doğru hareketi görüntünün üzerine bindirmek. Yoga yerine kolu yana kaldırmayı seçtim, çünkü ikinci problem zaten omuzla ilgiliydi. Referans olarak da kişinin kendi doğru tekrarlarını kullanıyorum. |
+| 3 | Veri Seti | 30 sn | REHAB26-ViewAngles adlı açık bir veri seti kullandım. Beş kişi, üç egzersiz, farklı kamera açıları; egzersizlerden biri kolu yana kaldırma. Seçmemin asıl nedeni etiketli olması: her tekrar ya doğru ya da beş hatadan biri. Bir hareketin ne zaman hatalı sayılacağına karar vermek için buna ihtiyacım vardı. Sunumdaki görüntüler de buradan. |
+| 4 | Sistem Nasıl Çalışıyor? | 35 sn | MediaPipe ile iskelet çıkarıyorum, kol açısından tekrarları ayırıyorum, her tekrarda beş ölçüyü kişinin kendi normaliyle karşılaştırıyorum. En çok sapan ölçü hatanın türünü veriyor; sonra Türkçe cümle ve bindirme geliyor. Başta kısa bir kalibrasyon var: kişi kolunu altı kez doğru kaldırıyor. |
+| 5 | Literatürden Aldıklarım | 40 sn | Pavlikov'da sabit eşikle omuz yükselmesinin en zor yakalanan hata olduğunu gördüm, çünkü kol kalkarken omuz da doğal olarak yükseliyor. Jánošová'dan kişiye özel tolerans bandını aldım, Cóias'tan omzu boyna göre ölçme fikrini, Sarsfield'den de DTW'yi. Benim eklediğim, bandı kol açısına göre kurmak. |
+| 6 | Omuz Silkmesini Nasıl Tespit Ediyorum? | 40 sn | Grafiği anlat (aşağıda). |
+| 7 | Türkçe Geri Bildirim | 30 sn | Puan yerine ne yaptığını ve nasıl düzelteceğini söylüyor. Cümlede derece ve kişinin kendi normali var: "normalde 150 dereceye çıkıyorsun, 35 derece daha kaldır." Doğru yapınca da söylüyor. Cümleler kurallarla oluşturuluyor, dil modeli yok. |
+| 8 | Doğru Hareketin Üzerine Bindirilmesi | 35 sn | Tekrar bitince yeniden oynatılıyor, üstüne turkuaz referans iskelet çiziliyor. Hızlar farklı olabileceği için DTW ile zamanda eşliyorum; referansı kalçaya taşıyıp boya göre ölçekliyor ve döndürüyorum. Normal aralığın dışına çıkan uzuv kırmızı. |
+| 9 | Sınırlılıklar ve Kaynaklar | 30 sn | Tek kamera olduğu için derinlik yok; öne kaçma ile dirsek bükme karışabiliyor. Yandan çekim uygun değil. Kalibrasyon şart. Hatalar taklit, gerçek hastada denenmedi. "Şimdi uygulamayı veri setindeki bir videoda kısaca göstereyim." |
+| — | Demo | ~60 sn | 4. bölüm. |
+
+**6. slayttaki grafiği nasıl anlatacaksın:**
+- Dikey eksen kulak ile omuz arasındaki mesafe. Eğri **aşağı indikçe omuz kulağa yaklaşıyor.**
+- Mavi çizgiler doğru tekrarlar, turuncu çizgi omuz silkmeli tekrar.
+- **Sol grafik (zamana göre):** Doğru tekrarlarda da eğri aşağı iniyor, yani omuz doğru harekette de kalkıyor. "Omuz şu kadar kalkarsa hata" diyen sabit bir eşik bu yüzden işe yaramıyor.
+- **Sağ grafik (kol açısına göre):** Gri alan bu kişinin normal aralığı. Doğru tekrarlar gri alanın içinde, omuz silkmeli tekrar ise belirgin şekilde altında. Uygulama tam olarak buna bakıyor.
+
+## 3. Soru gelirse: kısa cevaplar
+
+- **Neden yoga değil?** Hareketin yoga olması şart değildi. İkinci problem omuzla ilgili olduğu için omuz egzersizi seçtim; üç problem aynı harekette birleşti.
+- **Neden başka birinin videosu değil de kişinin kendi tekrarları?** Herkesin omzu farklı hareket ediyor. Makale de kişiye özel eşik öneriyordu. Ben de ayrıca denedim, kişinin kendi tekrarlarıyla belirgin şekilde daha iyi çıktı.
+- **Kişiye özel bandın işe yaradığını nereden biliyorsun?** Makale böyle öneriyordu; ben de denedim, belirgin şekilde daha iyi çıktı. (Sayı sorulursa: omuz silkmesini ayırmada ham ölçü 0,70, kişiye özel bant 0,95 AUC.)
+- **Veri setini neden kullandın?** Etiketli olduğu için. Bir sapmanın ne zaman hata sayılacağını belirlemek için doğru ve hatalı örneklere ihtiyacım vardı. Hata türleri de oradan.
+- **Kürek kemiğini ölçüyor musun?** Doğrudan hayır; MediaPipe kürek kemiğini vermiyor. Omzun kulağa göre konumundan dolaylı ölçüyorum.
+- **Dil modeli kullandın mı?** Uygulamada hayır, cümleler kural tabanlı. Kodun yazımında ve belgelerde Claude Code'dan destek aldım; raporda yazıyor.
+- **Gerçek zamanlı mı?** Canlı kamerayla çalışıyor; karar tekrar bitince veriliyor, çünkü tekrarın tamamına bakılıyor.
+
+## 4. Demo (veri setindeki videoyla)
+
+Sunumdan önce aynı bilgisayarda bir kez dene. Ayrıntılar ve yedek yollar: [`DEMO.md`](DEMO.md).
+
+```bash
+.venv\Scripts\activate
+python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
+```
+
+- `veri/rehab26/videos.zip` gerekir. İlk açılışta kalibrasyon hazırlanırken yaklaşık 1 dakika bekleme olur; **bunu sunumdan önce bir kez çalıştır**, sonraki açılışta profil hazır gelir.
+- Kalibrasyon, videodaki doğru etiketli tekrarlardan (1, 2, 3, 9, 10) otomatik kurulur.
+- Göstereceğin tekrarlar sırayla:
+  - **5. tekrar, omuz silkmesi:** "Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut…"
+  - **6. tekrar, baş eğme:** "Kolun yukarıdayken başını yaklaşık 20 derece yana eğdin…"
+  - **7. tekrar, kolu az kaldırma:** "Kolunu 115 dereceye kadar kaldırdın; normalde 150 dereceye çıkıyorsun…"
+  - **8. tekrar, dirsek bükme:** "Kolun yukarıdayken dirseğini yaklaşık 30 derece büktün…"
+- Vaktin azsa 5. tekrarın oynatımından sonra **Q** ile çık.
+- **Dikkat:** 4. tekrar veri setinde "kolun öne kaçması" olarak etiketli, ama uygulama "doğru" diyor. Üzerinde durma. Sorulursa: tek kamerada derinlik olmadığı için öne kaçmayı her zaman göremiyor, sınırlılıklarda bahsettiğim durum bu.
+- Hatalı tekrarlarda ikinci bir hata da söylenebiliyor ("Ayrıca kolun öne kaçtı" gibi). Normal; en büyük hata önce söyleniyor.
+- Tuşlar: Boşluk duraklat, R son tekrarı yeniden oynat, U uzman ayrıntısı, Q çıkış. Önce pencereye bir kez tıkla.
+
+---
+
+# Ek: ayrıntılı notlar (sunumda kullanılmıyor)
+
+Aşağıdakiler eski, ayrıntılı hazırlık notlarıdır. Deneylerin sonuçları burada; ders kapsamında değil, merak edip denediğim şeyler. Sunum için okuman gerekmiyor.
+
+### 1. Proje 30 saniyede
 
 Tek bir kamerayla **kolu yana kaldırma** egzersizini izleyen bir uygulama yaptım. Kişi önce kolunu 6 kez doğru kaldırıyor; sistem bundan o kişinin "normalini" öğreniyor. Sonraki her tekrarda sistem üç şey yapıyor:
 
@@ -16,7 +84,7 @@ Tek bir kamerayla **kolu yana kaldırma** egzersizini izleyen bir uygulama yapt�
 
 Yöntemin kalbi tek cümle: **"Kol şu açıdayken bu kişinin omzu normalde nerede?"** Buna *kişiye özel açı bandı* diyoruz.
 
-## 2. Ödev ne istiyordu, biz ne yaptık?
+### 2. Ödev ne istiyordu, biz ne yaptık?
 
 Ödev üç problemden en az birini çözen çalışan bir uygulama istiyor. Üçünü de aynı uygulamada çözdük.
 
@@ -31,26 +99,26 @@ Yöntemin kalbi tek cümle: **"Kol şu açıdayken bu kişinin omzu normalde ner
 - **Hareket yoga değil, omuz egzersizi.** Problem 2 zaten omuzu istiyor. Aynı hareketi seçince üç problem tek uygulamada birleşti.
 - **Referans başkasının videosu değil, kişinin kendi 6 doğru tekrarı.** Bu bir kolaylık değil, ölçülmüş bir karar: bandı başka 4 kişinin tekrarlarından kurunca omuz silkmesini ayırma başarısı 0,67'de kalıyor, kişinin kendi tekrarlarından kurunca 0,95 oluyor [`deney1/ozet.csv`]. Çünkü herkesin omzu, boynu, duruşu farklı; "doğru"nun yeri kişiden kişiye değişiyor.
 
-## 3. Sistem adım adım (ve her adımın nedeni)
+### 3. Sistem adım adım (ve her adımın nedeni)
 
 Aşağıdaki sıra, raporun 7 adımıyla aynı. Her adımın kodu `cekirdek/` altında; uygulama da deneyler de **aynı kodu** kullanıyor. Bunun anlamı: deneyde ölçtüğümüz başarı, uygulamanın gerçekten verdiği kararın başarısı.
 
-### 3.1 Ortam
+#### 3.1 Ortam
 Python 3.11.9, MediaPipe 1.2.2, OpenCV 5.0.0.93, NumPy 2.4.6, SciPy 1.17.1, pandas 3.1.1 [`docs/SURUMLER.md`]. Ekran kartı (GPU) gerekmiyor.
 
-### 3.2 Girdi
+#### 3.2 Girdi
 - Canlı kamera (1280×720) ya da video dosyası.
 - **En-boy düzeltmesi:** MediaPipe bir noktanın x'ini görüntünün genişliğine, y'sini yüksekliğine bölerek 0–1 arası verir. Görüntü kare değilse x ve y farklı ölçekte olur ve açılar bozulur. Bu yüzden her şeyden önce x'i genişlik/yükseklik oranıyla çarpıyoruz. (Bu uyarı Pavlikov ve ark.'ta da var: düzeltilmezse ölçüler en-boy oranına göre 24–36° oynuyor, s. 9.)
 - **Kamera nerede durmalı:** önden ya da hafif çapraz (en fazla ~60°). Tam yandan bakınca kolu yana kaldırmak kameraya doğru bir harekete dönüşüyor ve 2B'de görünmüyor. Kişi fazla yan durursa uygulama "Kameraya daha önden durun" uyarısı veriyor (dinlenmede omuz genişliği / gövde boyu < 0,389 ise) [`modeller/kamera_esigi.json`].
 
-### 3.3 Poz çıkarımı
+#### 3.3 Poz çıkarımı
 MediaPipe Pose Landmarker, "full" model, her karede 33 nokta. Yalnızca **2B (x, y)** kullanıyoruz; z (derinlik) tek kameradan tahmin edildiği için güvenilir değil. Kullandığımız noktalar: kulaklar, omuzlar, sağ dirsek, sağ bilek, kalçalar. Egzersizi **sağ kol** yapıyor.
 
-### 3.4 Kol açısı ve tekrar ayırma
+#### 3.4 Kol açısı ve tekrar ayırma
 - **Kol açısı:** sağ üst kol (omuz → dirsek) ile aşağı doğru dikey arasındaki açı. Kol yandayken 0°, yataydayken 90°, başın üstünde 180°. (Tanım Pavlikov ve ark.'tan, Denklem 5.)
 - **Tekrar ayırma:** kol açısı 30°'yi geçince tekrar başlıyor, 20°'nin altına inince bitiyor. Sayılması için tepe en az 60°, süre en az 0,8 s olmalı. İki ayrı eşik (30 ve 20) kullanmamızın nedeni, açı eşiğin etrafında titrerken tekrarın bir başlayıp bir bitmemesi.
 
-### 3.5 Beş ölçü
+#### 3.5 Beş ölçü
 Her hata türünün bir ölçüsü var. Uzunlukları kişinin dinlenmedeki **gövde boyuna** (omuz ortası – kalça ortası) bölüyoruz; böylece kameraya yakın ya da uzak durmak ölçüyü değiştirmiyor.
 
 | Hata | Ölçü | Hata olunca ne olur |
@@ -63,7 +131,7 @@ Her hata türünün bir ölçüsü var. Uzunlukları kişinin dinlenmedeki **gö
 
 **Neden kulak–omuz?** MediaPipe'ın omuz noktasına tek başına bakmak yerine omzu **kafaya göre** ölçüyoruz. Omzu boyna göre ölçme fikri Cóias ve ark.'tan (omuz yükselmesini boyun eklemine göre yer değiştirmeyle değerlendiriyorlar, s. 9).
 
-### 3.6 Açı bandı (yöntemin kalbi)
+#### 3.6 Açı bandı (yöntemin kalbi)
 
 **Sorun:** Kolunu doğru kaldırdığında da omzun bir miktar kalkar; kürek kemiği kolla birlikte döner. Sunumdaki grafikte bunu görüyorsun: doğru tekrarlarda da kulak–omuz mesafesi 0,45'ten 0,27'ye iniyor. Dolayısıyla "omuz şu kadar kalkarsa hata" diyen sabit bir eşik çalışmaz. Aynı sorunu Pavlikov ve ark. da yazıyor: normal abdüksiyonda omuz önden görünümde kolla birlikte yükselir ve tek bir dinlenme değerine göre ölçen bir ölçü bunu gerçek silkmeden ayıramaz (s. 12); onların sisteminde omuz yükselmesi en zayıf işaret (F1 0,55 ve 0,50; s. 23).
 
@@ -77,7 +145,7 @@ Her hata türünün bir ölçüsü var. Uzunlukları kişinin dinlenmedeki **gö
 
 **Bu fikrin kaynağı:** μ, τ, τ'nun alt sınırı ve kare hatası formülü Jánošová ve ark. (2026)'dan (s. 10–11). **Bizim değişikliğimiz:** onlar tekrarları DTW ile *zamanda* hizalayıp bandı zamana göre kuruyor; biz bandı *kol açısına* göre kuruyoruz. Neden önemli: kişi kolunu az kaldırdığında, zamana göre hizalanmış bantta omuz yanlış kol açısındaki değerle karşılaştırılıyordu. Kol açısına göre kurunca omuz hep aynı kol açısında karşılaştırılıyor. (Önce zaman bandını kullandık, sonra açı bandına geçtik; 7. bölümde sayıları var.)
 
-### 3.7 Hata puanı ve karar
+#### 3.7 Hata puanı ve karar
 1. **Kare hatası:** ölçü bandın içindeyse 0; dışındaysa (sapma − τ)/τ, en fazla 1. Yalnızca hatanın yönündeki taşma sayılıyor (omuzda yalnızca kulağa yaklaşma).
 2. **Tekrar puanı E:** kare hatalarının ortalaması. 0 = hep bandın içinde, 1 = hep çok dışında.
 3. **Az kaldırma puanı:** (kalibrasyon tepe açılarının medyanı − bu tekrarın tepe açısı) / max(tepelerin çeyrekler arası açıklığı, 5°).
@@ -89,14 +157,14 @@ Her hata türünün bir ölçüsü var. Uzunlukları kişinin dinlenmedeki **gö
 - *Ortak katman:* z ölçeği, hatanın yönleri ve T eşiği veri setindeki 5 kişiden öğrenildi. T, hata türü başarısını (makro-F1) en yükseğe çıkaran değer olarak seçildi.
 - Deneylerde bu ortak katman **4 kişide öğrenilip 5. kişide sınandı** ve bu her kişi için tekrarlandı. Uygulamada test kişisi olmadığı için aynı yöntemle 5 kişinin hepsiyle bir kez kuruldu. Uygulamanın T'si 3,80; deneydeki beş ayrı ayarda T 3,68 ile 5,00 arasında çıkmıştı [`kural_disa_aktar/loso_karsilastirma.csv`].
 
-### 3.8 Türkçe cümle
+#### 3.8 Türkçe cümle
 - Bulunan hata önce bir **sapma kodu**na çevriliyor: hata türü, taraf, faz (kaldırırken / yukarıdayken / indirirken), yön, şiddet, ölçü (derece) ve kişinin normal değeri.
 - Kod, kurallarla iki katmanlı metne dönüşüyor: büyük yazıyla **hasta cümlesi** (ne oldu + ne yapmalı; sayılar 5°'ye yuvarlı) ve `U` tuşuyla açılan **uzman ayrıntısı** ("dirsek açın normalde 177 derece iken 120 dereceye indi").
 - **Dil modeli (LLM) yok.** Cümleler tamamen kural tabanlı.
 - Omuz cümlesindeki "derece", omuz çizgisinin gövde eksenine göre eğiminin kişinin normalinden farkı. Bu yalnızca anlatım için; karara girmiyor.
 - Fikrin kaynakları: pozdan kurallarla metin üretme PoseScript ve PoseFix'ten ("posecode" ve "paircode" kavramları); skor yerine "hangi eklem, hangi fazda, nasıl düzelt" bilgisini verme ilkesi Ye ve ark. derlemesinden (sonuç bilgisi yerine performans bilgisi).
 
-### 3.9 Bindirme (Problem 3)
+#### 3.9 Bindirme (Problem 3)
 Her tekrar bitince o tekrar yeniden oynatılıyor ve üstüne yarı saydam turkuaz bir referans iskelet çiziliyor.
 
 - **Referans kim?** Kişinin kalibrasyon tekrarlarından, tepe açısı kalibrasyon medyanına en yakın olanı.
@@ -105,10 +173,10 @@ Her tekrar bitince o tekrar yeniden oynatılıyor ve üstüne yarı saydam turku
 - **İnce nokta (soru gelirse):** ölçek ve döndürme kare kare değil, tekrar başında **bir kez** hesaplanıyor. Kare kare gövde boyuna ölçekleseydik, omuz kalkınca gövde de "uzamış" görünür, silkme referansa da taşınır ve farkı göremezdik.
 - **Renk:** o karede bandın dışına çıkan ölçünün uzvu kırmızı (omuzda kulak–omuz çizgisi).
 
-### 3.10 Çıktı ve kayıt
+#### 3.10 Çıktı ve kayıt
 Solda video ve iskelet, sağda panel: karar, cümle, omuz eğrisi ve gri normal aralığı. Her tekrar `oturumlar/<tarih>.csv` dosyasına, kalibrasyon `profiller/<isim>.npz` dosyasına yazılıyor.
 
-## 4. Küçük sözlük
+### 4. Küçük sözlük
 
 - **AUC:** rastgele seçilen bir silkmeli tekrarın, rastgele seçilen bir doğru tekrardan daha yüksek hata puanı alma olasılığı. 0,5 yazı tura, 1 kusursuz ayırma. Eşik seçmeye gerek bırakmadan "puan iki grubu ne kadar iyi ayırıyor?" sorusunu cevaplar.
 - **Bant:** kişinin doğru tekrarlarından çıkan normal aralık, μ ± τ.
@@ -120,11 +188,11 @@ Solda video ve iskelet, sağda panel: karar, cümle, omuz eğrisi ve gri normal 
 - **Kişi bazlı birini-dışarıda-bırak:** eşikleri 4 kişide ayarla, 5. kişide sına; bunu her kişi için tekrarla. Böylece sistem, sınandığı kişiyi ayar sırasında hiç görmemiş olur.
 - **Görüş açısı:** kameranın kişiyi gördüğü açı. Önden 0–20°, çapraz 30–60°, profil 70–90°.
 
-## 5. Sonuçlar: ne bulduk, nasıl bulduk?
+### 5. Sonuçlar: ne bulduk, nasıl bulduk?
 
 **Veri:** REHAB26-ViewAngles veri setinin 1. egzersizi (kolu yana kaldırma). 5 sağlıklı kişi, 11 duruş yönü, 3 kamera; her tekrar doğru mu, yanlışsa hangi hata, etiketli. Hatalar kişilerin bilerek yaptığı taklitler. Üç kamerayla birlikte 1668 tekrar görüntüsü var; bunların 1363'ü önden + çapraz görüşte (682 hatalı, 681 doğru), 305'i profilde [`deney2/ozet.csv`]. Deneyler MediaPipe çalıştırmıyor; veri setinin hazır iskeletlerini kullanıyor.
 
-### 5.1 Soru 1 (Problem 2): Kişiye özel bant omuz silkmesini daha iyi buluyor mu?
+#### 5.1 Soru 1 (Problem 2): Kişiye özel bant omuz silkmesini daha iyi buluyor mu?
 
 **Evet.** Kulak–omuz ölçüsü, silkmeli tekrar / doğru tekrar, AUC [`deney1/ozet.csv`]:
 
@@ -154,7 +222,7 @@ Dört omuz ölçüsünü aynı veride karşılaştırdık (bütün görüşler) 
 - Kişi kişi bakınca kişiye özel bant 0,84 ile 0,98 arasında: Honza 0,975, Mima 0,954, Petra 0,981, Terka 0,982, Vasil 0,844 [`deney1/kisi_auc.csv`].
 - Profil görüşte bant da zayıflıyor: 0,842 [`deney1/ozet.csv`].
 
-### 5.2 Soru 2 (Problem 1): Hatanın türünü doğru söylüyor mu?
+#### 5.2 Soru 2 (Problem 1): Hatanın türünü doğru söylüyor mu?
 
 **Kısmen.** Önden + çapraz görüş, 682 hatalı ve 681 doğru tekrar [`deney2/ozet.csv`]:
 
@@ -189,7 +257,7 @@ Bu tablodan çıkanlar:
 
 **Olası soru: "Silkmeyi 0,95 ile buluyorsun, ama omuz türünde 135'te 56 mı?"** İkisi farklı soru. 0,95, silkmeli tekrarı *doğru tekrardan* ayırma başarısı (iki sınıf, eşik yok). Tür kararında ise beş hata birbiriyle yarışıyor ve tek bir eşik var; silkmeyi *diğer hatalardan* ayırma zaten daha zor (AUC 0,83). Omuz silkmelilerin 135'te yalnızca 20'sine "doğru" denmiş; yani sistem çoğunda bir sorun olduğunu görüyor, ama bir kısmında yanlış ad koyuyor.
 
-### 5.3 Soru 3: Hiç görmediği birinde, ev ortamında çalışıyor mu?
+#### 5.3 Soru 3: Hiç görmediği birinde, ev ortamında çalışıyor mu?
 
 **Bir işaret var (tek kişi).** Kendi çektiğimiz video: 6 kalibrasyon tekrarı, sonra sırası önceden rastgele belirlenmiş 21 test tekrarı. Eşiklerin hiçbiri bu videoya bakılarak değiştirilmedi [`kendi_kayit/kisi1/ozet.csv`]:
 
@@ -207,7 +275,7 @@ Bu tablodan çıkanlar:
 - Başka yere bakınca ya da hızlı yapınca gereksiz uyarı çıktı. Bundan kullanım talimatı çıktı: **kalibrasyonda ve değerlendirmede aynı yere bak, doğal hızda yap.**
 - Tek kişi, tek oturum, değerlendiren aynı zamanda geliştirici. Bu yüzden yüzde ya da güven aralığı vermiyoruz, yalnızca "kaçta kaç" diyoruz.
 
-### 5.4 Altyapı kontrolleri
+#### 5.4 Altyapı kontrolleri
 
 | Kontrol | Sonuç | Kaynak |
 | --- | --- | --- |
@@ -215,11 +283,11 @@ Bu tablodan çıkanlar:
 | Uygulamanın MediaPipe sürümü (1.2.2) ile veri setininki (0.10.20) | Aynı karelerde kol açısı farkı medyan 0,92°, %95'i 3,09° altında | [`uygulama_saglik/ex1_Honza_cam1_o0_poz_farki.csv`] |
 | Bütün sonuçlar bugünkü koddan yeniden üretiliyor mu? | 40 dosyanın 40'ı aynı (10 Kasım 2026) | [`hepsi/ozet.md`] |
 
-## 6. Hangi makaleden ne alındı?
+### 6. Hangi makaleden ne alındı?
 
 Aşağıdaki her satırı 11 Kasım 2026'da **makalenin kendi PDF'inden** doğruladım (sayfa numaraları makaleye ait). Sunumda yalnızca ilk dördünü ve MediaPipe'ı anman yeter; diğerleri soru gelirse.
 
-### Yönteme bir parçası giren makaleler
+#### Yönteme bir parçası giren makaleler
 
 | Makale | Ne alındı | Makalede nerede |
 | --- | --- | --- |
@@ -231,7 +299,7 @@ Aşağıdaki her satırı 11 Kasım 2026'da **makalenin kendi PDF'inden** doğru
 | **Delmas ve ark. (2024)**, *PoseScript*, ve **Delmas ve ark.**, *PoseFix* (ICCV) | Pozdan ve iki poz arasındaki farktan **kurallarla** kısa kodlar ("posecode", "paircode") çıkarıp şablon cümleye çevirme. Bizim "sapma kodu → cümle" yapımız bunun küçük bir benzeri. | PoseScript s. 1–2; PoseFix s. 15021 |
 | **Fieraru ve ark. (2021)**, *AIFit*, CVPR | Referansa (eğitmene) göre sapmayı bulup doğal dilde söyleyen en yakın öncül sistem. Onlar 3B poz ve eğitmen referansı kullanıyor; biz 2B ve kişinin kendi referansını. | s. 9919–9921 |
 
-### Bir tasarım kararının gerekçesi olan makaleler
+#### Bir tasarım kararının gerekçesi olan makaleler
 
 | Makale | Hangi kararın gerekçesi | Makaledeki dayanak |
 | --- | --- | --- |
@@ -244,7 +312,7 @@ Aşağıdaki her satırı 11 Kasım 2026'da **makalenin kendi PDF'inden** doğru
 
 **Kendi katkımız ne?** Hiçbir makaleden alınmayan iki şey: (1) bandı zamana değil **kol açısına** göre kurmak, (2) omuz için **kulak–omuz dikey mesafesi** ölçüsü. Ayrıca bütün parçaları (ölçüm, tür kararı, Türkçe cümle, bindirme) tek bir çalışan uygulamada birleştirmek.
 
-## 7. Denenip elenenler (soru gelirse)
+### 7. Denenip elenenler (soru gelirse)
 
 Kodları ve sonuçları depoda değil, git geçmişinde (`v-sunum` etiketi); ödevin parçası değiller ama "bunu denediniz mi?" sorusunun cevabıdırlar. Kaynak yolları o etiketteki `sonuclar/` klasörüne göre.
 
@@ -254,7 +322,7 @@ Kodları ve sonuçları depoda değil, git geçmişinde (`v-sunum` etiketi); öd
 | **Görüntüden omuz silueti** (ödevdeki "pose + lokal görüntü" önerisi) | Önden çekimde ayırıyor (0,94), çaprazda bozuluyor (0,55); toplamda 0,72. Kulak–omuz aynı tekrarlarda 0,97. | `siluet/ozet.csv` |
 | **Zaman bandı** (literatürdeki hâli: DTW ile zamanda hizala) | Silkme / doğru 0,909 (açı bandında 0,947); silkme / diğer hatalar 0,705 (açı bandında 0,829). Açı bandına geçildi. | DENEYLER.md, "Denenip işe yaramayanlar" |
 
-## 8. Sınırlılıklar (kendin söyle, sorulmasını bekleme)
+### 8. Sınırlılıklar (kendin söyle, sorulmasını bekleme)
 
 1. **Veri:** 5 sağlıklı kişi; hatalar taklit, gerçek hasta yok.
 2. **Tek kamera, 2B:** derinlik yok, dereceler yaklaşık. Öne kaçma ile dirsek, baş eğme ile omuz karışabiliyor. Profil çekim uygun değil.
@@ -263,46 +331,7 @@ Kodları ve sonuçları depoda değil, git geçmişinde (`v-sunum` etiketi); öd
 5. **Dar bant:** τ, ortalamanın güven aralığı; yeni bir tekrarın düşebileceği aralık bundan daha geniş olurdu (6 tekrarla yaklaşık 2,6 kat; hesap, ölçüm değil). Bu yüzden küçük sapmalar da uyarıya dönüşebiliyor.
 6. **Tek hareket:** sistem yalnızca kolu yana kaldırmada ölçüldü.
 
-## 9. Beş dakikanın akışı
-
-| # | Slayt | Süre | Söylenecek tek cümle |
-| --- | --- | --- | --- |
-| 1 | Kapak | 15 sn | Tek kamerayla egzersizi izleyen, hatayı Türkçe söyleyen ve doğru tekrarı üstüne bindiren bir uygulama. |
-| 2 | Ödevin üç problemi | 30 sn | Üç problem tek uygulamada; hareket omuz egzersizi, referans kişinin kendi 6 doğru tekrarı. |
-| 3 | Beş adım | 35 sn | MediaPipe → kol açısı → açı bandı → hata türü → cümle ve bindirme. |
-| 4 | Doğru harekette de omuz kalkıyor | 45 sn | Sabit eşik çalışmaz; kol açısına göre kişinin normaline bakıyoruz. |
-| 5 | 0,70'ten 0,95'e | 40 sn | Kazanç ölçüden değil, kişiye özel banttan geliyor. |
-| 6 | Cümle | 30 sn | Puan değil; ne oldu, kaç derece, ne yapmalı. |
-| 7 | Bindirme | 35 sn | DTW ile zamanda; öteleme, ölçek, döndürme ile geometride. |
-| 8 | Tür doğruluğu | 45 sn | Hatalıların 56,6/100'ünde ilk söylenen doğru; kendi videomda 9/11. |
-| 9 | Canlı demo | 60 sn | Bir doğru, bir az kaldırma, bir omuz silkmesi. |
-| 10 | Sınırlılıklar ve kaynaklar | 30 sn | 5 sağlıklı kişi, 2B, kalibrasyon şart. |
-
-Toplam yaklaşık 6 dakika ediyor. Süre sıkışırsa 3. slaytı 15 saniyeye indir ve 8. slayttaki sol tabloyu yalnızca tek cümleyle geç. Her slaytın konuşmacı notunda söylenecek metin yazılı.
-
-## 10. Canlı demo
-
-Ayrıntılı kontrol listesi ve yedek yollar: [`DEMO.md`](DEMO.md). Özet:
-
-```bash
-.venv\Scripts\activate
-python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/kisi1/test.MOV
-```
-
-- **26. sn**, tekrar 4, doğru → "Hareketi doğru yaptın. Kolun yaklaşık 140 dereceye çıktı, omzun ve dirseğin yerindeydi."
-- **41. sn**, tekrar 6, az kaldırma → "Kolunu 105 dereceye kadar kaldırdın; normalde 140 dereceye çıkıyorsun…"
-- **49. sn**, tekrar 7, omuz silkmesi → "Kolunu kaldırırken sağ omzunu kulağına doğru yaklaşık 5 derece kaldırdın. Omzunu aşağıda ve gevşek tut."
-- Tekrar 7'nin oynatımından sonra **Q** ile çık.
-- Tuşlar: Boşluk duraklat, R son tekrarı yeniden oynat, U uzman ayrıntısı. Önce pencereye bir kez tıkla.
-- Pencere açılmazsa: `sonuclar/sunum/demo_kisi1.mp4` dosyasını video oynatıcıda aç.
-
-**Demoda dürüst kalınacak iki nokta:**
-- Tekrar 6'da sistem az kaldırmanın yanında ikinci hata olarak hafif bir baş eğme de söylüyor ("…başını yaklaşık 5 derece yana eğdin"). Etiket yalnızca az kaldırma. Sorulursa: bant dar olduğu için küçük sapmalar da uyarıya dönüşebiliyor (8. bölüm, madde 5).
-- Doğru bir tekrarın oynatımında da bir uzuv kısa süre kırmızı görünebilir. O kare bandın dışındadır, ama tekrarın toplam puanı eşiği geçmediği için karar "doğru" çıkar.
-
-**Sunumdan önce bir kez dene:** aynı bilgisayar, aynı ekran çözünürlüğü, priz takılı.
-
-## 11. Gelebilecek sorular ve cevapları
+### 9. Gelebilecek sorular ve cevapları
 
 **Neden yoga değil?** Derste hareketin yoga olmasının şart olmadığı söylendi. Problem 2 omuzu istiyor; omuz egzersizi seçince üç problem aynı uygulamada birleşti.
 
@@ -340,7 +369,7 @@ python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/ki
 
 **Bir başkası bunu yeniden kurabilir mi?** Evet. `pip install -r requirements.txt`, sonra `python -m uygulama.main --isim adin`. Deneylerin hepsi `python -m deneyler.hepsi` ile yaklaşık 1,5 dakikada yeniden üretiliyor ve kayıtlı sonuçlarla karşılaştırılıyor (son çalıştırmada 40 dosyanın 40'ı aynı).
 
-## 12. Akılda tutulacak sayılar
+### 10. Akılda tutulacak sayılar
 
 | Sayı | Ne |
 | --- | --- |
@@ -356,6 +385,6 @@ python -m uygulama.main --profil profiller/kisi1.npz --video veri/kendi_kayit/ki
 | **30° / 20°** | Tekrarın başlama / bitme açısı |
 | **5 kişi, 1363 tekrar** | Veri seti (önden + çapraz görüş) |
 
-## 13. Makale doğrulaması hakkında not
+### 11. Makale doğrulaması hakkında not
 
 `LITERATUR.md`'deki özetler yapay zekâyla çıkarılmıştı ve "rapora girecek sayılar makalenin kendisinden doğrulanmalı" notu vardı. 11 Kasım 2026'da projede kullanılan 12 makalenin PDF'leri açılıp, bu dosyada ve raporda geçen her iddia ve sayı makalenin metninde arandı. Hepsi tuttu; düzeltilmesi gereken bir sayı çıkmadı. Doğrulananların listesi `LITERATUR.md`'nin başında. Kullanılmayan makaleler incelenmedi.

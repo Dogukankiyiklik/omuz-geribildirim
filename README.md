@@ -1,6 +1,6 @@
 # Omuz Silkmesi Tespiti ve Türkçe Geri Bildirim
 
-Bilgisayarlı Görü dersi ara sınav projesi (sunum: 16 Kasım 2026).
+Bilgisayarlı Görü dersi ara sınav projesi.
 
 Tek bir RGB kamerayla **kolu yana kaldırma** egzersizini izleyen bir uygulama. MediaPipe ile çıkarılan iskeletten hatalı tekrarları bulur. Odak, omzun kulağa doğru kalkması, yani **omuz silkmesi**. Hatanın türünü belirler (omuz, baş eğme, kolun öne kaçması, dirsek bükme, yetersiz kaldırma) ve kişiye derecesiyle **ne yapacağını söyleyen Türkçe bir cümle** verir: *"Kolunu 110 dereceye kadar kaldırdın; normalde 140 dereceye çıkıyorsun. Kolunu yaklaşık 30 derece daha yukarı kaldır."*
 
@@ -19,10 +19,10 @@ Yöntemin temeli **kişiye özel açı bandı**: kişinin 6 doğru tekrarından,
 - [`docs/SISTEM.md`](docs/SISTEM.md): sistemin adım adım çalışması ve yararlanılan literatür.
 - [`docs/DENEYLER.md`](docs/DENEYLER.md): deneyler, sonuçlar ve sınırlılıklar.
 - [`docs/ODEV.md`](docs/ODEV.md): ödev şartları ve projedeki karşılıkları (hocanın özgün dosyası: `docs/ODEV_asil.docx`).
-- [`docs/LITERATUR.md`](docs/LITERATUR.md): kodda `M39`, `M01` gibi kodlarla anılan makaleler, hangisinden ne alındığı, rapor için kaynak önerisi ve özetleri.
+- [`docs/LITERATUR.md`](docs/LITERATUR.md): kodda `M39`, `M01` gibi kodlarla anılan makaleler, hangisinden ne alındığı ve özetleri.
 - [`docs/YENIDEN_KURULUM.md`](docs/YENIDEN_KURULUM.md): sıfırdan kurulum ve deneylerin yeniden üretimi.
-- [`docs/RAPOR.docx`](docs/RAPOR.docx) ([PDF](docs/RAPOR.pdf)): hocanın şablonuna göre 1 sayfalık rapor.
-- [`docs/SUNUM_HAZIRLIK.md`](docs/SUNUM_HAZIRLIK.md): sunum için slayt slayt konuşma metni, kısa soru-cevaplar ve demo; sonunda ayrıntılı notlar (deney sonuçları dahil).
+- [`docs/RAPOR.docx`](docs/RAPOR.docx) ([PDF](docs/RAPOR.pdf)): ödev şablonuna göre 1 sayfalık rapor.
+- [`docs/SUNUM.pdf`](docs/SUNUM.pdf): ara sınav sunumunun slaytları.
 
 ## Hızlı başlangıç
 
@@ -36,11 +36,11 @@ pytest -q                          # testler (veri seti yoksa veri gerektirenler
 ```
 
 ```bash
-# Kendi kameranla: önce 6 doğru tekrarla kalibrasyon, sonra değerlendirme
-python -m uygulama.main --isim adin
+# Canlı kamera: önce 6 doğru tekrarla kalibrasyon, sonra değerlendirme
+python -m uygulama.main --isim kisi1
 
 # Kayıtlı profille bir video dosyası
-python -m uygulama.main --profil profiller/adin.npz --video test.mp4
+python -m uygulama.main --profil profiller/kisi1.npz --video test.mp4
 
 # Veri setinden bir video (veri seti veri/rehab26/ altında olmalı)
 python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
@@ -59,10 +59,10 @@ Kod ve sonuç klasörlerinin her birinde, içindeki dosyaları anlatan bir `READ
 | `deneyler/` | Deney betikleri (silkme tespiti: ham / genel bant / kişiye özel bant; hata türü; Türkçe geri bildirim; kendi kayıt; tekrar ayırma; uygulamanın iki eşiği) ve hepsini yeniden üreten `hepsi.py` |
 | `araclar/` | Uygulamanın kural dosyasını üreten `kural_disa_aktar.py`; sunumdaki açı bandı şeklini çizen `sunum_sekilleri.py` ve hata türü × ölçü ısı haritasını çizen `hata_olcu_haritasi.py` |
 | `modeller/` | Uygulamanın kullandığı kural ve eşik dosyaları (JSON) |
-| `sonuclar/` | Deney çıktıları (CSV, her deneyin `ozet.csv`'si) ve sunum demosunun yedekleri |
+| `sonuclar/` | Deney çıktıları (CSV, her deneyin `ozet.csv`'si) ve sunumdaki şekiller |
 | `testler/` | pytest testleri |
 | `referans/` | Silkme tespitinin (Deney 1) beklenen sonuçları; kod değişince sonuçların bozulmadığını sınayan test bunu kullanır |
-| `docs/` | Belgeler (yukarıdaki liste; ayrıca sunum demosu `DEMO.md`, paket sürümleri `SURUMLER.md`, yapay zekâ kullanımı `LLM_KULLANIMI.md`) |
+| `docs/` | Belgeler (yukarıdaki liste; ayrıca paket sürümleri `SURUMLER.md`, yapay zekâ kullanımı `LLM_KULLANIMI.md`) |
 | `veri/` | Veri setleri (git'e **girmez**; indirme: [`veri/README.md`](veri/README.md)) |
 
 ## Veri seti ve lisans

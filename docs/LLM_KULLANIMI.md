@@ -1,6 +1,6 @@
 # Üretken yapay zekâ kullanımı
 
-Ödevin kuralı gereği projede üretken yapay zekânın nerede ve hangi amaçla kullanıldığı aşağıda. Rapor için kısa not en altta.
+Ödevin kuralı gereği projede üretken yapay zekânın nerede ve hangi amaçla kullanıldığı aşağıda. Rapordaki not en altta.
 
 ## Claude Code (Anthropic): kod ve belgeler
 - `cekirdek/`, `deneyler/`, `uygulama/`, `araclar/` ve `testler/` altındaki kodun yazılması.
@@ -9,7 +9,7 @@
 - Geliştirme kayıtları (artık depoda değil; git geçmişinde `v-sunum` etiketi), belgeler (`docs/`, klasörlerdeki README'ler) ve sunum şekilleri (`deneyler/sunum_sekilleri.py`; 10 Kasım 2026'da kaldırıldı, git geçmişinde `cc39d2a`). Belgelerdeki sayılar sonuç dosyalarından kopyalandı.
 - Ödeve göre sadeleştirme (10 Kasım 2026): ödev dışı dosyaların ayrı bir klasöre taşınması (14 Kasım 2026'da bu klasör depodan silindi), kalıntıların temizlenmesi ve belgelerin yeniden yazılması. Aynı gün, kullanıcının isteğiyle Deney 1–3 uygulamanın kullandığı tek yönteme indirildi, sunum şekilleri betiği ve görsel kontrol aracı kaldırıldı, çekirdekte artık kullanılmayan kod silindi; her adımda bütün sonuçların birebir aynı yeniden üretildiği `deneyler/hepsi.py` ile denetlendi.
 
-- Rapor, sunum ve hazırlık belgesi (11 Kasım 2026): 1 sayfalık rapor (`docs/RAPOR.docx`), sunum slaytları ve konuşmacı notları, `docs/SUNUM_HAZIRLIK.md` ve sunumdaki açı bandı şekli (`araclar/sunum_sekilleri.py`) Claude Code ile hazırlandı; kullanıcı okuyup düzeltir ve sunar. Aynı gün, kullanılan on iki makaledeki iddia ve sayılar makalelerin PDF'lerinden doğrulandı ([`LITERATUR.md`](LITERATUR.md)). Rapor 14 Kasım 2026'da, kullanıcının isteğiyle daha okunur bir dille yeniden yazıldı. 15 Kasım 2026'da, yine kullanıcının isteğiyle, sunum ve rapor deney sonuçları çıkarılarak makalelere dayanan kısa bir anlatıma göre düzenlendi; sunumdaki görseller veri setinden alındı, `SUNUM_HAZIRLIK.md` ve `DEMO.md` buna göre güncellendi. Aynı gün sunum, kullanıcının kendi notlarındaki anlatıma göre 7 slayta indirildi; ısı haritası (`araclar/hata_olcu_haritasi.py`) eklendi.
+- Rapor ve sunum (11–16 Kasım 2026): 1 sayfalık rapor (`docs/RAPOR.docx`), sunum slaytları (`docs/SUNUM.pdf`) ve konuşmacı notları, sunum hazırlık notları ve sunumdaki şekiller (`araclar/sunum_sekilleri.py`, `araclar/hata_olcu_haritasi.py`) Claude Code ile hazırlandı; kullanıcı okuyup düzeltti ve sundu. Aynı gün, kullanılan on iki makaledeki iddia ve sayılar makalelerin PDF'lerinden doğrulandı ([`LITERATUR.md`](LITERATUR.md)). Rapor 14 Kasım 2026'da, kullanıcının isteğiyle daha okunur bir dille yeniden yazıldı. 15–16 Kasım 2026'da, yine kullanıcının isteğiyle, sunum ve rapor deney sonuçları çıkarılarak makalelere dayanan kısa bir anlatıma göre düzenlendi ve sunum kullanıcının kendi notlarındaki anlatıma göre 5 slayta indirildi; sunumdaki görseller veri setinden alındı. Sunumdan sonra hazırlık ve demo notları depodan çıkarıldı.
 
 ## Claude (ayrı sohbet): planlama ve yorum
 - Literatür taraması ve makale özetleri: her makale, sabit bir istemle tek tek özetletildi; projede işe yarayan on iki makalenin özeti [`LITERATUR.md`](LITERATUR.md)'de.
@@ -25,5 +25,7 @@
 - Kendi kayıtlarının çekimi, etiketlenmesi ve videodan kontrolü.
 - Sunumun yapılması; raporun ve slaytların okunup onaylanması.
 
-## Rapor için not
-> **Yapay zekâ kullanımı:** Kod yazımı, hata ayıklama ve belgeler (bu rapor dahil) için Claude Code (Anthropic) kullanılmıştır; uygulamanın kendisi dil modeli kullanmaz.
+## Rapordaki not
+> **Yapay zekâ kullanımı:** Kod yazımı, hata ayıklama ve belgeler için Claude Code (Anthropic) kullanılmıştır.
+
+Uygulamanın kendisi dil modeli kullanmaz; geri bildirim cümleleri kural tabanlıdır.

@@ -3,9 +3,9 @@ Yığın modu: pencere açmadan aynı değerlendirme. Kendi kayıt deneyi (deney
 
 Kullanım:
     # 1) Kalibrasyon videosundan profil + test videosunu değerlendirme
-    python -m uygulama.toplu --isim adin --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
+    python -m uygulama.toplu --isim kisi1 --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
     # 2) Kayıtlı profille değerlendirme
-    python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4
+    python -m uygulama.toplu --profil profiller/kisi1.npz --video test.mp4
     # 3) Sağlık kontrolü: veri setinden bir video; MediaPipe yeniden çalıştırılır ve veri setindeki iskeletle karşılaştırılır
     python -m uygulama.toplu --veri-seti ex1_Honza --kamera cam1 --yonelim 0
     # Pencere modunda aynı video: python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0

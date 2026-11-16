@@ -9,20 +9,20 @@ Bu klasör yalnızca **arayüz ve akıştır**. Ölçüler, bant, hata türü, c
 Proje kökünden:
 
 ```bash
-# Canlı kamera: önce kalibrasyon, sonra değerlendirme; profil profiller/adin.npz olarak kaydedilir
-python -m uygulama.main --isim adin
+# Canlı kamera: önce kalibrasyon, sonra değerlendirme; profil profiller/kisi1.npz olarak kaydedilir
+python -m uygulama.main --isim kisi1
 
 # Kayıtlı profille doğrudan değerlendirme (kalibrasyon atlanır)
-python -m uygulama.main --profil profiller/adin.npz
+python -m uygulama.main --profil profiller/kisi1.npz
 
 # Video dosyalarıyla: kalibrasyon videosu + değerlendirilecek video
-python -m uygulama.main --isim adin --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
+python -m uygulama.main --isim kisi1 --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
 
 # Veri setinden bir video (veri/rehab26/ gerekir); profil aynı videonun etiketi doğru tekrarlarından kurulur
 python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 
 # Pencere açmadan aynı değerlendirme; sonuç CSV ve terminalde tablo
-python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4
+python -m uygulama.toplu --profil profiller/kisi1.npz --video test.mp4
 ```
 
 Bütün seçenekler: `python -m uygulama.main --help`. Sık kullanılanlar:
@@ -66,7 +66,7 @@ Panelin altındaki düğmelere fareyle tıklanabilir; kısayol düğmede parante
 | `oturum.py` | Pencereden bağımsız akış (`Oturum` sınıfı). `kare_ekle()` her karenin kol açısını tekrar ayırıcıya verir ve biten tekrarı döndürür. Kalibrasyonda tekrar onay bekler; `kalibrasyonu_bitir()` profili kurar. Değerlendirmede karar `cekirdek/degerlendirici.py` içindeki `degerlendir()` fonksiyonundan gelir. Profili (`profil_kaydet` / `profil_yukle`) ve oturum CSV'sini (`oturum_kaydet`) de yazar. |
 | `panel.py` | Ekrandaki her çizim: canlı iskelet, bindirmeli oynatım (`Oynatici`), sağdaki geri bildirim paneli (`panel()`), düğmeler, kol açısı çubuğu ve omuz grafiği. Türkçe karakterler için metin PIL ile yazılır. |
 | `poz.py` | MediaPipe PoseLandmarker'ı saran küçük sınıf (`PozCikarici`). Bir kare alır, 33 eklem noktası döndürür (x, y, z, görünürlük); biçim veri setindekiyle aynıdır. Model dosyası yoksa ilk çalıştırmada `modeller/` altına indirir. |
-| `toplu.py` | Pencere açmadan aynı değerlendirme (video → CSV). Kendi kayıt deneyi bunu kullanır; sunum demosunun profili de bununla üretilir (`docs/DEMO.md`). `--veri-seti` ile **sağlık kontrolü** yapar: veri setinden bir videoda MediaPipe'ı yeniden çalıştırır, sonucu veri setindeki iskeletle ve etiketlerle karşılaştırır (`sonuclar/uygulama_saglik/`). |
+| `toplu.py` | Pencere açmadan aynı değerlendirme (video → CSV). Kendi kayıt deneyi bunu kullanır. `--veri-seti` ile **sağlık kontrolü** yapar: veri setinden bir videoda MediaPipe'ı yeniden çalıştırır, sonucu veri setindeki iskeletle ve etiketlerle karşılaştırır (`sonuclar/uygulama_saglik/`). |
 
 ## Kullandığı dosyalar ve çıktılar
 

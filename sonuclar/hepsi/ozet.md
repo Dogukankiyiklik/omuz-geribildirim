@@ -27,4 +27,4 @@ Yok: bütün dosyalar aynı.
 | klasör | neden yeniden üretilmedi | var mı | dosya sayısı |
 | --- | --- | --- | --- |
 | uygulama_saglik | uygulama sağlık kontrolü (MediaPipe sürüm farkı) | True | 3 |
-| sunum | sunum demosunun yedek görüntüleri | True | 6 |
+| sunum | sunumdaki şekiller | True | 6 |

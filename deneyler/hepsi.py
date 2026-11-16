@@ -82,7 +82,7 @@ HIZLI = ["deney1", "kamera_acisi", "hiz_esigi"]
 URETILEN_MODELLER = sorted({m for a in ADIMLAR for m in a.modeller})
 # Yeniden üretilmeyen, yalnızca listelenen kayıtlı çıktılar
 LISTELENEN = {"uygulama_saglik": "uygulama sağlık kontrolü (MediaPipe sürüm farkı)",
-              "sunum": "sunum demosunun yedek görüntüleri"}
+              "sunum": "sunumdaki şekiller"}
 YOK_SAYILAN_ANAHTARLAR = {"bilgi", "tarih"}   # JSON'larda sürüm/tarih bilgisi
 
 

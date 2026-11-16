@@ -69,9 +69,9 @@ Word dosyası Problem 1 ve 3'ü yoga hareketi ve "doğru yoga hareketini göster
 - Son kontrol sorusu: "Bir başka öğrenci bu raporla uygulamanın temel sürümünü yeniden kurabilir mi?"
 
 ## Ödevin kaynak rehberinde omuz için önerilenler
-Raporun sınırlılık veya kaynak kısmında anılabilir:
+Bu üçü projede kullanılmadı:
 - **Lefebvre vd. (2025):** DeepLabCut ile 20 anatomik omuz/üst ekstremite noktası.
 - **Ceglia vd. (2026):** RGB-D ve akromial küme ile omuz/skapula kinematiği.
 - **RGB-D omuz ROM sistematik derlemesi (2025).**
 
-Projede gerçekten kullanılan makaleler ve rapor için kaynak önerisi: [`LITERATUR.md`](LITERATUR.md). Doldurulmuş rapor: [`RAPOR.docx`](RAPOR.docx); sunuma hazırlık: [`SUNUM_HAZIRLIK.md`](SUNUM_HAZIRLIK.md).
+Projede kullanılan makaleler: [`LITERATUR.md`](LITERATUR.md). Rapor: [`RAPOR.docx`](RAPOR.docx) ([PDF](RAPOR.pdf)); sunum slaytları: [`SUNUM.pdf`](SUNUM.pdf).

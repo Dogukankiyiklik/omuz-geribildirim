@@ -3,11 +3,11 @@ Omuz geri bildirim uygulaması: solda görüntü ve iskelet, sağda geri bildiri
 
 Kullanım:
     # Canlı kamera: önce kalibrasyon, sonra değerlendirme
-    python -m uygulama.main --isim adin
-    python -m uygulama.main --profil profiller/adin.npz            # kayıtlı profille doğrudan değerlendirme
-    # Video dosyası (sunumdaki demonun ana yolu)
-    python -m uygulama.main --isim adin --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
-    python -m uygulama.main --profil profiller/adin.npz --video test.mp4
+    python -m uygulama.main --isim kisi1
+    python -m uygulama.main --profil profiller/kisi1.npz            # kayıtlı profille doğrudan değerlendirme
+    # Video dosyası
+    python -m uygulama.main --isim kisi1 --kalibrasyon-video kalibrasyon.mp4 --video test.mp4
+    python -m uygulama.main --profil profiller/kisi1.npz --video test.mp4
     # Veri setinden bir video: profil aynı videonun etiketi doğru tekrarlarından kurulur
     python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0
 

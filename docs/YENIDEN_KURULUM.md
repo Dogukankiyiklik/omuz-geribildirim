@@ -52,10 +52,10 @@ Betiklerin sırası ve her birinin ne ürettiği [`deneyler/README.md`](../deney
 ## 4. Uygulama
 
 ```bash
-python -m uygulama.main --isim adin                                      # canlı kamera: 6 doğru tekrarla kalibrasyon + değerlendirme
-python -m uygulama.main --profil profiller/adin.npz --video test.mp4     # kayıtlı profille video dosyası
+python -m uygulama.main --isim kisi1                                      # canlı kamera: 6 doğru tekrarla kalibrasyon + değerlendirme
+python -m uygulama.main --profil profiller/kisi1.npz --video test.mp4     # kayıtlı profille video dosyası
 python -m uygulama.main --veri-seti ex1_Honza --kamera cam1 --yonelim 0  # veri setinden video
-python -m uygulama.toplu --profil profiller/adin.npz --video test.mp4    # pencere açmadan, CSV
+python -m uygulama.toplu --profil profiller/kisi1.npz --video test.mp4    # pencere açmadan, CSV
 ```
 
 Çıktılar `oturumlar/<tarih>.csv` ve `profiller/<isim>.npz` dosyalarıdır; ikisi de git'e girmez. Ayrıntı: [`uygulama/README.md`](../uygulama/README.md).
